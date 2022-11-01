@@ -1,0 +1,39 @@
+[Unit]
+Description="Polkadot node1"
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10
+User=kusama
+SyslogIdentifier=kusama-n1
+SyslogFacility=local7
+KillSignal=SIGHUP
+ExecStart=/opt/kusama/bin/polkadot \
+     --chain kusama \
+     --rpc-port 10000 \
+     --ws-port 10001 \
+     --listen-addr /ip4/0.0.0.0/tcp/31333 \
+     --listen-addr /ip4/0.0.0.0/tcp/31335/ws \
+     --public-addr /dns/boot.stake.plus/tcp/31333 \
+     --public-addr /dns/boot.stake.plus/tcp/31334/ws \
+     --execution wasm \
+     --wasm-execution compiled \
+     --base-path /opt/kusama/node1/ \
+     --in-peers 10 \
+     --out-peers 10 \
+     --pruning 100 \
+     --max-runtime-instances 128 \
+     --db-cache 8192 \
+     --runtime-cache-size 64 \
+     --no-hardware-benchmarks \
+     --ws-external \
+     --rpc-external \
+     --rpc-methods safe \
+     --rpc-cors all \
+     --allow-private-ipv4 \
+
+[Install]
+WantedBy=multi-user.target
