@@ -1,12 +1,16 @@
 <template>
-  <v-container>
+  <v-container class="text-left">
     <v-card class="mx-auto"
-    max-width="400"
+    max-width="500"
     tile>
-      <v-card-title>Contacts</v-card-title>
+      <v-card-title>Members</v-card-title>
       <v-card-text>
+        <p>The program is currently in 'proof-of-concept' mode. The POC aims to validate the network design and reference hardware.
+          </p>
+        <p>The results of the proof-of-concept will be used in the Treasury Proposal.
+          <i>(Currently being discussed <a href="https://kusama.polkassembly.io/post/1969" target="_blank">here</a>)</i>.</p>
         <v-list>
-          <v-list-item three-line v-for="contact in contacts" :key="contact.email">
+          <v-list-item three-line v-for="contact in contacts" :key="contact.matrix">
             <v-list-item-avatar><v-gravatar :email="contact.email"></v-gravatar></v-list-item-avatar>
             <!-- <v-list-item-icon>
               <v-icon>mdi-home</v-icon>
@@ -26,7 +30,7 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
-  name: 'ContactsX',
+  name: 'MembersX',
   data () {
     return {
       contacts: [
