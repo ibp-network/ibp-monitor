@@ -10,6 +10,8 @@ git clone https://github.com/dotsama-ibp/dotsama-ibp
 ```
 cd dotsama-ibp/www
 npm install
+# if you get eslint error, use npm install --force
+# TODO: fix this!
 ```
 
 ### Compiles and hot-reloads for development

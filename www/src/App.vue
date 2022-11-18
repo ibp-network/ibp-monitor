@@ -10,8 +10,11 @@
     <!-- <router-view/> -->
     <v-container>
       <v-main>
-        <v-banner>
-          <div class="text-h4">Dotsama Infrastructure Builders Program</div>
+        <v-banner class="text-middle">
+          <div class="d-flex flex-column justify-space-between align-center">
+            <v-img width="70%" src="/dotsama-2.png"></v-img>
+          </div>
+          <div class="text-h4">Infrastructure Builders Program</div>
         </v-banner>
         <v-card>
           <v-card-title>Mission</v-card-title>
