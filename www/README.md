@@ -1,7 +1,14 @@
-# vuetify
+# Website for dotters.network
 
+- hosted on https://dotters.network
+
+## get the code
+```
+git clone https://github.com/dotsama-ibp/dotsama-ibp
+```
 ## Project setup
 ```
+cd dotsama-ibp/www
 npm install
 ```
 
@@ -20,5 +27,5 @@ npm run build
 npm run lint
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+# Refs
+- made with vue.js and vuetify.js
