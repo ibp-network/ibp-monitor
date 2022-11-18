@@ -1,6 +1,6 @@
 <template>
   <v-app-bar app
-    color="red darken2"
+    color="warning"
     elevation="0">
     <!-- <v-app-bar-nav-icon to="/">
       <v-icon>mdi-home</v-icon>

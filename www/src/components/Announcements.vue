@@ -7,7 +7,7 @@
         <!-- <v-timeline-item small>
           <p>IBP formed</p>
         </v-timeline-item> -->
-        <v-timeline-item small>
+        <v-timeline-item small icon="mdi-exclamation">
           <v-card>
             <!-- <v-card-title>RPC Nodes</v-card-title> -->
             <v-card-text>
@@ -25,7 +25,7 @@
             </v-card-text>
           </v-card>
         </v-timeline-item>
-        <v-timeline-item>
+        <v-timeline-item icon="mdi-account-voice">
           <v-card>
             <v-card-text>
               Treatury Proposal post opened on polkassembly. Please feel free to join

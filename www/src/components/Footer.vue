@@ -1,12 +1,13 @@
 <template>
-  <v-footer app padless color="red darken-2" dark>
+  <v-footer app padless color="warning darken-1" dark>
     <v-col cols="2"></v-col>
     <v-col
       class="text-center"
       cols="8"
     >
     <small>
-      built with <a class="dark" href="https://vuetifyjs.com" target="_blank">vuetify.js</a>
+      <!-- built with <a class="dark" href="https://vuetifyjs.com" target="_blank">vuetify.js</a>,
+      <a class="dark" href="https://materialdesignicons.com" target="_blank">material-design-icons</a> -->
     </small>
     </v-col>
     <v-col cols="2">
