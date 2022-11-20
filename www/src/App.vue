@@ -10,7 +10,9 @@
     <!-- <router-view/> -->
     <v-container>
       <v-main>
-        <router-view></router-view>
+        <v-fade-transition>
+          <router-view></router-view>
+        </v-fade-transition>
       </v-main>
     </v-container>
     <br>

@@ -5,7 +5,7 @@
       <v-card-text>
         <ul>
           <li>You must belong to the
-             <a href="https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot">1000 Validators Program [1KV | TVP]</a>.</li>
+             <a href="https://wiki.polkadot.network/docs/maintain-guides-how-to-validate-polkadot" target="_blank">1000 Validators Program [1KV | TVP]</a>.</li>
           <li>You must deploy your own hardware in an independent datacentre (no AWS, GCP)</li>
         </ul>
         <br>
