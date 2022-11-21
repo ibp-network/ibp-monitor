@@ -6,6 +6,15 @@
 - gossipsub propagates messages to all peers
 - each peer can keep copies of state, as needed
 
+## getting started
+(Tested on node 16)
+```
+git clone https://github.com/dotsama-ibp/dotsama-ibp
+cd dotsama-ibp/gossip
+npm install
+node server.js
+```
+
 ## TODO
 
 - how to create your own peerId
