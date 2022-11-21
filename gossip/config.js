@@ -7,9 +7,9 @@ const config = {
   ],
   listenPort: 0, // 0 for debugging 30000, // all nodes should listen on this port
   allowedTopics: ['/ibp', '/ibp/healthCheck'],
-  updateInterval: 5000,
+  updateInterval: 30000, // 30 seconds
   bootstrapPeers: [
-    // "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/{metaspanPeerId}",
+    "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
   ],
   services: [
     {

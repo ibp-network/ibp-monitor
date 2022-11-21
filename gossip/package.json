@@ -15,6 +15,7 @@
     "@libp2p/bootstrap": "^5.0.0",
     "@libp2p/mdns": "^5.1.0",
     "@libp2p/mplex": "^7.0.0",
+    "@libp2p/peer-id-factory": "^1.0.19",
     "@libp2p/tcp": "^6.0.2",
     "@polkadot/api": "^9.9.1",
     "it-pipe": "^2.0.4",
