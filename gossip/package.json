@@ -1,0 +1,24 @@
+{
+  "name": "gossip",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@chainsafe/libp2p-gossipsub": "^5.2.1",
+    "@chainsafe/libp2p-noise": "^10.1.0",
+    "@libp2p/bootstrap": "^5.0.0",
+    "@libp2p/mdns": "^5.1.0",
+    "@libp2p/mplex": "^7.0.0",
+    "@libp2p/tcp": "^6.0.2",
+    "@polkadot/api": "^9.9.1",
+    "it-pipe": "^2.0.4",
+    "libp2p": "^0.40.0",
+    "uint8arrays": "^4.0.2"
+  }
+}
