@@ -15,15 +15,22 @@ import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/
 import { config } from './config.js'
 import { MessageHandler } from './lib/MessageHandler.js'
 import { HealthChecker } from './lib/HealthChecker.js'
+import { DataStore } from './lib/DataStore.js'
 import { asyncForeach } from './lib/utils.js'
 
 const LISTEN_PORT = config.listenPort || 30000
 const UPDATE_INTERVAL = config.updateInterval || 3000
 
-const mh = new MessageHandler()
+const ds = new DataStore({ initialiseDb: false })
+const mh = new MessageHandler({ datastore: ds })
 const hc = new HealthChecker(config.services)
 
 var counter = 0;
+
+// peerId: [list of services]
+var serviceCatalog = {};
+
+// express http /metrics endpoint
 
 (async () => {
 
@@ -50,7 +57,7 @@ var counter = 0;
     floodPublish: true,
     doPX: true,
     allowPublishToZeroPeers: true,
-    signMessages: true,
+    signMessages: true, // TODO: how can we test this?
     strictSigning: true,
     // messageCache: false,
     // scoreParams: {},
@@ -94,6 +101,11 @@ var counter = 0;
     pubsub: gsub
   })
 
+  libp2p.handle('/ibp/services', (connection, stream, protocol) => {
+    // const peerId = connection
+    console.debug('/ibp/services', connection, stream, protocol)
+  })
+
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
 
@@ -101,15 +113,26 @@ var counter = 0;
     console.debug('found peer: ', peerId.detail.id.toString())
   })
 
-  libp2p.pubsub.addEventListener('message', mh.handleMessage)
+  libp2p.pubsub.addEventListener('message', function (evt) { mh.handleMessage(evt) })
 
   for (var i=0; i < config.allowedTopics.length; i++) {
     console.debug('subscribing to', config.allowedTopics[i])
     libp2p.pubsub.subscribe(config.allowedTopics[i])
   }
 
+  // Publish our list of services
+  setTimeout(async () => {
+    const res = await libp2p.pubsub.publish('/ibp/services', uint8ArrayFromString(JSON.stringify({
+      services: config.services
+    })))
+  }, 5000)
+
+  // publish the results of our healthChecks
   setInterval(async () => {
     console.debug('sending our updates')
+    libp2p.getPeers().forEach(async (peer) => {
+      console.log('our peers are:', peer.toString())
+    })
     const results = await hc.check() || []
     asyncForeach(results, async (result) => {
       const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
@@ -117,5 +140,13 @@ var counter = 0;
     })
 
   }, UPDATE_INTERVAL)
+
+  console.log('\nServer is running, press crtl-c to stop\n')
+  process.on('SIGINT', async () => {
+    console.warn('\nControl-c detected, shutting down...')
+    await libp2p.stop()
+    console.warn('... stopped!')
+    process.exit()
+  });  // CTRL+C
 
 })()

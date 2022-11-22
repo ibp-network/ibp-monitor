@@ -20,6 +20,8 @@
     "@polkadot/api": "^9.9.1",
     "it-pipe": "^2.0.4",
     "libp2p": "^0.40.0",
+    "sequelize": "^6.25.7",
+    "sqlite3": "^5.1.2",
     "uint8arrays": "^4.0.2"
   }
 }
