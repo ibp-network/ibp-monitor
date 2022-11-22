@@ -20,7 +20,9 @@ class HealthChecker {
    */
   async check (services = []) {
     var results = []
-    await asyncForeach(services, async (service) => {
+    // await asyncForeach(services, async (service) => {
+    for (var i = 0; i < services.length; i++) {
+      const service = services[i]
       // TODO different types of service? http / substrate / ...?
       try {
         console.debug('HealthCheck.check()', service.serviceId)
@@ -49,7 +51,7 @@ class HealthChecker {
       } catch (err) {
         console.error(err)
       }
-    })
+    }
     // console.log(results)
     return results
   }

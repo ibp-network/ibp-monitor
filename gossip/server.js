@@ -103,9 +103,14 @@ var serviceCatalog = {};
   })
 
   // peer sends us a list of their services
-  libp2p.handle('/ibp/services', async (connection, stream, protocol) => {
+  libp2p.handle('/ibp/services', async ({ connection, stream, protocol }) => {
     // const peerId = connection
-    const services = await streamToString(stream)
+    var services = []
+    // console.log('handle /ibp/service', connection, stream, protocol)
+    if (stream) {
+      const servicesStr = await streamToString(stream)
+      services = JSON.parse(servicesStr)  
+    }
     console.debug('/ibp/services', connection.remotePeer.toString(), services)
     // TODO put this in dataStore?
     serviceCatalog[connection.remotePeer.toString()] = services
@@ -146,12 +151,23 @@ var serviceCatalog = {};
         // console.debug('stream.stat', stream.stat)
         // send a direct message to peer
         await stringToStream(JSON.stringify(config.services), stream)
+        // await pipe(
+        //   stream,
+        //   (source) => map(source, (buf) => uint8ArrayToString(buf.subarray())),
+        //   // Sink function
+        //   async (source) => {
+        //     // For each chunk of data
+        //     for await (const chunk of source) {
+        //       ret = ret + chunk.toString()
+        //     }
+        //   }
+        // )
       } catch (err) {
         console.warn('GOT AN ERROR')
         console.error(err)
       }
       const results = await hc.check(serviceCatalog[peerId.toString()]) || []
-      console.debug('sending healthCheck results to all')
+      console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
         // console.debug('sent message to peer', res?.toString())

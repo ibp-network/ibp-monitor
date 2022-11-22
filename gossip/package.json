@@ -18,6 +18,7 @@
     "@libp2p/peer-id-factory": "^1.0.19",
     "@libp2p/tcp": "^6.0.2",
     "@polkadot/api": "^9.9.1",
+    "it-map": "^2.0.0",
     "it-pipe": "^2.0.4",
     "libp2p": "^0.40.0",
     "sequelize": "^6.25.7",
