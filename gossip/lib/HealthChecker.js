@@ -2,18 +2,25 @@ import { ApiPromise, WsProvider } from '@polkadot/api'
 import { asyncForeach } from './utils.js'
 
 class HealthChecker {
-  services = []
-  constructor(services = [], logger) {
+
+  // services = []
+
+  constructor() {
     // TODO customise the logger for debug
-    this.services = services
+    // this.services = services
   }
 
   addService () {}
   deleteService () {}
 
-  async check () {
+  /**
+   * Run the HealthCheck process on each peer service
+   * @param {*} services - array of services for a peer
+   * @returns array of results
+   */
+  async check (services = []) {
     var results = []
-    await asyncForeach(this.services, async (service) => {
+    await asyncForeach(services, async (service) => {
       // TODO different types of service? http / substrate / ...?
       try {
         console.debug('HealthCheck.check()', service.serviceId)

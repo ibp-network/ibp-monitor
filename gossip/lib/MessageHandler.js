@@ -28,6 +28,9 @@ class MessageHandler {
     // console.log(evt.detail)
     // if (peerId != self.peerId) {}
     switch (evt.detail.topic) {
+      case '/ibp/services':
+        console.warn('GOT MESSAGE IN HANDLER, WHY NOT IN PROTOCOL ???')
+        break
       case '/ibp/healthCheck':
         const model = JSON.parse(uint8ArrayToString(evt.detail.data))
         console.log(this.datastore)
