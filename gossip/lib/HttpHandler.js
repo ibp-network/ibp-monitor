@@ -12,7 +12,7 @@ import moment from 'moment'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const shortStash = function (stash) { return stash.slice(0, 6) + '...' + stash.slice(-6) }
+const shortStash = function (stash) { return stash?.slice(0, 6) + '...' + stash?.slice(-6) }
 
 class HttpHandler {
 
@@ -33,12 +33,12 @@ class HttpHandler {
     this.app.set('view engine', 'ejs')
 
     this.app.get('/', (req, res) => {
-      let tpl = this._geTemplate('index')
+      let tpl = this._getTemplate('index')
       let data = {
         templateDir: this.templateDir,
         peers: [
-          { id: 1, name: 'peer 1', peerId: '123123123123'},
-          { id: 2, name: 'peer 2', peerId: '456456456456'},
+          // { id: 1, name: 'peer 1', peerId: '123123123123'},
+          // { id: 2, name: 'peer 2', peerId: '456456456456'},
         ]
       }
       let page = ejs.render(tpl, data, {})
@@ -46,7 +46,7 @@ class HttpHandler {
     })
 
     this.app.get('/service', async (req, res) => {
-      let tpl = this._geTemplate('services')
+      let tpl = this._getTemplate('services')
       let models = await this.datastore.service.findAll()
       let data = {
         moment,
@@ -60,15 +60,15 @@ class HttpHandler {
     })
     this.app.get('/service/:serviceId', async (req, res) => {
       let { serviceId } = req.params
-      let tpl = this._geTemplate('service')
-      const model = await this.datastore.service.findOne({ serviceId })
-      const healthChecks = await this.datastore.healthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']] })
+      let tpl = this._getTemplate('service')
+      const service = await this.datastore.service.findOne({ serviceId })
+      const healthChecks = await this.datastore.healthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']], limit: 10 })
       let data = {
         templateDir: this.templateDir,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
-        peer,
+        service,
         healthChecks
       }
       let page = ejs.render(tpl, data, {})
@@ -76,7 +76,7 @@ class HttpHandler {
     })
 
     this.app.get('/peer', async (req, res) => {
-      let tpl = this._geTemplate('peers')
+      let tpl = this._getTemplate('peers')
       let peers = await this.datastore.peer.findAll()
       let data = {
         moment,
@@ -89,17 +89,39 @@ class HttpHandler {
       res.send(page)
     })
     this.app.get('/peer/:peerId', async (req, res) => {
+      console.debug('app.get(/peer/:peerId)', req.params)
       let { peerId } = req.params
-      let tpl = this._geTemplate('peer')
+      let tpl = this._getTemplate('peer')
       const peer = await this.datastore.peer.findByPk(peerId)
-      const healthChecks = await this.datastore.healthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']] })
+      const services = await this.datastore.service.findAll({ where: { peerId } })
+      const healthChecks = await this.datastore.healthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']], limit: 10 })
       let data = {
         templateDir: this.templateDir,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
         peer,
+        services,
         healthChecks
+      }
+      let page = ejs.render(tpl, data, {})
+      res.send(page)
+    })
+
+    this.app.get('/healthCheck', async (req, res) => {
+      let offset = Number(req.query.offset) || 0
+      let limit = Number(req.query.limit) || 15
+      let tpl = this._getTemplate('healthChecks')
+      let count = await this.datastore.healthCheck.count()
+      let models = await this.datastore.healthCheck.findAll({ order: [['id', 'DESC']], limit, offset })
+      let data = {
+        moment,
+        shortStash,
+        dateTimeFormat: this.dateTimeFormat,
+        templateDir: this.templateDir,
+        models,
+        count, limit, offset,
+        pagination: this._pagination(count, offset, limit)
       }
       let page = ejs.render(tpl, data, {})
       res.send(page)
@@ -111,8 +133,56 @@ class HttpHandler {
     this.app.listen(port, cb)
   }
 
-  _geTemplate (name) {
+  _getTemplate (name) {
     return fs.readFileSync(`${this.templateDir}/${name}.ejs`, 'utf-8')
+  }
+
+  /**
+   * Create data for the pagination template object
+   * @param {*} count 
+   * @param {*} offset 
+   * @param {*} limit 
+   * @returns 
+   */
+  _pagination (count, offset, limit) {
+    console.debug('_pagination()', count, offset, limit)
+    var pages = []
+    const pageCount = Math.ceil(count/limit)
+    const currentPage = Math.min(Math.ceil(offset/limit)+1, pageCount) // 11/2 = 5
+    // console.debug('currentPage', currentPage)
+    for (var i = 1; i <= pageCount; i++) {
+      const page = {
+        query: `?offset=${(i-1) * limit}&limit=${limit}`,
+        class: 'pagination-link',
+        text: `${i}`,
+        current: i == currentPage
+      }
+      pages.push(page)
+    }
+    if (pages.length > 10) {
+      if (currentPage <= 3 || currentPage >= (pageCount - 3)) {
+        pages = [].concat(
+          pages.slice(0, 5),
+          [{ class: 'pagination-ellipsis', text: '∙∙∙' }],
+          pages.slice(-5)
+        )  
+      } else {
+        pages = [].concat(
+          pages.slice(0, 1),
+          [{ class: 'pagination-ellipsis', text: '∙∙∙' }],
+          pages.slice(currentPage - 3, currentPage + 2),
+          [{ class: 'pagination-ellipsis', text: '∙∙∙' }],
+          pages.slice(-1)
+        )
+      }
+    }
+    // console.debug(pages)
+    const prev = { query: `?offset=${ Math.max(offset-limit, 0) }&limit=${limit}` }
+    const next = currentPage < pageCount
+      ? { query: `?offset=${ offset + limit }&limit=${limit}` }
+      : { query: `?offset=${ offset }&limit=${limit}` }
+    // console.debug('next', next)
+    return { pages, prev, next }
   }
 
   async handleRequest (req, res, next) {

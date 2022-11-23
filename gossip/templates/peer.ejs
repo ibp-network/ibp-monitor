@@ -4,8 +4,8 @@
 
   <section class="section">
 
-    <nav class="level">
-      <div class="level-left">
+    <!-- <nav class="level"> -->
+      <!-- <div class="level-left"> -->
         <nav class="breadcrumb" aria-label="breadcrumbs">
           <ul>
             <li><a href="/">Home</a></li>
@@ -13,8 +13,49 @@
             <li class="is-active"><a href="#" aria-current="page"> <%= peer.peerId %>  </a></li>
           </ul>
         </nav>
-      </div>
-    </nav>
+      <!-- </div> -->
+    <!-- </nav> -->
+
+    <table class="table is-bordered">
+      <tbody>
+        <tr>
+          <th>Peer Id</th>
+          <td><%= peer.peerId %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tabs">
+      <ul>
+        <li class="is-active"><a>Services</a></li>
+      </ul>
+    </div>
+
+    <table class="table is-fullwidth">
+      <thead>
+        <th>id</th>
+        <th>name</th>
+        <th>url</th>
+      </thead>
+      <tbody>
+        <% services.forEach(service => { %>
+        <tr>
+          <td><a href="/service/<%= service.serviceId %>"><%= shortStash(service.serviceId) %></a></td>
+          <td><%= service.name %> </td>
+          <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.url %>" target="_blank">
+            <%= service.url %>
+            <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
+          </a></td>
+        </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="tabs">
+      <ul>
+        <li class="is-active"><a>Checks</a></li>
+      </ul>
+    </div>
 
     <table class="table is-fullwidth">
       <!--
@@ -27,8 +68,8 @@
       -->
       <thead>
         <th>Id</th>
-        <th>Sender</th>
-        <!-- <th>Record</th> -->
+        <!-- <th>Sender</th> -->
+        <th>Service</th>
         <th>Version</th>
         <th>Performance</th>
         <th>Timestamp</th>
@@ -38,8 +79,8 @@
         <% healthChecks.forEach(hc => { %>
           <tr>
             <td><%= hc.id %></td>
-            <td><a href="/peer/<%= hc.senderId %> "><%= shortStash(hc.senderId) %></a></td>
-            <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
+            <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
+            <td><a href="/service/<%= hc.serviceId %> "><%= shortStash(hc.serviceId) %></a></td>
             <td><%= hc.record.version %></td>
             <td><%= hc.record.performance %></td>
             <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>

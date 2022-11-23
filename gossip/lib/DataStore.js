@@ -23,7 +23,7 @@ class Model {
     this.definition = definition
     this.options = options
     this._table = db.define(this.tableName, definition, options)
-    this.setup(config)
+    // this.setup(config)
   }
 
   // handle async setup
@@ -43,6 +43,7 @@ class Model {
   async findOne (crit) { return this._table.findOne(crit) }
   async findAll (crit) { return crit ? this._table.findAll(crit) : this._table.findAll() }
   async delete (crit) { return this._table.destroy(crit) }
+  async count (crit) { return this._table.count(crit) }
 }
 
 class DataStore {
@@ -58,6 +59,11 @@ class DataStore {
     this.peer = new Model(peerModel, { initialiseDb: config.initialiseDb })
     this.service = new Model(serviceModel, { initialiseDb: config.initialiseDb })
     this.healthCheck = new Model(healthCheckModel, { initialiseDb: config.initialiseDb })
+  }
+
+  async close () {
+    console.debug('Closing datastore...')
+    return await db.close()
   }
 
   // /**

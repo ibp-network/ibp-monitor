@@ -16,6 +16,7 @@ const config = {
   bootstrapPeers: [
     "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
   ],
+  checkOwnServices: true,
   services: [
     // Uncomment your services
     // {

@@ -50,9 +50,11 @@ var serviceCatalog = {};
     }), 'utf-8')
   }
   console.debug('Our peerId', peerId.toString())
+  // ensure our peerId is in the DB
+  await ds.peer.upsert({peerId: peerId.toString()})
 
   const gsub = gossipsub({
-    emitSelf: false,
+    emitSelf: true, // get our own pubsub messages
     gossipIncoming: true,
     fallbackToFloodsub: true,
     floodPublish: true,
@@ -102,29 +104,30 @@ var serviceCatalog = {};
     pubsub: gsub
   })
 
-  // peer sends us a list of their services
-  libp2p.handle('/ibp/services', async ({ connection, stream, protocol }) => {
-    // const peerId = connection
-    var services = []
-    // console.log('handle /ibp/service', connection, stream, protocol)
-    if (stream) {
-      const servicesStr = await streamToString(stream)
-      services = JSON.parse(servicesStr)  
-    }
-    console.debug('/ibp/services', connection.remotePeer.toString(), services)
-    // `touch` the peer model
-    await ds.peer.upsert({ peerId: connection.remotePeer.toString() })
-    // TODO put this in dataStore?
-    // serviceCatalog[connection.remotePeer.toString()] = services
-    for (var i = 0; i < services.length; i++) {
-      var service = services[i]
-      console.log(service)
-      let model = { ...service, peerId: connection.remotePeer.toString() }
-      console.log('serviceModel for upsert', model)
-      await ds.service.upsert(model)
-    }
-    // libp2p.dialProtocol(connection.remotePeer, '/ibp/servicesResponse', uint8ArrayFromString(JSON.stringify(config.services)))
-  })
+  // not here, we'll do this in the MessageHandler()
+  // // peer sends us a list of their services
+  // libp2p.handle('/ibp/services', async ({ connection, stream, protocol }) => {
+  //   // const peerId = connection
+  //   var services = []
+  //   // console.log('handle /ibp/service', connection, stream, protocol)
+  //   if (stream) {
+  //     const servicesStr = await streamToString(stream)
+  //     services = JSON.parse(servicesStr)  
+  //   }
+  //   console.debug('/ibp/services', connection.remotePeer.toString(), services)
+  //   // `touch` the peer model
+  //   await ds.peer.upsert({ peerId: connection.remotePeer.toString() })
+  //   // TODO put this in dataStore?
+  //   // serviceCatalog[connection.remotePeer.toString()] = services
+  //   for (var i = 0; i < services.length; i++) {
+  //     var service = services[i]
+  //     console.log(service)
+  //     let model = { ...service, peerId: connection.remotePeer.toString() }
+  //     console.log('serviceModel for upsert', model)
+  //     await ds.service.upsert(model)
+  //   }
+  //   // libp2p.dialProtocol(connection.remotePeer, '/ibp/servicesResponse', uint8ArrayFromString(JSON.stringify(config.services)))
+  // })
 
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
@@ -142,22 +145,38 @@ var serviceCatalog = {};
     libp2p.pubsub.subscribe(config.allowedTopics[i])
   }
 
-  // publish our services & the results of our healthChecks
-  // pubsub will balance the # peer connections. Each node will only healthCheck its peers.
-  // results will be broadcast to all peers
+  // publish our services 
+  const publishServices = async () => {
+    for (var i = 0; i < config.services.length; i++) {
+      const service = config.services[i]
+      const results = await hc.check([service])
+      console.debug('result', results[0])
+      service.serviceId = results[0].serviceId
+      const res = await libp2p.pubsub.publish('/ibp/services', uint8ArrayFromString(JSON.stringify([service])))
+      // console.debug(res)
+    }
+  }
+
+  await publishServices()
   setInterval(async () => {
-    console.debug('sending our updates')
+    console.debug('Publishing our services')
+    await publishServices()
+  }, UPDATE_INTERVAL)
+
+  // publish the results of our healthChecks
+  const publishResults = async () => {
+    console.debug('Publishing our healthChecks')
     libp2p.getPeers().forEach(async (peerId) => {
       console.log('our peers are:', peerId.toString())
-      try {
-        const stream = await libp2p.dialProtocol(peerId, '/ibp/services')
-        // console.debug('stream.stat', stream.stat)
-        // send a direct message to each peer
-        await stringToStream(JSON.stringify(config.services), stream)
-      } catch (err) {
-        console.warn('GOT AN ERROR')
-        console.error(err)
-      }
+      // try {
+      //   const stream = await libp2p.dialProtocol(peerId, '/ibp/services')
+      //   // console.debug('stream.stat', stream.stat)
+      //   // send a direct message to each peer
+      //   await stringToStream(JSON.stringify(config.services), stream)
+      // } catch (err) {
+      //   console.warn('GOT AN ERROR')
+      //   console.error(err)
+      // }
       // check services of our peers
       const services = ds.service.findAll({peerId: peerId.toString()})
       const results = await hc.check(services) || []
@@ -166,7 +185,7 @@ var serviceCatalog = {};
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
         // console.debug('sent message to peer', res?.toString())
       })
-    }) // === end of update cycle ===
+    }) // === end of peers update cycle ===
 
     // check our own services?
     if (config.checkOwnServices) {
@@ -175,9 +194,22 @@ var serviceCatalog = {};
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
+        const model = {
+          peerId: libp2p.peerId.toString(),
+          serviceId: result.serviceId,
+          record: result
+        }
+        console.log('save our own /ibp/healthCheck', model)
+        await ds.healthCheck.create(model)
       })
     }
 
+  }
+  // pubsub will balance the # peer connections. Each node will only healthCheck its peers.
+  // results will be broadcast to all peers
+  // await publishResults()
+  setInterval(async () => {
+    await publishResults()
   }, UPDATE_INTERVAL)
 
   // start HttpHandler
@@ -187,6 +219,8 @@ var serviceCatalog = {};
     process.on('SIGINT', async () => {
       console.warn('\nControl-c detected, shutting down...')
       await libp2p.stop()
+      // close the DB gracefully
+      await ds.close()
       console.warn('... stopped!')
       process.exit()
     });  // CTRL+C

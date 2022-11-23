@@ -1,0 +1,99 @@
+
+<%- include(templateDir + '/html1.ejs'); -%>
+<%- include(templateDir + '/navbar.ejs'); -%>
+
+  <section class="section">
+
+    <nav class="level">
+      <div class="level-left">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Checks</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+
+    <table class="table is-fullwidth">
+      <thead>
+        <th>CheckId</th>
+        <th>Peer</th>
+        <th>Version</th>
+        <th>Performance</th>
+        <th>Timestamp</th>
+      </thead>
+
+      <tbody>
+        <% models.forEach(hc => { %>
+          <tr>
+            <td><%= hc.id %></td>
+            <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td>
+            <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
+            <td><%= hc.record.version %></td>
+            <td class="has-text-right"><%= hc.record.performance.toFixed(4) %></td>
+            <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+      <a class="pagination-previous" href="/healthCheck<%= pagination.prev.query %>"><i class="fa-solid fa-angle-left"></i></a>
+      <a class="pagination-next" href="/healthCheck<%= pagination.next.query %>"><i class="fa-solid fa-angle-right"></i></a>
+      <ul class="pagination-list">
+        <% pagination.pages.forEach(page => { %>
+          <li>
+            <a class="<%= page.class %><%= page.current ? ' is-current' : '' %> " href="/healthCheck<%= page.query %> "><%= page.text %></a>
+          </li>
+        <% }) %>
+        <button class="button is-white">Items:</button>
+        <div class="select">
+          <select id="itemsPerPage" label="Items per page" onchange="handleSelect()">
+            <% 
+              var options = [ 10, 20, 50 ]
+              for (var i = 0; i < options.length; i++) {
+                const option = options[i]
+                var selected = (option === limit) ? 'selected' : ''
+                %> <option value="<%= option %>" <%=selected %>><%= option %></option> <%
+              }
+            %>
+          </select>
+        </div>
+        <!--
+        <li>
+          <a class="pagination-link" aria-label="page 1">1</a>
+        </li>
+        <li>
+          <span class="pagination-ellipsis">&hellip;</span>
+        </li>
+        <li>
+          <a class="pagination-link" aria-label="Goto page 45">45</a>
+        </li>
+        <li>
+          <a class="pagination-link is-current" aria-label="Page 46" aria-current="page">46</a>
+        </li>
+        <li>
+          <a class="pagination-link" aria-label="Goto page 47">47</a>
+        </li>
+        <li>
+          <span class="pagination-ellipsis">&hellip;</span>
+        </li>
+        <li>
+          <a class="pagination-link" aria-label="Goto page 86">86</a>
+        </li>
+      </ul>
+      -->
+    </nav>
+
+  </section>
+
+  <script>
+    function handleSelect (evt) {
+      var x = document.getElementById('itemsPerPage');
+      console.debug('handleSelect', x.value)
+      window.location.href = `/healthCheck?offset=0&limit=${x.value}`
+    }
+  </script>
+
+<%- include(templateDir + '/html2.ejs'); -%>
