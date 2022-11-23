@@ -127,6 +127,26 @@ class HttpHandler {
       res.send(page)
     })
 
+    this.app.get('/healthCheck/:id', async (req, res) => {
+      let { id } = req.params
+      let { raw } = req.query
+      let tpl = this._getTemplate('healthCheck')
+      let model = await this.datastore.healthCheck.findByPk(id)
+      if (raw) {
+        res.json(model)
+      } else {
+        let data = {
+          moment,
+          shortStash,
+          dateTimeFormat: this.dateTimeFormat,
+          templateDir: this.templateDir,
+          model
+        }
+        let page = ejs.render(tpl, data, {})
+        res.send(page)
+      }
+    })
+
   }
 
   listen (port, cb) {

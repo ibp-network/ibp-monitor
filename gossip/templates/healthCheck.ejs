@@ -1,0 +1,32 @@
+
+<%- include(templateDir + '/html1.ejs'); -%>
+<%- include(templateDir + '/navbar.ejs'); -%>
+
+  <section class="section">
+
+    <!-- <nav class="level"> -->
+      <!-- <div class="level-left"> -->
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/healthCheck">Checks</a></li>
+            <li class="is-active"><a href="#" aria-current="page"> <%= model.id %>  </a></li>
+            <li><a href="/healthCheck/<%= model.id %>?raw=true"><small><em>(json)</em></small></a></li>
+          </ul>
+        </nav>
+      <!-- </div> -->
+    <!-- </nav> -->
+
+    <div class="tabs">
+      <ul>
+        <li class="is-active"><a>JSON</a></li>
+      </ul>
+    </div>
+
+    <pre>
+<%= JSON.stringify(model, {}, 4) %> 
+    </pre>
+
+  </section>
+
+<%- include(templateDir + '/html2.ejs'); -%>
