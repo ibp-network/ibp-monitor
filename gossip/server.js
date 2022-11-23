@@ -178,7 +178,7 @@ var serviceCatalog = {};
       //   console.error(err)
       // }
       // check services of our peers
-      const services = ds.service.findAll({peerId: peerId.toString()})
+      const services = await ds.service.findAll({peerId: peerId.toString()})
       const results = await hc.check(services) || []
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
