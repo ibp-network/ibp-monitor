@@ -6,6 +6,7 @@ const config = {
     // TODO: list all peers/members public keys...?
   ],
   listenPort: 0, // 0 for debugging 30000, // all nodes should listen on this port
+  httpPort: 30001,
   allowedTopics: [
     '/ibp',
     '/ibp/services',

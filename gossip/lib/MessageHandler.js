@@ -9,7 +9,7 @@ class MessageHandler {
     console.log('MessageHandler()', config)
     this.datastore = config?.datastore || new DataStore({ initialiseDb: true })
     // this.datastore = new DataStore({ initialiseDb: true })
-    console.log('MessageHandler()', this.datastore)
+    // console.log('MessageHandler()', this.datastore)
   }
 
   /**
@@ -32,9 +32,15 @@ class MessageHandler {
         console.warn('GOT MESSAGE IN HANDLER, WHY NOT IN PROTOCOL ???')
         break
       case '/ibp/healthCheck':
-        const model = JSON.parse(uint8ArrayToString(evt.detail.data))
-        console.log(this.datastore)
-        await this.datastore.insertHealthCheck(evt.detail.from.toString(), model)
+        const record = JSON.parse(uint8ArrayToString(evt.detail.data))
+        const model = {
+          peerId: evt.detail.from.toString(),
+          serviceId: record.serviceId,
+          record
+        }
+        console.log('handleMessage: /ibp/healthCheck', model)
+        // await this.datastore.insertHealthCheck(evt.detail.from.toString(), model)
+        await this.datastore.healthCheck.create(model)
         break
       default:
         console.log(`received: ${uint8ArrayToString(evt.detail.data)} from ${evt.detail.from.toString()} on topic ${evt.detail.topic}`)

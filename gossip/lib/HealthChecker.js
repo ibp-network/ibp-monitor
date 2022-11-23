@@ -29,7 +29,7 @@ class HealthChecker {
         const provider = new WsProvider(service.url)
         const api = await ApiPromise.create({ provider })
         await api.isReady
-        const localPeerId = await api.rpc.system.localPeerId()
+        const serviceId = await api.rpc.system.localPeerId()
         // console.log('localPeerId', localPeerId.toString())
         const chain = await api.rpc.system.chain()
         const chainType = await api.rpc.system.chainType()
@@ -43,13 +43,19 @@ class HealthChecker {
         const version = await api.rpc.system.version()
         // console.debug(health.toString())
         results.push({
-          peerId: localPeerId.toString(), chain, chainType, health, networkState, syncState, version,
+          // our peerId will be added by the receiver of the /ibp/healthCheck messate
+          serviceId: serviceId.toString(),
+          url: service.url,
+          chain, chainType, health, networkState, syncState, version,
           performance: end - start
         })
         await provider.disconnect()
         console.debug('HealthCheck.check() done')
       } catch (err) {
         console.error(err)
+        results.push({
+          url: service.url, service, error: err
+        })
       }
     }
     // console.log(results)

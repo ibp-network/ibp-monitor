@@ -1,0 +1,27 @@
+
+<%- include(templateDir + '/html1.ejs'); -%>
+<%- include(templateDir + '/navbar.ejs'); -%>
+
+    <!-- <h1 class="title">Hello from index</h1> -->
+    <section class="section">
+
+    <table class="table is-fullwidth">
+      <thead>
+        <th>Peer No</th>
+        <th>Name</th>
+        <th>PeerId</th>
+      </thead>
+
+      <tbody>
+        <% peers.forEach(peer => { %>
+          <tr>
+            <td><%= peer.id %></td>
+            <td><%= peer.name %></td>
+            <td><%= peer.peerId %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+  </section>
+<%- include(templateDir + '/html2.ejs'); -%>

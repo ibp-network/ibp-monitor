@@ -1,0 +1,40 @@
+
+<%- include(templateDir + '/html1.ejs'); -%>
+<%- include(templateDir + '/navbar.ejs'); -%>
+
+  <section class="section">
+
+    <nav class="level">
+      <div class="level-left">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Services</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+
+    <table class="table is-fullwidth">
+      <thead>
+        <th>Service url</th>
+        <th>Host peer</th>
+        <th>Discovered</th>
+        <th>Last seen</th>
+      </thead>
+
+      <tbody>
+        <% services.forEach(service => { %>
+          <tr>
+            <td><a href="/service/<%= service.url %>"><%= service.url %></a></td>
+            <td><a href="/service/<%= service.peerId %>"></a><%= service.peerId %></td>
+            <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
+            <td><%= moment(service.updatedAt).format(dateTimeFormat) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+  </section>
+
+<%- include(templateDir + '/html2.ejs'); -%>

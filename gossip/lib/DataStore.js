@@ -3,85 +3,99 @@
 // import sqlite3 from 'sqlite3' //).verbose();
 // keep in memory for now
 import { DataTypes, Sequelize } from 'sequelize'
+import { serviceModel } from '../models/service.js';
+import { peerModel } from '../models/peer.js'
+import { healthCheckModel } from '../models/healthCheck.js'
 
 const db = new Sequelize({
   dialect: 'sqlite',
-  storage: './data/datastore.sqlite'
+  storage: './data/datastore.sqlite',
+  logging: false
 });
 
+class Model {
+  tableName = undefined
+  definition = undefined
+  options = undefined
+
+  constructor ({definition, options}, config) {
+    this.tableName = options.tableName
+    this.definition = definition
+    this.options = options
+    this._table = db.define(this.tableName, definition, options)
+    this.setup(config)
+  }
+
+  // handle async setup
+  async setup (config) {
+    console.debug('Model.setup()', this.tableName, config)
+    await this._table.sync({ force: config.initialiseDb, alter: true })
+  }
+
+  async create (model) { return this._table.create(model) }
+  // async upsert (pk, model) { 
+  //   const exists = await this._table.findByPk(pk)
+  //   if (exists) return this._table.update(model, { where: { id: pk } })
+  //   else return this.create(model)
+  // }
+  async upsert (model, options={}) { return this._table.upsert(model, options) }
+  async findByPk (pk) { return this._table.findByPk(pk) }
+  async findOne (crit) { return this._table.findOne(crit) }
+  async findAll (crit) { return crit ? this._table.findAll(crit) : this._table.findAll() }
+  async delete (crit) { return this._table.destroy(crit) }
+}
+
 class DataStore {
-  // dateTime, sender, record
-  healthChecks = undefined
-  pruning = 90 // days
+
+  service = undefined
+  peer = undefined
+  healthCheck = undefined
+  pruning = 90 // days // TODO activate pruning!
 
   constructor(config = {}) {
     console.debug('DataStore()', config)
-    // this.pruning = config.pruning || 90
-    // if (config.initialiseDb) this.init()
-
-    this.healthChecks = db.define('health_checks', {
-      id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-      // dateTime: { type: DataTypes.STRING },
-      senderId: { type: DataTypes.STRING },
-      peerId: { type: DataTypes.STRING },
-      record: { type: DataTypes.STRING },
-    }, {
-      tableName: 'health_checks',
-      timestamps: true,
-      createdAt: true,
-      updatedAt: false
-    })
-    this.healthChecks.sync({ force: config.initialiseDb, alter: true })
+    this.pruning = config.pruning || 90
+    this.peer = new Model(peerModel, { initialiseDb: config.initialiseDb })
+    this.service = new Model(serviceModel, { initialiseDb: config.initialiseDb })
+    this.healthCheck = new Model(healthCheckModel, { initialiseDb: config.initialiseDb })
   }
 
-  // loadFromBase () {
-  //   const file = '../data/'
-  //   // TODO reload database from file
+  // /**
+  //  * @deprecated use datastore.{model} functions
+  //  */
+  // async getAllHealthChecks (senderId = null) {
+  //   if (senderId) {
+  //     return this._healthChecks.findAll().filter(f => f.senderId === senderId)
+  //   } else {
+  //     return this._healthChecks.findAll()
+  //   }
   // }
 
-  async init () {
-  //   console.debug('DataStore().init()...')
-  //   // db.dropTable('health_check')
-  //   db.schema.dropTableIfExists('health_check')
-  //   db.schema.createTable('health_check', (table) => {
-  //     table.increments('id')
-  //     // table.timestamps('dateTime')
-  //     // table.datetime('dateTime', { precision: 6 }).defaultTo(db.fn.now(6))
-  //     table.timestamp('dateTime').defaultTo(db.fn.now());
-  //     table.string('senderId')
-  //     table.string('peerId')
-  //     table.binary('record')
+  // /**
+  //  * @deprecated use datastore.{model} functions
+  //  */
+  //  async getHealthCheck (id = null) {
+  //   return this._healthChecks.findByPk(id)
+  // }
+
+  // /**
+  //  * @deprecated use datastore.{model} functions
+  //  */
+  //  async insertHealthCheck (senderId, healthCheck) {
+  //   return this._healthChecks.create({
+  //     // dateTime: new Date(), // will get now()
+  //     senderId: senderId,
+  //     peerId: healthCheck.peerId,
+  //     record: JSON.stringify(healthCheck)
   //   })
-  }
+  // }
 
-  async insert () {}
-  async update () {}
-  async upsert () {}
-
-  async getAllHealthChecks (senderId = null) {
-    if (senderId) {
-      return this.healthChecks.findAll().filter(f => f.senderId === senderId)
-    } else {
-      return this.healthChecks.findAll()
-    }
-  }
-
-  async getHealthCheck (id = null) {
-    return this.healthChecks.findByPk(id)
-  }
-
-  async insertHealthCheck (senderId, healthCheck) {
-    return this.healthChecks.create({
-      // dateTime: new Date(), // will get now()
-      senderId: senderId,
-      peerId: healthCheck.peerId,
-      record: JSON.stringify(healthCheck)
-    })
-  }
-
-  async deleteHealthCheck (id = null) {
-    return this.healthChecks.destroy({ id: id })
-  }
+  // /**
+  //  * @deprecated use datastore.{model} functions
+  //  */
+  //  async deleteHealthCheck (id = null) {
+  //   return this._healthChecks.destroy({ id: id })
+  // }
 
 }
 

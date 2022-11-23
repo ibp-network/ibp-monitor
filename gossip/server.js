@@ -11,27 +11,27 @@ import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
-import { pipe } from 'it-pipe'
 
 import { config } from './config.js'
 import { DataStore } from './lib/DataStore.js'
 import { MessageHandler } from './lib/MessageHandler.js'
 import { HealthChecker } from './lib/HealthChecker.js'
+import { HttpHandler } from './lib/HttpHandler.js'
 import { asyncForeach, streamToString, stringToStream } from './lib/utils.js'
 
-const LISTEN_PORT = config.listenPort || 30000
+const HTTP_PORT = config.httpPort || 30001
+const GOSSIP_PORT = config.listenPort || 30000
 const UPDATE_INTERVAL = config.updateInterval || 3000
 
 const ds = new DataStore({ initialiseDb: false })
 const mh = new MessageHandler({ datastore: ds })
 const hc = new HealthChecker()
+const hh = new HttpHandler({ datastore: ds })
 
 var counter = 0;
 
 // peerId: [list of services]
 var serviceCatalog = {};
-
-// express http /metrics endpoint
 
 (async () => {
 
@@ -86,7 +86,7 @@ var serviceCatalog = {};
     peerId,
     addresses: {
       listen: [
-        `/ip4/0.0.0.0/tcp/${LISTEN_PORT}`
+        `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
       ]
     },
     transports: [
@@ -112,8 +112,17 @@ var serviceCatalog = {};
       services = JSON.parse(servicesStr)  
     }
     console.debug('/ibp/services', connection.remotePeer.toString(), services)
+    // `touch` the peer model
+    await ds.peer.upsert({ peerId: connection.remotePeer.toString() })
     // TODO put this in dataStore?
-    serviceCatalog[connection.remotePeer.toString()] = services
+    // serviceCatalog[connection.remotePeer.toString()] = services
+    for (var i = 0; i < services.length; i++) {
+      var service = services[i]
+      console.log(service)
+      let model = { ...service, peerId: connection.remotePeer.toString() }
+      console.log('serviceModel for upsert', model)
+      await ds.service.upsert(model)
+    }
     // libp2p.dialProtocol(connection.remotePeer, '/ibp/servicesResponse', uint8ArrayFromString(JSON.stringify(config.services)))
   })
 
@@ -122,6 +131,7 @@ var serviceCatalog = {};
 
   libp2p.addEventListener('peer:discovery', function (peerId) {
     console.debug('found peer: ', peerId.detail.id.toString())
+    ds.peer.upsert({ peerId: peerId.detail.id.toString() })
   })
 
   libp2p.pubsub.addEventListener('message', function (evt) { mh.handleMessage(evt) })
@@ -131,13 +141,6 @@ var serviceCatalog = {};
     console.debug('subscribing to', config.allowedTopics[i])
     libp2p.pubsub.subscribe(config.allowedTopics[i])
   }
-
-  // // Publish our list of services // not needed, each node will poll its peers for config.services
-  // setTimeout(async () => {
-  //   const res = await libp2p.pubsub.publish('/ibp/services', uint8ArrayFromString(JSON.stringify({
-  //     services: config.services
-  //   })))
-  // }, 5000)
 
   // publish our services & the results of our healthChecks
   // pubsub will balance the # peer connections. Each node will only healthCheck its peers.
@@ -149,24 +152,15 @@ var serviceCatalog = {};
       try {
         const stream = await libp2p.dialProtocol(peerId, '/ibp/services')
         // console.debug('stream.stat', stream.stat)
-        // send a direct message to peer
+        // send a direct message to each peer
         await stringToStream(JSON.stringify(config.services), stream)
-        // await pipe(
-        //   stream,
-        //   (source) => map(source, (buf) => uint8ArrayToString(buf.subarray())),
-        //   // Sink function
-        //   async (source) => {
-        //     // For each chunk of data
-        //     for await (const chunk of source) {
-        //       ret = ret + chunk.toString()
-        //     }
-        //   }
-        // )
       } catch (err) {
         console.warn('GOT AN ERROR')
         console.error(err)
       }
-      const results = await hc.check(serviceCatalog[peerId.toString()]) || []
+      // check services of our peers
+      const services = ds.service.findAll({peerId: peerId.toString()})
+      const results = await hc.check(services) || []
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
@@ -174,14 +168,28 @@ var serviceCatalog = {};
       })
     }) // === end of update cycle ===
 
+    // check our own services?
+    if (config.checkOwnServices) {
+      console.debug('checking our own services...')
+      const results = await hc.check(config.services) || []
+      console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
+      asyncForeach(results, async (result) => {
+        const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
+      })
+    }
+
   }, UPDATE_INTERVAL)
 
-  console.log('\nServer is running, press crtl-c to stop\n')
-  process.on('SIGINT', async () => {
-    console.warn('\nControl-c detected, shutting down...')
-    await libp2p.stop()
-    console.warn('... stopped!')
-    process.exit()
-  });  // CTRL+C
+  // start HttpHandler
+  hh.listen(HTTP_PORT, () => {
+    // app.listen(HTTP_PORT, () => {    
+    console.log('\nServer is running, press crtl-c to stop\n')
+    process.on('SIGINT', async () => {
+      console.warn('\nControl-c detected, shutting down...')
+      await libp2p.stop()
+      console.warn('... stopped!')
+      process.exit()
+    });  // CTRL+C
+  })
 
 })()
