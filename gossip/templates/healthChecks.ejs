@@ -18,6 +18,7 @@
     <table class="table is-fullwidth">
       <thead>
         <th>CheckId</th>
+        <th>Service</th>
         <th>Peer</th>
         <th>Version</th>
         <th>Performance</th>
@@ -28,6 +29,7 @@
         <% models.forEach(hc => { %>
           <tr>
             <td><%= hc.id %></td>
+            <td><a href="/service/<%= hc.serviceId %> "><%= shortStash(hc.serviceId) %></a></td>
             <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td>
             <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
             <td><%= hc.record.version %></td>
