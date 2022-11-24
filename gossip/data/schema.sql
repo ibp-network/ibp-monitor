@@ -27,3 +27,12 @@ CREATE TABLE "service" (
 	"updatedAt"	DATETIME NOT NULL,
 	PRIMARY KEY("serviceId")
 );
+
+-- relationship between peer & service
+create table "peer_service" (
+	"peerId"	VARCHAR(50) UNIQUE,
+	"serviceId"	VARCHAR(50) UNIQUE,
+	"createdAt"	DATETIME NOT NULL,
+	"updatedAt"	DATETIME NOT NULL,
+  PRIMARY KEY("peerId", "serviceId")
+);

@@ -9,6 +9,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import moment from 'moment'
 
+import { config } from '../config.js'
+
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
@@ -21,25 +23,43 @@ class HttpHandler {
   templateDir = __dirname + '/../templates'
   // for display purposes // TODO move this to config?
   dateTimeFormat = 'YYYY.MM.DD HH:mm'
+  localPeerId = ''
 
   constructor({ datastore, app, dateTimeFormat }) {
     this.datastore = datastore
-    this.app = app ? app : express()
-    this.dateTimeFormat = dateTimeFormat || 'YYYY/MM/DD HH:mm'
+    this.app = app 
+      ? app
+      : (() => {
+        const app = express()
+        app.use(express.static('static'))
+        return app
+      })()
+    this.dateTimeFormat = dateTimeFormat || config.dateTimeFormat
     this.setup()
+  }
+
+  setLocalPeerId (peerId) {
+    this.localPeerId = peerId
   }
 
   setup () {
     this.app.set('view engine', 'ejs')
 
-    this.app.get('/', (req, res) => {
+    this.app.get('/', async (req, res) => {
       let tpl = this._getTemplate('index')
+      let peerCount = await this.datastore.Peer.count()
+      let serviceCount = await this.datastore.Service.count()
+      let checkCount = await this.datastore.HealthCheck.count()
       let data = {
+        localPeerId: this.localPeerId,
         templateDir: this.templateDir,
-        peers: [
-          // { id: 1, name: 'peer 1', peerId: '123123123123'},
-          // { id: 2, name: 'peer 2', peerId: '456456456456'},
-        ]
+        peerCount,
+        serviceCount,
+        checkCount,
+        // peers: [
+        //   // { id: 1, name: 'peer 1', peerId: '123123123123'},
+        //   // { id: 2, name: 'peer 2', peerId: '456456456456'},
+        // ]
       }
       let page = ejs.render(tpl, data, {})
       res.send(page)
@@ -47,8 +67,9 @@ class HttpHandler {
 
     this.app.get('/service', async (req, res) => {
       let tpl = this._getTemplate('services')
-      let models = await this.datastore.service.findAll()
+      let models = await this.datastore.Service.findAll({ include: 'peers' })
       let data = {
+        localPeerId: this.localPeerId,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
@@ -61,14 +82,16 @@ class HttpHandler {
     this.app.get('/service/:serviceId', async (req, res) => {
       let { serviceId } = req.params
       let tpl = this._getTemplate('service')
-      const service = await this.datastore.service.findOne({ serviceId })
-      const healthChecks = await this.datastore.healthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']], limit: 10 })
+      const service = await this.datastore.Service.findByPk(serviceId, { include: 'peers' })
+      const healthChecks = await this.datastore.HealthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']], limit: 10 })
       let data = {
+        localPeerId: this.localPeerId,
         templateDir: this.templateDir,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
         service,
+        peers: service.peers,
         healthChecks
       }
       let page = ejs.render(tpl, data, {})
@@ -77,8 +100,9 @@ class HttpHandler {
 
     this.app.get('/peer', async (req, res) => {
       let tpl = this._getTemplate('peers')
-      let peers = await this.datastore.peer.findAll()
+      let peers = await this.datastore.Peer.findAll({include: 'services'})
       let data = {
+        localPeerId: this.localPeerId,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
@@ -92,16 +116,17 @@ class HttpHandler {
       console.debug('app.get(/peer/:peerId)', req.params)
       let { peerId } = req.params
       let tpl = this._getTemplate('peer')
-      const peer = await this.datastore.peer.findByPk(peerId)
-      const services = await this.datastore.service.findAll({ where: { peerId } })
-      const healthChecks = await this.datastore.healthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']], limit: 10 })
+      const peer = await this.datastore.Peer.findByPk(peerId, { include: ['services'] })
+      //const services = await this.datastore.Service.findAll({ where: { peerId } })
+      const healthChecks = await this.datastore.HealthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']], limit: 10 })
       let data = {
+        localPeerId: this.localPeerId,
         templateDir: this.templateDir,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
         peer,
-        services,
+        services: peer.services,
         healthChecks
       }
       let page = ejs.render(tpl, data, {})
@@ -112,9 +137,10 @@ class HttpHandler {
       let offset = Number(req.query.offset) || 0
       let limit = Number(req.query.limit) || 15
       let tpl = this._getTemplate('healthChecks')
-      let count = await this.datastore.healthCheck.count()
-      let models = await this.datastore.healthCheck.findAll({ order: [['id', 'DESC']], limit, offset })
+      let count = await this.datastore.HealthCheck.count()
+      let models = await this.datastore.HealthCheck.findAll({ order: [['id', 'DESC']], limit, offset, include: 'service' })
       let data = {
+        localPeerId: this.localPeerId,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
@@ -131,11 +157,12 @@ class HttpHandler {
       let { id } = req.params
       let { raw } = req.query
       let tpl = this._getTemplate('healthCheck')
-      let model = await this.datastore.healthCheck.findByPk(id)
+      let model = await this.datastore.HealthCheck.findByPk(id)
       if (raw) {
         res.json(model)
       } else {
         let data = {
+          localPeerId: this.localPeerId,
           moment,
           shortStash,
           dateTimeFormat: this.dateTimeFormat,

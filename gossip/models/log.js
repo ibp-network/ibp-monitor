@@ -1,16 +1,16 @@
 import { DataTypes } from 'sequelize'
 
-const healthCheckModel = {
-  // tableName: 'peers',
+const logModel = {
+  
   definition: {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    // dateTime: { type: DataTypes.STRING },
+    level: { type: DataTypes.STRING(10) }, // error, warning, info, debug
     peerId: { type: DataTypes.STRING(64) },
     serviceId: { type: DataTypes.STRING(64) },
-    record: { type: DataTypes.JSON },
+    data: { type: DataTypes.JSON },
   }, 
   options: {
-    tableName: 'health_check',
+    tableName: 'log',
     timestamps: true,
     createdAt: true,
     updatedAt: false
@@ -18,5 +18,5 @@ const healthCheckModel = {
 }
 
 export {
-  healthCheckModel
+  logModel
 }

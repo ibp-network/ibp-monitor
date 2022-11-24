@@ -1,6 +1,5 @@
 
 <%- include(templateDir + '/html1.ejs'); -%>
-<%- include(templateDir + '/navbar.ejs'); -%>
 
   <section class="section">
 
@@ -14,27 +13,8 @@
         </nav>
       </div>
     </nav>
-
-    <table class="table is-fullwidth">
-      <thead>
-        <th>PeerId</th>
-        <!-- <th>Name</th> -->
-        <th>Discovered</th>
-        <th>Last seen</th>
-      </thead>
-
-      <tbody>
-        <% peers.forEach(peer => { %>
-          <tr>
-            <td><a href="/peer/<%= peer.peerId %>"><%= peer.peerId %></a></td>
-            <!-- <td><%= peer.name %></td> -->
-            <td><%= moment(peer.createdAt).format(dateTimeFormat) %></td>
-            <td><%= moment(peer.updatedAt).format(dateTimeFormat) %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <%- include(templateDir + '/peersTable.ejs', { peers, columns: ['peerId', 'services', 'createdAt'] }); -%>   
 
   </section>
 
-<%- include(templateDir + '/html2.ejs'); -%>
+<%- include(templateDir + '/html2.ejs', {localPeerId}); -%>

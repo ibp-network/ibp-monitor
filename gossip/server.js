@@ -24,8 +24,8 @@ const GOSSIP_PORT = config.listenPort || 30000
 const UPDATE_INTERVAL = config.updateInterval || 3000
 
 const ds = new DataStore({ initialiseDb: false })
-const mh = new MessageHandler({ datastore: ds })
-const hc = new HealthChecker()
+const hc = new HealthChecker({ datastore: ds })
+const mh = new MessageHandler({ datastore: ds, api: hc })
 const hh = new HttpHandler({ datastore: ds })
 
 var counter = 0;
@@ -50,8 +50,9 @@ var serviceCatalog = {};
     }), 'utf-8')
   }
   console.debug('Our peerId', peerId.toString())
+  hh.setLocalPeerId(peerId.toString())
   // ensure our peerId is in the DB
-  await ds.peer.upsert({peerId: peerId.toString()})
+  await ds.Peer.upsert({peerId: peerId.toString()})
 
   const gsub = gossipsub({
     emitSelf: true, // get our own pubsub messages
@@ -132,12 +133,8 @@ var serviceCatalog = {};
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
 
-  libp2p.addEventListener('peer:discovery', function (peerId) {
-    console.debug('found peer: ', peerId.detail.id.toString())
-    ds.peer.upsert({ peerId: peerId.detail.id.toString() })
-  })
-
-  libp2p.pubsub.addEventListener('message', function (evt) { mh.handleMessage(evt) })
+  libp2p.addEventListener('peer:discovery', (peerId) => mh.handleDiscovery(peerId) )
+  libp2p.pubsub.addEventListener('message', (evt) => mh.handleMessage(evt) )
 
   // subscribe to pubsub topics
   for (var i=0; i < config.allowedTopics.length; i++) {
@@ -146,21 +143,10 @@ var serviceCatalog = {};
   }
 
   // publish our services 
-  const publishServices = async () => {
-    for (var i = 0; i < config.services.length; i++) {
-      const service = config.services[i]
-      const results = await hc.check([service])
-      console.debug('result', results[0])
-      service.serviceId = results[0].serviceId
-      const res = await libp2p.pubsub.publish('/ibp/services', uint8ArrayFromString(JSON.stringify([service])))
-      // console.debug(res)
-    }
-  }
-
-  await publishServices()
+  await mh.publishServices(config.services, libp2p)
   setInterval(async () => {
     console.debug('Publishing our services')
-    await publishServices()
+    await mh.publishServices(config.services, libp2p)
   }, UPDATE_INTERVAL)
 
   // publish the results of our healthChecks
@@ -178,8 +164,10 @@ var serviceCatalog = {};
       //   console.error(err)
       // }
       // check services of our peers
-      const services = await ds.service.findAll({peerId: peerId.toString()})
-      const results = await hc.check(services) || []
+      // const services = await ds.Service.findAll({ where: { peers: { peerId: peerId.toString() } } })
+      const peer = await ds.Peer.findByPk( peerId.toString(), { include: 'services' })
+      // console.debug('peer', peer)
+      const results = await hc.check(peer.services) || []
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
@@ -199,13 +187,13 @@ var serviceCatalog = {};
           serviceId: result.serviceId,
           record: result
         }
-        console.log('save our own /ibp/healthCheck', model)
-        await ds.healthCheck.create(model)
+        // console.log('save our own /ibp/healthCheck', model)
+        await ds.HealthCheck.create(model)
       })
     }
+  } // end of publishResults()
 
-  }
-  // pubsub will balance the # peer connections. Each node will only healthCheck its peers.
+  // pubsub should balance the # peer connections. Each node will only healthCheck its peers.
   // results will be broadcast to all peers
   // await publishResults()
   setInterval(async () => {

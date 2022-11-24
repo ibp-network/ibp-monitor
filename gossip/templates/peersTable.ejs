@@ -1,0 +1,37 @@
+<% 
+  if(locals.columns === []) {
+    columns = ['peerId', 'createdAt', 'updatedAt',
+      // services?
+    ]
+  }
+  //const columns = []
+%> 
+
+<table class="table is-fullwidth">
+  <thead>
+    <% if (columns.includes('peerId')) { %>
+    <th>Peer</th>
+    <% } %>
+    <% if (columns.includes('services')) { %>
+    <th class="has-text-centered">Services</th>
+    <% } %>
+    <th>Discovered</th>
+    <th>Last Seen (UTC)</th>
+  </thead>
+  <tbody>
+    <% peers.forEach(peer => {
+        //  if (!peer.services) peer.services = []
+    %>
+    <tr>
+      <% if (columns.includes('peerId')) { %>
+      <td><a href="/peer/<%= peer.peerId %>"><%= shortStash(peer.peerId) %></a></td>
+      <% } %>
+      <% if (columns.includes('services')) { %>
+      <td class="has-text-centered"><%= peer.services?.length %></td>
+      <% } %>
+      <td><%= moment(peer.createdAt).format(dateTimeFormat) %></td>
+    <td><%= moment.utc(peer.updatedAt).format(dateTimeFormat) %> </td>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>

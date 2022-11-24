@@ -1,6 +1,5 @@
 
 <%- include(templateDir + '/html1.ejs'); -%>
-<%- include(templateDir + '/navbar.ejs'); -%>
 
   <section class="section">
 
@@ -12,79 +11,47 @@
       </ul>
     </nav>
 
-    <!-- <div class="card">
-      <div class="card-content"> -->
-      <table class="table is-bordered">
-        <tbody>
-          <tr>
-            <th>Id</th>
-            <td><%= service.serviceId %></td>
-          </tr>
-          <tr>
-            <th>Name</th>
-            <td><%= service.name %></td>
-          </tr>
-          <tr>
-            <th>Url</th>
-            <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.url %>" target="_blank">
-              <%= service.url %>
-              <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
-            </a></td>
-          </tr>
-          <tr>
-            <th> peer</th>
-            <td><a href="/peer/<%= service.peerId %>"><%= shortStash(service.peerId) %></a></td>
-          </tr>
-          <tr>
-            <th>Discovered</th>
-            <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
-          </tr>
-          <tr>
-            <th>Updated</th>
-            <td><%= moment(service.updatedAt).format(dateTimeFormat) %></td>
-          </tr>
-        </tbody>
-      </table>
-    <!-- </div>
-    </div> -->
+    <table class="table is-bordered">
+      <tbody>
+        <tr>
+          <th>Id</th>
+          <td><%= service.serviceId %></td>
+        </tr>
+        <tr>
+          <th>Name</th>
+          <td><%= service.name %></td>
+        </tr>
+        <tr>
+          <th>Url</th>
+          <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.url %>" target="_blank">
+            <%= service.url %>
+            <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
+          </a></td>
+        </tr>
+        <tr>
+          <th>Discovered</th>
+          <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
+        </tr>
+        <tr>
+          <th>Updated</th>
+          <td><%= moment(service.updatedAt).format(dateTimeFormat) %></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tabs">
+      <ul>
+        <li class="is-active"><a>Peers</a></li>
+      </ul>
+    </div>
+    <%- include(templateDir + '/peersTable.ejs', { peers, columns: ['peerId', 'updatedAt'] }); -%>
 
     <div class="tabs">
       <ul>
         <li class="is-active"><a>Checks</a></li>
       </ul>
     </div>
-
-    <table class="table is-fullwidth">
-      <!--
-        {"peerId":"12D3KooWR87dpwfWdg8nQVx243ugPM66vFCcVVQCUu7Cn733YY9q","chain":"Kusama",
-        "chainType":{"live":null},
-        "health":{"peers":40,"isSyncing":false,"shouldHavePeers":true},
-        "syncState":{"startingBlock":15276616,"currentBlock":15439788,"highestBlock":15439788},
-        "version":"0.9.32-c71e872afed",
-        "performance":94.72355604171753}
-      -->
-      <thead>
-        <th>Id</th>
-        <th>Sender</th>
-        <!-- <th>Record</th> -->
-        <th>Version</th>
-        <th>Performance</th>
-        <th>Timestamp</th>
-      </thead>
-
-      <tbody>
-        <% healthChecks.forEach(hc => { %>
-          <tr>
-            <td><%= hc.id %></td>
-            <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td>
-            <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
-            <td><%= hc.record.version %></td>
-            <td><%= hc.record.performance %></td>
-            <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <%- include(templateDir + '/checksTable.ejs', { healthChecks }); -%>
 
   </section>
 

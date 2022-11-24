@@ -1,0 +1,37 @@
+<% 
+  //const columns = []
+%> 
+
+<table class="table is-fullwidth has-text-centered">
+  <!--
+    {"peerId":"12D3KooWR87dpwfWdg8nQVx243ugPM66vFCcVVQCUu7Cn733YY9q","chain":"Kusama",
+    "chainType":{"live":null},
+    "health":{"peers":40,"isSyncing":false,"shouldHavePeers":true},
+    "syncState":{"startingBlock":15276616,"currentBlock":15439788,"highestBlock":15439788},
+    "version":"0.9.32-c71e872afed",
+    "performance":94.72355604171753}
+  -->
+  <thead>
+    <th class="has-text-centered">Id</th>
+    <!-- <th>Sender</th> -->
+    <th class="has-text-centered">Service</th>
+    <th class="has-text-centered">Peer</th>
+    <th class="has-text-centered">Version</th>
+    <th class="has-text-right">Performance</th>
+    <th class="has-text-centered">Timestamp</th>
+  </thead>
+
+  <tbody>
+    <% healthChecks.forEach(hc => { %>
+      <tr>
+        <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
+        <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
+        <td><a href="/service/<%= hc.serviceId %> "><%= shortStash(hc.serviceId) %></a></td>
+        <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td>
+        <td><%= hc.record.version %></td>
+        <td class="has-text-right"><%= hc.record.performance.toFixed(4) %></td>
+        <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

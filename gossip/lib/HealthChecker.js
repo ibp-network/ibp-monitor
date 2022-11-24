@@ -4,14 +4,26 @@ import { asyncForeach } from './utils.js'
 class HealthChecker {
 
   // services = []
+  datastore = undefined
 
-  constructor() {
+  constructor({ datastore }) {
     // TODO customise the logger for debug
     // this.services = services
+    this.datastore = datastore
   }
 
   addService () {}
   deleteService () {}
+
+  async getServiceId (url = '') {
+    const provider = new WsProvider(url)
+    const api = await ApiPromise.create({ provider })
+    await api.isReady
+    const serviceId = await api.rpc.system.localPeerId()
+    await api.disconnect()
+    await provider.disconnect()
+    return serviceId.toString()
+  }
 
   /**
    * Run the HealthCheck process on each peer service
@@ -21,6 +33,7 @@ class HealthChecker {
   async check (services = []) {
     var results = []
     // await asyncForeach(services, async (service) => {
+    console.debug('check() # services', services.length)
     for (var i = 0; i < services.length; i++) {
       const service = services[i]
       // TODO different types of service? http / substrate / ...?

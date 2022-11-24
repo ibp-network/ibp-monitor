@@ -1,6 +1,5 @@
 
 <%- include(templateDir + '/html1.ejs'); -%>
-<%- include(templateDir + '/navbar.ejs'); -%>
 
   <section class="section">
 
@@ -18,22 +17,28 @@
     <table class="table is-fullwidth">
       <thead>
         <th>CheckId</th>
-        <th>Service</th>
+        <th colspan="2">Service</th>
         <th>Peer</th>
         <th>Version</th>
-        <th>Performance</th>
-        <th>Timestamp</th>
+        <th class="has-text-centered">Performance (ms)</th>
+        <th>Timestamp (UCT)</th>
       </thead>
 
       <tbody>
         <% models.forEach(hc => { %>
           <tr>
             <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
-            <td><a href="/service/<%= hc.serviceId %>"><%= shortStash(hc.serviceId) %></a></td>
-            <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td>
+            <td>
+              <a href="/service/<%= hc.serviceId %>"><%= shortStash(hc.serviceId) %></a>
+            </td>
+            <td><%= hc.service.url %></td>
+            <td>
+              <a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a>
+              <% if (hc.peerId === localPeerId) { %><i class="fa-regular fa-circle-check"></i><% } %>
+            </td>
             <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
             <td><%= hc.record.version %></td>
-            <td class="has-text-right"><%= hc.record.performance.toFixed(4) %></td>
+            <td class="has-text-centered"><%= hc.record.performance.toFixed(4) %></td>
             <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
           </tr>
         <% }) %>

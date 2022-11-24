@@ -1,6 +1,5 @@
 
 <%- include(templateDir + '/html1.ejs'); -%>
-<%- include(templateDir + '/navbar.ejs'); -%>
 
   <section class="section">
 
@@ -17,6 +16,16 @@
       <!-- </div> -->
     <!-- </nav> -->
 
+    <table class="table">
+      <tr>
+        <th>Service</th>
+        <td><a href="/service/<%= model.serviceId %> "><%= shortStash(model.serviceId) %></a></td>
+      <!-- </tr> -->
+      <!-- <tr> -->
+        <th>Peer</th>
+        <td><a href="/peer/<%= model.peerId %> "><%= shortStash(model.peerId) %></a></td>
+      </tr>
+    </table>
     <div class="tabs">
       <ul>
         <li class="is-active"><a>JSON</a></li>

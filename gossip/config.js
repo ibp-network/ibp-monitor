@@ -1,4 +1,5 @@
 const config = {
+  dateTimeFormat: 'DD/MM/YYYY HH:mm',
   peerId: {
     // TODO: each member should register a known peerId
   },
