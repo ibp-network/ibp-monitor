@@ -61,7 +61,7 @@ class HttpHandler {
         //   // { id: 2, name: 'peer 2', peerId: '456456456456'},
         // ]
       }
-      let page = ejs.render(tpl, data, {})
+      let page = this._renderPage(tpl, data, {})
       res.send(page)
     })
 
@@ -76,26 +76,30 @@ class HttpHandler {
         templateDir: this.templateDir,
         services: models,
       }
-      let page = ejs.render(tpl, data, {})
+      let page = this._renderPage(tpl, data, {})
       res.send(page)
     })
     this.app.get('/service/:serviceId', async (req, res) => {
       let { serviceId } = req.params
       let tpl = this._getTemplate('service')
       const service = await this.datastore.Service.findByPk(serviceId, { include: 'peers' })
-      const healthChecks = await this.datastore.HealthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']], limit: 10 })
-      let data = {
-        localPeerId: this.localPeerId,
-        templateDir: this.templateDir,
-        moment,
-        shortStash,
-        dateTimeFormat: this.dateTimeFormat,
-        service,
-        peers: service.peers,
-        healthChecks
+      if (!service) {
+        res.send(this._notFound())
+      } else {
+        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']], limit: 10 })
+        let data = {
+          localPeerId: this.localPeerId,
+          templateDir: this.templateDir,
+          moment,
+          shortStash,
+          dateTimeFormat: this.dateTimeFormat,
+          service,
+          peers: service.peers,
+          healthChecks
+        }
+        let page = this._renderPage(tpl, data, {})
+        res.send(page)  
       }
-      let page = ejs.render(tpl, data, {})
-      res.send(page)
     })
 
     this.app.get('/peer', async (req, res) => {
@@ -109,7 +113,7 @@ class HttpHandler {
         templateDir: this.templateDir,
         peers,
       }
-      let page = ejs.render(tpl, data, {})
+      let page = this._renderPage(tpl, data, {})
       res.send(page)
     })
     this.app.get('/peer/:peerId', async (req, res) => {
@@ -117,20 +121,24 @@ class HttpHandler {
       let { peerId } = req.params
       let tpl = this._getTemplate('peer')
       const peer = await this.datastore.Peer.findByPk(peerId, { include: ['services'] })
-      //const services = await this.datastore.Service.findAll({ where: { peerId } })
-      const healthChecks = await this.datastore.HealthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']], limit: 10 })
-      let data = {
-        localPeerId: this.localPeerId,
-        templateDir: this.templateDir,
-        moment,
-        shortStash,
-        dateTimeFormat: this.dateTimeFormat,
-        peer,
-        services: peer.services,
-        healthChecks
+      if (!peer) {
+        res.send(this._notFound())
+      } else {
+        //const services = await this.datastore.Service.findAll({ where: { peerId } })
+        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']], limit: 10 })
+        let data = {
+          localPeerId: this.localPeerId,
+          templateDir: this.templateDir,
+          moment,
+          shortStash,
+          dateTimeFormat: this.dateTimeFormat,
+          peer,
+          services: peer.services,
+          healthChecks
+        }
+        let page = this._renderPage(tpl, data, {})
+        res.send(page)
       }
-      let page = ejs.render(tpl, data, {})
-      res.send(page)
     })
 
     this.app.get('/healthCheck', async (req, res) => {
@@ -149,31 +157,33 @@ class HttpHandler {
         count, limit, offset,
         pagination: this._pagination(count, offset, limit)
       }
-      let page = ejs.render(tpl, data, {})
+      let page = this._renderPage(tpl, data, {})
       res.send(page)
     })
-
     this.app.get('/healthCheck/:id', async (req, res) => {
       let { id } = req.params
       let { raw } = req.query
       let tpl = this._getTemplate('healthCheck')
       let model = await this.datastore.HealthCheck.findByPk(id)
-      if (raw) {
-        res.json(model)
+      if (!model) {
+        res.send(this._notFound())
       } else {
-        let data = {
-          localPeerId: this.localPeerId,
-          moment,
-          shortStash,
-          dateTimeFormat: this.dateTimeFormat,
-          templateDir: this.templateDir,
-          model
-        }
-        let page = ejs.render(tpl, data, {})
-        res.send(page)
+        if (raw) {
+          res.json(model)
+        } else {
+          let data = {
+            localPeerId: this.localPeerId,
+            moment,
+            shortStash,
+            dateTimeFormat: this.dateTimeFormat,
+            templateDir: this.templateDir,
+            model
+          }
+          let page = this._renderPage(tpl, data, {})
+          res.send(page)
+        }  
       }
     })
-
   }
 
   listen (port, cb) {
@@ -182,6 +192,23 @@ class HttpHandler {
 
   _getTemplate (name) {
     return fs.readFileSync(`${this.templateDir}/${name}.ejs`, 'utf-8')
+  }
+
+  _renderPage (template, data, options) {
+    let page 
+    try {
+      page = ejs.render(template, data, options)
+    } catch (err) {
+      const errorPage = this._getTemplate('errorPage')
+      page = ejs.render(errorPage, { ...data, error: err }, {})
+    }
+    return page
+  }
+
+  _notFound(context = {}) {
+    const tpl = this._getTemplate('notFound')
+    const page = this._renderPage(tpl, { templateDir: this.templateDir, localPeerId: this.localPeerId, context }, {})
+    return page
   }
 
   /**

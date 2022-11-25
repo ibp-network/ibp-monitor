@@ -1,0 +1,17 @@
+<%- include(templateDir + '/html1.ejs'); -%>
+
+<div class="section">
+
+  <nav class="breadcrumb" aria-label="breadcrumbs">
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li class="is-active"><a href="#" aria-current="page">Error</a></li>
+    </ul>
+  </nav>
+
+  <pre>
+    <%= JSON.stringify(error, {}, 4) %>
+  </pre>
+
+</div>
+<%- include(templateDir + '/html2.ejs'); -%>

@@ -23,6 +23,10 @@ const HTTP_PORT = config.httpPort || 30001
 const GOSSIP_PORT = config.listenPort || 30000
 const UPDATE_INTERVAL = config.updateInterval || 3000
 
+// TODO make this dns and ip4...?
+const EXTERNAL_IP = config.externalIp || '0.0.0.0'
+const LISTEN_ADDRESS = `/ip4/${EXTERNAL_IP}/tcp/${GOSSIP_PORT}`
+
 const ds = new DataStore({ initialiseDb: false })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
@@ -31,7 +35,7 @@ const hh = new HttpHandler({ datastore: ds })
 var counter = 0;
 
 // peerId: [list of services]
-var serviceCatalog = {};
+// var serviceCatalog = {};
 
 (async () => {
 
@@ -89,46 +93,16 @@ var serviceCatalog = {};
     peerId,
     addresses: {
       listen: [
-        `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
+        // `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
+        LISTEN_ADDRESS
       ]
     },
-    transports: [
-      new tcp()
-    ],
-    streamMuxers: [
-      mplex()
-    ],
-    connectionEncryption: [
-      new noise()
-    ],
+    transports: [  new tcp() ],
+    streamMuxers: [ mplex() ],
+    connectionEncryption: [  new noise() ],
     peerDiscovery,
     pubsub: gsub
   })
-
-  // not here, we'll do this in the MessageHandler()
-  // // peer sends us a list of their services
-  // libp2p.handle('/ibp/services', async ({ connection, stream, protocol }) => {
-  //   // const peerId = connection
-  //   var services = []
-  //   // console.log('handle /ibp/service', connection, stream, protocol)
-  //   if (stream) {
-  //     const servicesStr = await streamToString(stream)
-  //     services = JSON.parse(servicesStr)  
-  //   }
-  //   console.debug('/ibp/services', connection.remotePeer.toString(), services)
-  //   // `touch` the peer model
-  //   await ds.peer.upsert({ peerId: connection.remotePeer.toString() })
-  //   // TODO put this in dataStore?
-  //   // serviceCatalog[connection.remotePeer.toString()] = services
-  //   for (var i = 0; i < services.length; i++) {
-  //     var service = services[i]
-  //     console.log(service)
-  //     let model = { ...service, peerId: connection.remotePeer.toString() }
-  //     console.log('serviceModel for upsert', model)
-  //     await ds.service.upsert(model)
-  //   }
-  //   // libp2p.dialProtocol(connection.remotePeer, '/ibp/servicesResponse', uint8ArrayFromString(JSON.stringify(config.services)))
-  // })
 
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
