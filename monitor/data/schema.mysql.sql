@@ -33,19 +33,22 @@ CREATE TABLE `service` (
 );
 
 -- relationship between peer & service
-CREATE TABLE `peer_service` (
-  `peerId` varchar(64) NOT NULL,
-  `serviceUrl` varchar(132) NOT NULL DEFAULT '',
-  `createdAt` datetime DEFAULT NULL,
-  `updatedAt` datetime DEFAULT NULL,
-  PRIMARY KEY (`peerId`,`serviceId`)
-);
+-- CREATE TABLE `peer_service` (
+--   `peerId` varchar(64) NOT NULL,
+--   `serviceUrl` varchar(132) NOT NULL DEFAULT '',
+--   `createdAt` datetime DEFAULT NULL,
+--   `updatedAt` datetime DEFAULT NULL,
+--   PRIMARY KEY (`peerId`,`serviceId`)
+-- );
 
 -- results of healthCheck script
 CREATE TABLE `health_check` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `serviceUrl` varchar(64) DEFAULT NULL,
   `monitorId` varchar(64) DEFAULT NULL,
+  `peerId` varchar(64) DEFAULT NULL,
+  `level` varchar(10) DEFAULT NULL,
+  `source` varchar(10) DEFAULT NULL,
   `record` text,
   `createdAt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)

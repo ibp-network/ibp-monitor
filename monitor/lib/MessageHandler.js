@@ -73,6 +73,8 @@ class MessageHandler {
         model = {
           monitorId: evt.detail.from.toString(),
           serviceUrl: record.serviceUrl,
+          level: record.level || 'info',
+          source: 'gossip',
           record
         }
         console.log('/ibp/healthCheck from', evt.detail.from.toString(), 'for', record.serviceUrl)
