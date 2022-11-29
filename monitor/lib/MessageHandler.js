@@ -89,12 +89,12 @@ class MessageHandler {
   async publishServices (services = [], libp2p) {
     for (var i = 0; i < services.length; i++) {
       const service = services[i]
-      try {
-        service.serviceId = await this.api.getServiceId(service.url)
-      } catch (err) {
-        console.warn('Error getting serviceId for', service.url)
-        console.error(err)
-      }
+      // try {
+      //   service.serviceId = await this.api.getServiceId(service.url)
+      // } catch (err) {
+      //   console.warn('Error getting serviceId for', service.url)
+      //   console.error(err)
+      // }
       // console.debug('result', results[0])
       const res = await libp2p.pubsub.publish('/ibp/services', uint8ArrayFromString(JSON.stringify([service])))
       // console.debug(res)

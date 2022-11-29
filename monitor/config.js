@@ -8,9 +8,14 @@ const EXTERNAL_IP = '8.8.8.8'
 const config = {
   dateTimeFormat: 'DD/MM/YYYY HH:mm',
   sequelize: {
-    dialect: 'sqlite',
-    storage: './data/datastore.sqlite',
-    logging: false
+    databasename: '',
+    username: '',
+    password: '',
+    options: {
+      dialect: 'sqlite',
+      storage: './data/datastore.sqlite',
+      logging: false
+    }
   },
   peerId: {
     // TODO: each member should register a known peerId

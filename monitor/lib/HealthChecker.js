@@ -55,14 +55,17 @@ class HealthChecker {
         const syncState = await api.rpc.system.syncState()
         const version = await api.rpc.system.version()
         // console.debug(health.toString())
-        results.push({
+        const result = {
           // our peerId will be added by the receiver of the /ibp/healthCheck messate
           serviceId: serviceId.toString(),
           url: service.url,
           chain, chainType, health, networkState, syncState, version,
           performance: end - start
-        })
+        }
+        results.push(result)
         await provider.disconnect()
+        // save healthCheck in storage
+        await this.datastore.Check.create(result)
         console.debug('HealthCheck.check() done')
       } catch (err) {
         console.error(err)

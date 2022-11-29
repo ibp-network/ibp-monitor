@@ -131,15 +131,15 @@ var counter = 0;
     await mh.publishServices(config.services, libp2p)
   }, UPDATE_INTERVAL)
 
-  console.log('definging publishResults, we have', libp2p.getPeers().length, 'peers')
+  // console.log('defining publishResults, we have', libp2p.getPeers().length, 'peers')
   // publish the results of our healthChecks
   async function publishResults () {
-    console.debug('Publishing our healthChecks to', libp2p.getPeers().length, 'peers')
+    console.debug('Publishing our healthChecks for', libp2p.getPeers().length, 'peers')
     libp2p.getPeers().forEach(async (peerId) => {
-      console.log('our peers are:', peerId.toString())
-      const peer = await ds.Peer.findByPk( peerId.toString(), { include: 'services' })
+      console.log('- our peers are:', peerId.toString())
+      const peer = await ds.Peer.findByPk( peerId.toString(), { include: 'service' })
       // console.debug('peer', peer)
-      const results = await hc.check(peer.services) || []
+      const results = await hc.check([peer.service]) || []
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
@@ -151,16 +151,16 @@ var counter = 0;
     if (config.checkOwnServices) {
       console.debug('checking our own services...')
       const results = await hc.check(config.services) || []
-      console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
+      console.debug(`publishing our healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
-        const model = {
-          peerId: libp2p.peerId.toString(),
-          serviceId: result.serviceId,
-          record: result
-        }
-        // console.log('save our own /ibp/healthCheck', model)
-        await ds.HealthCheck.create(model)
+        // const model = {
+        //   peerId: libp2p.peerId.toString(),
+        //   serviceUrl: result.serviceUrl,
+        //   record: result
+        // }
+        // // console.log('save our own /ibp/healthCheck', model)
+        // await ds.HealthCheck.create(model)
       })
     }
   } // end of publishResults()
