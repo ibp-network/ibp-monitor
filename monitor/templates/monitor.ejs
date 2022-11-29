@@ -6,9 +6,9 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
       <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="/peer">Peers</a></li>
-        <li class="is-active"><a href="#" aria-current="page"> <%= peer.peerId %> </a>
-          <%- include(templateDir + '/isLocalPeer.ejs', { peerId: peer.peerId, localPeerId }); -%>
+        <li><a href="/monitor">monitors</a></li>
+        <li class="is-active"><a href="#" aria-current="page"> <%= monitor.monitorId %> </a>
+          <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%>
         </li>
       </ul>
     </nav>
@@ -16,18 +16,15 @@
     <table class="table is-bordered">
       <tbody>
         <tr>
-          <th>Peer Id</th>
-          <td><%= peer.peerId %></td>
+          <th>Monitor Id</th>
+          <td><%= monitor.monitorId %></td>
         </tr>
+        <!-- <tr>
+          <th>Service Url</th>
+          <td><%= monitor.serviceUrl %></td>
+        </tr> -->
       </tbody>
     </table>
-
-    <div class="tabs">
-      <ul>
-        <li class="is-active"><a>Services</a></li>
-      </ul>
-    </div>
-    <%- include(templateDir + '/servicesTable.ejs', { services, columns: [] }); -%>
 
     <div class="tabs">
       <ul>
@@ -35,7 +32,6 @@
       </ul>
     </div>
     <%- include(templateDir + '/checksTable.ejs', { healthChecks, columns: [] }); -%>
-
 
   </section>
 

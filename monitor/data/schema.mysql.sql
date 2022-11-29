@@ -4,6 +4,7 @@ CREATE TABLE `monitor` (
   `monitorId` varchar(64) NOT NULL DEFAULT '',
   `name` varchar(64) DEFAULT NULL,
   `services` text NOT NULL,
+  `multiaddrs` text NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`monitorId`)
@@ -32,14 +33,14 @@ CREATE TABLE `service` (
   PRIMARY KEY (`serviceUrl`)
 );
 
--- relationship between peer & service
--- CREATE TABLE `peer_service` (
---   `peerId` varchar(64) NOT NULL,
---   `serviceUrl` varchar(132) NOT NULL DEFAULT '',
---   `createdAt` datetime DEFAULT NULL,
---   `updatedAt` datetime DEFAULT NULL,
---   PRIMARY KEY (`peerId`,`serviceId`)
--- );
+-- relationship between monitor & service
+CREATE TABLE `monitor_service` (
+  `monitorId` varchar(64) NOT NULL,
+  `serviceUrl` varchar(132) NOT NULL DEFAULT '',
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL,
+  PRIMARY KEY (`monitorId`,`serviceUrl`)
+);
 
 -- results of healthCheck script
 CREATE TABLE `health_check` (

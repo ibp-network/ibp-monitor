@@ -3,7 +3,7 @@ import { asyncForeach } from './utils.js'
 
 class HealthChecker {
 
-  // services = []
+  localMonitorId = undefined
   datastore = undefined
 
   constructor({ datastore }) {
@@ -14,6 +14,10 @@ class HealthChecker {
 
   addService () {}
   deleteService () {}
+
+  setLocalMonitorId (localMonitorId) {
+    this.localMonitorId = localMonitorId
+  }
 
   async getServiceId (url = '') {
     const provider = new WsProvider(url)
@@ -60,13 +64,13 @@ class HealthChecker {
         // console.debug(health.toString())
         result = {
           // our peerId will be added by the receiver of the /ibp/healthCheck messate
-          monitorId: this.monitorId, // .toString(),
+          monitorId: this.localMonitorId, // .toString(),
           serviceUrl: service.serviceUrl,
           peerId: peerId.toString(),
           source: 'check',
           level: 'info',
           record: {
-            monitorId: this.monitorId, // .toString(),
+            monitorId: this.localMonitorId, // .toString(),
             serviceUrl: service.serviceUrl,
             chain, chainType, health, networkState, syncState, version,
             performance: end - start
@@ -78,19 +82,20 @@ class HealthChecker {
       } catch (err) {
         console.error(err)
         result = {
-          monitorId: this.monitorId, // .toString(),
+          monitorId: this.localMonitorId, // .toString(),
           serviceUrl: service.serviceUrl,
           peerId: peerId ? peerId.toString() : '', // probably won't know this...?
           source: 'check',
           level: 'error',
           record: {
-            monitorId: this.monitorId, // .toString(),
+            monitorId: this.localMonitorId, // .toString(),
             serviceUrl: service.serviceUrl,
             service, error: err
           }
         }
       }
       results.push(result)
+      // comment this if we receive our own gossip messages
       const created = await this.datastore.HealthCheck.create(result)
       // console.debug('HealthCheck created', created)
     }

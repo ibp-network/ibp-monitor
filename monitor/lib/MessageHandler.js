@@ -18,9 +18,10 @@ class MessageHandler {
 
   // libp2p.addEventListener('peer:discovery', (peerId) => {})
   async handleDiscovery (peerId) {
+    // const example = {"isTrusted":false,"detail":{"id":"12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu","multiaddrs":["/ip4/127.0.0.1/tcp/30000","/ip4/192.168.1.91/tcp/30000","/ip4/192.168.1.80/tcp/30000","/ip4/10.62.0.1/tcp/30000","/ip4/172.17.0.1/tcp/30000"],"protocols":[]}}
     console.debug('peer:discover ', peerId.detail.id.toString())
     try {
-      const model = { monitorId: peerId.detail.id.toString() }
+      const model = { monitorId: peerId.detail.id.toString(), multiaddrs: peerId.detail.multiaddrs }
       const [monitorModel, created] = await this.datastore.Monitor.upsert(model, model)
     } catch (err) {
       console.warn('Error trying to upsert discovered monitor', peerId.detail.id.toString())
@@ -51,36 +52,33 @@ class MessageHandler {
       case '/ibp/services':
         const services = JSON.parse(uint8ArrayToString(evt.detail.data)) || []
         console.debug('/ibp/services from', evt.detail.from.toString()) //, services)
-        // `touch` the peer model
-        let [monitor, _] = await this.datastore.Monitor.upsert({
-          monitorId: evt.detail.from.toString(),
-          services: services
+        // `touch` the monitor model
+        let [monitor, _] = await this.datastore.Monitor.upsert({ monitorId: evt.detail.from.toString() })
+        const serviceUrls = services.map(s => s.serviceUrl)
+        services.forEach(async (service) => {
+          await this.datastore.Service.upsert(service)
         })
-        // var ids = []
-        for (var i = 0; i < services.length; i++) {
-          model = services[i]
-          console.log(model)
-          const [x, _] = await this.datastore.Service.upsert(model)
-          await this.datastore.Peer.upsert({peerId: evt.detail.from.toString(), serviceUrl: model.serviceUrl})
-          // ids.push(model.url)
-        }
-        // await monitor.addServices(ids)
+        await monitor.addServices(serviceUrls)      
         break
 
       // a peer has published some results
       case '/ibp/healthCheck':
         const record = JSON.parse(uint8ArrayToString(evt.detail.data))
+        // console.log('got healthcheck from ', evt.detail.from.toString(), record)
         model = {
+          ...record,
           monitorId: evt.detail.from.toString(),
-          serviceUrl: record.serviceUrl,
-          level: record.level || 'info',
-          source: 'gossip',
-          record
+          // serviceUrl: record.serviceUrl,
+          // level: record.level || 'info',
+          source: 'gossip'
+          // record
         }
+        // console.log('model for update', model)
         console.log('/ibp/healthCheck from', evt.detail.from.toString(), 'for', record.serviceUrl)
         // console.log('handleMessage: /ibp/healthCheck', model)
         // await this.datastore.insertHealthCheck(evt.detail.from.toString(), model)
-        await this.datastore.HealthCheck.create(model)
+        const created = await this.datastore.HealthCheck.create(model)
+        // console.log('created', created)
         break
 
       default:

@@ -22,12 +22,12 @@
         <div class="column">
           <div class="card has-text-centered">
             <div class="card-header has-background-primary">
-              <p class="card-header-title">Peers</p>
+              <p class="card-header-title">Monitors</p>
             </div>
             <div class="card-content">
               <div class="media">
                 <div class="media-content">
-                  <p class="title is-1"><%= peerCount %></p>
+                  <p class="title is-1"><%= monitorCount %></p>
                 </div>
               </div>
             </div>
@@ -50,4 +50,4 @@
       </div>
 
   </section>
-<%- include(templateDir + '/html2.ejs', { localPeerId }); -%>
+<%- include(templateDir + '/html2.ejs', { localMonitorId }); -%>

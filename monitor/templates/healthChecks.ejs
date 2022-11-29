@@ -1,6 +1,25 @@
 
 <%- include(templateDir + '/html1.ejs'); -%>
 
+  <%
+  const levels = {
+    debug: 'grey',
+    log: 'info',
+    info: 'info',
+    warning: 'warning',
+    error: 'danger'
+  }
+  const icons = {
+    debug:   'fa-magnifying-glass',
+    log:     'fa-info',
+    info:    'fa-info',
+    warning: 'fa-circle-exclamation',
+    error:   'fa-triangle-exclamation'
+  }
+  function getLevelClass (level) { return levels[level] }
+  function getLevelIcon (level) { return icons[level] }
+
+  %>
   <section class="section">
 
     <nav class="level">
@@ -16,9 +35,11 @@
 
     <table class="table is-fullwidth">
       <thead>
+        <th> </th>
         <th>CheckId</th>
-        <th colspan="2">Service</th>
-        <th>Peer</th>
+        <th>Service</th>
+        <th>Monitor</th>
+        <th>Source</th>
         <th>Version</th>
         <th class="has-text-centered">Performance (ms)</th>
         <th>Timestamp (UCT)</th>
@@ -27,18 +48,23 @@
       <tbody>
         <% models.forEach(hc => { %>
           <tr>
+            <td class="has-background- <%= getLevelClass(hc.level) %> has-text-centered">
+              <i class="fa-solid <%= getLevelIcon(hc.level) %>"></i>
+            </td>
             <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
             <td>
-              <a href="/service/<%= hc.serviceId %>"><%= shortStash(hc.serviceId) %></a>
+              <a href="/service/<%= encodeURIComponent(hc.serviceUrl) %>"><%= hc.serviceUrl %></a>
+              <a href="https://polkadot.js.org/apps/?rpc=<%= hc.serviceUrl %>" target="_blank">
+                <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super></a>
             </td>
-            <td><%= hc.service.url %></td>
             <td>
-              <a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a>
-              <% if (hc.peerId === localPeerId) { %><i class="fa-regular fa-circle-check"></i><% } %>
+              <a href="/monitor/<%= hc.monitorId %> "><%= shortStash(hc.monitorId) %></a>
+              <% if (hc.monitorId === localMonitorId) { %><i class="fa-regular fa-circle-check"></i><% } %>
             </td>
             <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
+            <td><%= hc.source %></td>
             <td><%= hc.record.version %></td>
-            <td class="has-text-centered"><%= hc.record.performance.toFixed(4) %></td>
+            <td class="has-text-centered"><%= hc.record.performance?.toFixed(4) %></td>
             <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
           </tr>
         <% }) %>

@@ -38,8 +38,8 @@ class HttpHandler {
     this.setup()
   }
 
-  setLocalMonitorId (peerId) {
-    this.localMonitorId = peerId
+  setLocalMonitorId (monitorId) {
+    this.localMonitorId = monitorId
   }
 
   setup () {
@@ -47,13 +47,13 @@ class HttpHandler {
 
     this.app.get('/', async (req, res) => {
       let tpl = this._getTemplate('index')
-      let peerCount = await this.datastore.Peer.count()
+      let monitorCount = await this.datastore.Monitor.count()
       let serviceCount = await this.datastore.Service.count()
       let checkCount = await this.datastore.HealthCheck.count()
       let data = {
-        localPeerId: this.localPeerId,
+        localMonitorId: this.localMonitorId,
         templateDir: this.templateDir,
-        peerCount,
+        monitorCount,
         serviceCount,
         checkCount,
         // peers: [
@@ -67,9 +67,9 @@ class HttpHandler {
 
     this.app.get('/service', async (req, res) => {
       let tpl = this._getTemplate('services')
-      let models = await this.datastore.Service.findAll({ include: 'peers' })
+      let models = await this.datastore.Service.findAll({ include: 'monitors' })
       let data = {
-        localPeerId: this.localPeerId,
+        localMonitorId: this.localMonitorId,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
@@ -79,22 +79,24 @@ class HttpHandler {
       let page = this._renderPage(tpl, data, {})
       res.send(page)
     })
-    this.app.get('/service/:serviceId', async (req, res) => {
-      let { serviceId } = req.params
+    this.app.get('/service/:serviceUrl', async (req, res) => {
+      let { serviceUrl } = req.params
+      serviceUrl = decodeURIComponent(serviceUrl)
       let tpl = this._getTemplate('service')
-      const service = await this.datastore.Service.findByPk(serviceId, { include: 'peers' })
+      const service = await this.datastore.Service.findByPk(serviceUrl, { include: 'monitors' })
       if (!service) {
         res.send(this._notFound())
       } else {
-        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { serviceId }, order: [['id', 'DESC']], limit: 10 })
+        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { serviceUrl }, order: [['id', 'DESC']], limit: 10 })
+        healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {
-          localPeerId: this.localPeerId,
+          localMonitorId: this.localMonitorId,
           templateDir: this.templateDir,
           moment,
           shortStash,
           dateTimeFormat: this.dateTimeFormat,
           service,
-          peers: service.peers,
+          monitors: service.monitors,
           healthChecks
         }
         let page = this._renderPage(tpl, data, {})
@@ -102,38 +104,40 @@ class HttpHandler {
       }
     })
 
-    this.app.get('/peer', async (req, res) => {
-      let tpl = this._getTemplate('peers')
-      let peers = await this.datastore.Peer.findAll({include: 'services'})
+    this.app.get('/monitor', async (req, res) => {
+      let tpl = this._getTemplate('monitors')
+      let monitors = await this.datastore.Monitor.findAll({include: ['services']})
+      // console.log('monitors', monitors)
       let data = {
-        localPeerId: this.localPeerId,
+        localMonitorId: this.localMonitorId,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
         templateDir: this.templateDir,
-        peers,
+        monitors,
       }
       let page = this._renderPage(tpl, data, {})
       res.send(page)
     })
-    this.app.get('/peer/:peerId', async (req, res) => {
-      console.debug('app.get(/peer/:peerId)', req.params)
-      let { peerId } = req.params
-      let tpl = this._getTemplate('peer')
-      const peer = await this.datastore.Peer.findByPk(peerId, { include: ['services'] })
-      if (!peer) {
+    this.app.get('/monitor/:monitorId', async (req, res) => {
+      console.debug('app.get(/monitor/:monitorId)', req.params)
+      let { monitorId } = req.params
+      let tpl = this._getTemplate('monitor')
+      const monitor = await this.datastore.Monitor.findByPk(monitorId)
+      if (!monitor) {
         res.send(this._notFound())
       } else {
-        //const services = await this.datastore.Service.findAll({ where: { peerId } })
-        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { peerId }, order: [['id', 'DESC']], limit: 10 })
+        //const services = await this.datastore.Service.findAll({ where: { monitorId } })
+        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { monitorId }, order: [['id', 'DESC']], limit: 10 })
+        healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {
-          localPeerId: this.localPeerId,
+          localMonitorId: this.localMonitorId,
           templateDir: this.templateDir,
           moment,
           shortStash,
           dateTimeFormat: this.dateTimeFormat,
-          peer,
-          services: peer.services,
+          monitor,
+          // services: monitor.services,
           healthChecks
         }
         let page = this._renderPage(tpl, data, {})
@@ -146,9 +150,12 @@ class HttpHandler {
       let limit = Number(req.query.limit) || 15
       let tpl = this._getTemplate('healthChecks')
       let count = await this.datastore.HealthCheck.count()
-      let models = await this.datastore.HealthCheck.findAll({ order: [['id', 'DESC']], limit, offset, include: 'service' })
+      let models = await this.datastore.HealthCheck.findAll({ order: [['id', 'DESC']], limit, offset })
+      models.forEach(model => {
+        model.record = this._toJson(model.record)
+      })
       let data = {
-        localPeerId: this.localPeerId,
+        localMonitorId: this.localMonitorId,
         moment,
         shortStash,
         dateTimeFormat: this.dateTimeFormat,
@@ -168,11 +175,13 @@ class HttpHandler {
       if (!model) {
         res.send(this._notFound())
       } else {
+        // mysql / mariadb old verions field is TEXT...
+        model.record = this._toJson(model.record)
         if (raw) {
           res.json(model)
         } else {
           let data = {
-            localPeerId: this.localPeerId,
+            localMonitorId: this.localMonitorId,
             moment,
             shortStash,
             dateTimeFormat: this.dateTimeFormat,
@@ -190,6 +199,17 @@ class HttpHandler {
     this.app.listen(port, cb)
   }
 
+  _toJson (record) {
+    var ret = record
+    console.debug('record is type', typeof record)
+    if (typeof record === 'string') {
+      try { ret = JSON.parse(record)} catch (err) {
+        console.warn('can not parse', record, 'to json')
+      }
+    }
+    return ret
+  }
+
   _getTemplate (name) {
     return fs.readFileSync(`${this.templateDir}/${name}.ejs`, 'utf-8')
   }
@@ -199,15 +219,16 @@ class HttpHandler {
     try {
       page = ejs.render(template, data, options)
     } catch (err) {
+      console.error(err)
       const errorPage = this._getTemplate('errorPage')
-      page = ejs.render(errorPage, { ...data, error: err }, {})
+      page = ejs.render(errorPage, { ...data, template, error: err.toString() }, {})
     }
     return page
   }
 
   _notFound(context = {}) {
     const tpl = this._getTemplate('notFound')
-    const page = this._renderPage(tpl, { templateDir: this.templateDir, localPeerId: this.localPeerId, context }, {})
+    const page = this._renderPage(tpl, { templateDir: this.templateDir, localMonitorId: this.localMonitorId, context }, {})
     return page
   }
 

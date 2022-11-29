@@ -55,11 +55,18 @@ var counter = 0;
   }
   console.debug('Our monitorId', peerId.toString())
   hh.setLocalMonitorId(peerId.toString())
-  // ensure our peerId is in the DB
-  await ds.Monitor.upsert({ monitorId: peerId.toString(), name: 'localhost', services: config.services }, {name: 'localhost', services: config.services})
+  hc.setLocalMonitorId(peerId.toString())
+  
+  // ensure our monitorId is in the DB, add the multiaddrs when connected below
+  const [monitor, monCreated] = await ds.Monitor.upsert({ monitorId: peerId.toString(), name: 'localhost' })
+  const serviceIds = config.services.map(s => s.serviceUrl)
+  config.services.forEach(async (service) => {
+    await ds.Service.upsert(service)
+  })
+  await monitor.addServices(serviceIds)
 
   const gsub = gossipsub({
-    emitSelf: true, // get our own pubsub messages
+    emitSelf: false, // don't want our own pubsub messages
     gossipIncoming: true,
     fallbackToFloodsub: true,
     floodPublish: true,
@@ -111,7 +118,7 @@ var counter = 0;
   //   console.debug(peerId.toString(), 'has disconnected')
   // })
   libp2p.addEventListener('peer:discovery', async (peerId) => {
-    console.log('- in discovery: we have', libp2p.pubsub.getPeers().length, 'pubsub peers', JSON.stringify(peerId))
+    // console.log('- in discovery: we have', libp2p.pubsub.getPeers().length, 'pubsub peers', JSON.stringify(peerId))
     await mh.handleDiscovery(peerId)
   })
   libp2p.pubsub.addEventListener('message', async (evt) => {

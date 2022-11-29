@@ -16,10 +16,10 @@
 
     <table class="table is-fullwidth">
       <thead>
-        <th>Id</th>
         <th>Service url</th>
+        <th>P.JS</th>
         <th>Name</th>
-        <th>Peers</th>
+        <th>Monitors</th>
         <th>Discovered</th>
         <th>Last seen</th>
       </thead>
@@ -27,13 +27,13 @@
       <tbody>
         <% services.forEach(service => { %>
           <tr>
-            <td><a href="/service/<%= service.serviceId %>"><%= shortStash(service.serviceId) %></a></td>
-            <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.url %>" target="_blank">
-              <%= service.url %>
+            <td><a href="/service/<%= encodeURIComponent(service.serviceUrl) %>"><%= service.serviceUrl %></a></td>
+            <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.serviceUrl %>" target="_blank">
+              <%= service.serviceUrl %>
               <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
             </a></td>
             <td><%= service.name %></td>
-            <td><%= service.peers.length %></td>
+            <td><%= service.monitors.length %></td>
             <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
             <td><%= moment(service.updatedAt).format(dateTimeFormat) %></td>
           </tr>
@@ -43,4 +43,4 @@
 
   </section>
 
-<%- include(templateDir + '/html2.ejs', { localPeerId }); -%>
+<%- include(templateDir + '/html2.ejs', { localMonitorId }); -%>

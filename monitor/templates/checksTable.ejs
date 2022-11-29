@@ -15,7 +15,8 @@
     <th class="has-text-centered">Id</th>
     <!-- <th>Sender</th> -->
     <th class="has-text-centered">Service</th>
-    <th class="has-text-centered">Peer</th>
+    <th class="has-text-centered">Monitor</th>
+    <th class="has-text-centered">Source</th>
     <th class="has-text-centered">Version</th>
     <th class="has-text-right">Performance</th>
     <th class="has-text-centered">Timestamp</th>
@@ -26,10 +27,11 @@
       <tr>
         <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
         <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
-        <td><a href="/service/<%= hc.serviceId %> "><%= shortStash(hc.serviceId) %></a></td>
-        <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td>
+        <td><a href="/service/<%= encodeURIComponent(hc.serviceUrl) %> "><%= hc.serviceUrl %></a></td>
+        <td><a href="/monitor/<%= hc.monitorId %> "><%= shortStash(hc.monitorId) %></a></td>
+        <td><%= hc.source %></td>
         <td><%= hc.record.version %></td>
-        <td class="has-text-right"><%= hc.record.performance.toFixed(4) %></td>
+        <td class="has-text-right"><%= hc.record.performance?.toFixed(4) %></td>
         <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
       </tr>
     <% }) %>

@@ -19,11 +19,11 @@
     <table class="table">
       <tr>
         <th>Service</th>
-        <td><a href="/service/<%= model.serviceId %> "><%= shortStash(model.serviceId) %></a></td>
+        <td><a href="/service/<%= encodeURIComponent(model.serviceUrl) %> "><%= model.serviceUrl %></a></td>
       <!-- </tr> -->
       <!-- <tr> -->
-        <th>Peer</th>
-        <td><a href="/peer/<%= model.peerId %> "><%= shortStash(model.peerId) %></a></td>
+        <th>Monitor</th>
+        <td><a href="/monitor/<%= model.monitorId %> "><%= shortStash(model.monitorId) %></a></td>
       </tr>
     </table>
     <div class="tabs">

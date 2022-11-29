@@ -11,10 +11,10 @@
   <tbody>
     <% services.forEach(service => { %>
     <tr>
-      <td><a href="/service/<%= service.serviceId %>"><%= shortStash(service.serviceId) %></a></td>
+      <td><a href="/service/<%= encodeURIComponent(service.serviceUrl) %>"><%= service.serviceUrl %></a></td>
       <td><%= service.name %> </td>
-      <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.url %>" target="_blank">
-        <%= service.url %>
+      <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.serviceUrl %>" target="_blank">
+        <%= service.serviceUrl %>
         <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
       </a></td>
     </tr>

@@ -6,7 +6,7 @@ const healthCheckModel = {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     // dateTime: { type: DataTypes.STRING },
     monitorId: { type: DataTypes.STRING(64) },
-    serviceId: { type: DataTypes.STRING(64) },
+    serviceUrl: { type: DataTypes.STRING(64) },
     peerId: { type: DataTypes.STRING(64) }, // networkId of the validator
     source: { type: DataTypes.STRING(10) }, // gossip, check
     level: { type: DataTypes.STRING(10) }, // log, error, info?

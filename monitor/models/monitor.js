@@ -5,7 +5,8 @@ const monitorModel = {
   definition: {
     monitorId: { type: DataTypes.STRING(64), primaryKey: true },
     name: { type: DataTypes.STRING(64) },
-    services: { type: DataTypes.JSON },
+    // services: { type: DataTypes.JSON },
+    multiaddrs: { type: DataTypes.JSON }
   },
   options: {
     tableName: 'monitor',

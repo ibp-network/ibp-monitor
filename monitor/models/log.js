@@ -6,7 +6,7 @@ const logModel = {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     level: { type: DataTypes.STRING(10) }, // error, warning, info, debug
     peerId: { type: DataTypes.STRING(64) },
-    serviceId: { type: DataTypes.STRING(64) },
+    serviceUrl: { type: DataTypes.STRING(64) },
     data: { type: DataTypes.JSON },
   }, 
   options: {

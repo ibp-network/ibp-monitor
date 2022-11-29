@@ -7,24 +7,24 @@
       <ul>
         <li><a href="/">Home</a></li>
         <li><a href="/service">Services</a></li>
-        <li class="is-active"><a href="#" aria-current="page"> <%= service.serviceId %>  </a></li>
+        <li class="is-active"><a href="#" aria-current="page"> <%= service.serviceUrl %>  </a></li>
       </ul>
     </nav>
 
     <table class="table is-bordered">
       <tbody>
         <tr>
-          <th>Id</th>
-          <td><%= service.serviceId %></td>
+          <th>Url</th>
+          <td><%= service.serviceUrl %></td>
         </tr>
         <tr>
           <th>Name</th>
           <td><%= service.name %></td>
         </tr>
         <tr>
-          <th>Url</th>
-          <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.url %>" target="_blank">
-            <%= service.url %>
+          <th>Polkadot.js</th>
+          <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.serviceUrl %>" target="_blank">
+            <%= service.serviceUrl %>
             <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
           </a></td>
         </tr>
@@ -41,10 +41,10 @@
 
     <div class="tabs">
       <ul>
-        <li class="is-active"><a>Peers</a></li>
+        <li class="is-active"><a>Monitors</a></li>
       </ul>
     </div>
-    <%- include(templateDir + '/peersTable.ejs', { peers, columns: ['peerId', 'updatedAt'] }); -%>
+    <%- include(templateDir + '/monitorsTable.ejs', { monitors, columns: ['monitorId', 'updatedAt'] }); -%>
 
     <div class="tabs">
       <ul>
