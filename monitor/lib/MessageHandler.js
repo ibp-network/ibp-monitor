@@ -20,9 +20,10 @@ class MessageHandler {
   async handleDiscovery (peerId) {
     console.debug('peer:discover ', peerId.detail.id.toString())
     try {
-      const [peerModel, created] = await this.datastore.Peer.upsert({ peerId: peerId.detail.id.toString() })
+      const model = { monitorId: peerId.detail.id.toString() }
+      const [monitorModel, created] = await this.datastore.Monitor.upsert(model, model)
     } catch (err) {
-      console.warn('Error trying to upsert discovered peer', peerId.detail.id.toString())
+      console.warn('Error trying to upsert discovered monitor', peerId.detail.id.toString())
       console.error(err)
     }
     // console.debug('upsert', created, peerModel)
@@ -43,6 +44,7 @@ class MessageHandler {
   async handleMessage (evt) {
     // console.log(evt.detail)
     // if (peerId != self.peerId) {}
+    var model
     switch (evt.detail.topic) {
 
       // a peer has published their services
@@ -50,29 +52,24 @@ class MessageHandler {
         const services = JSON.parse(uint8ArrayToString(evt.detail.data)) || []
         console.debug('/ibp/services from', evt.detail.from.toString()) //, services)
         // `touch` the peer model
-        let [peer, _] = await this.datastore.Peer.upsert({
-          peerId: evt.detail.from.toString()
-          // services: services
+        let [monitor, _] = await this.datastore.Monitor.upsert({
+          monitorId: evt.detail.from.toString(),
+          services: services
         })
-        var ids = []
+        // var ids = []
         for (var i = 0; i < services.length; i++) {
-          var service = services[i]
-          // console.log(service)
-          if (!service.serviceId) {
-            service.serviceId = await this.api.getServiceId(service.url)
-          }
-          let model = { ...service, peerId: evt.detail.from.toString() }
-          // console.log('serviceModel for upsert', model)
+          model = services[i]
+          console.log(model)
           const [x, _] = await this.datastore.Service.upsert(model)
-          ids.push(x.serviceId)
+          // ids.push(model.url)
         }
-        await peer.addServices(ids)
+        // await monitor.addServices(ids)
         break
 
       // a peer has published some results
       case '/ibp/healthCheck':
         const record = JSON.parse(uint8ArrayToString(evt.detail.data))
-        const model = {
+        model = {
           peerId: evt.detail.from.toString(),
           serviceId: record.serviceId,
           record

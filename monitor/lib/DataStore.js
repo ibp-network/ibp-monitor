@@ -1,15 +1,16 @@
 
 import { DataTypes, Sequelize, Model } from 'sequelize'
-import { serviceModel } from '../models/service.js';
+
+import { monitorModel } from '../models/monitor.js'
+import { serviceModel } from '../models/service.js'
 import { peerModel } from '../models/peer.js'
 import { healthCheckModel } from '../models/healthCheck.js'
 import { logModel } from '../models/log.js'
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './data/datastore.sqlite',
-  logging: false
-});
+import { config } from '../config.js'
+import { configLocal } from '../config.local.js'
+const cfg = Object.assign(config, configLocal)
+const sequelize = new Sequelize(cfg.sequelize.database, cfg.sequelize.username, cfg.sequelize.password, cfg.sequelize.options)
 
 class DataStore {
 
@@ -22,27 +23,23 @@ class DataStore {
   constructor(config = {}) {
     console.debug('DataStore()', config)
     this.pruning = config.pruning || 90
-    //const Peer = new Model(peerModel, { initialiseDb: config.initialiseDb })
+    const Monitor = sequelize.define('monitor', monitorModel.definition, { ...monitorModel.options, sequelize })
     const Peer = sequelize.define('peer', peerModel.definition, { ...peerModel.options, sequelize })
-    // const Peer = Model.init(peerModel.definition, { sequelize, ...peerModel.options })
-    // const Service = new Model(serviceModel, { initialiseDb: config.initialiseDb })
     const Service = sequelize.define('service', serviceModel.definition, { ...serviceModel.options, sequelize })
-    // const Service = Model.init(serviceModel.definition, { ...serviceModel.options, sequelize })
-    // const HealthCheck = new Model(healthCheckModel, { initialiseDb: config.initialiseDb })
     const HealthCheck = sequelize.define('health_check', healthCheckModel.definition, { ...healthCheckModel.options, sequelize })
-    // const HealthCheck = Model.init(healthCheckModel.definition, { ...healthCheckModel.options, sequelize })
-    // const PeerService = 
     const Log = sequelize.define('log', logModel.definition, { ...logModel.options, sequelize })
 
-    Peer.belongsToMany(Service, { as: 'services', through: 'peer_service', foreignKey: 'peerId', otherKey: 'serviceId' });
-    // Peer.hasMany(Service, { as: 'services', foreignKey: 'peerId' })
+    // Monitor.hasMany(Service, { as: 'services' }) // not needed, it's stored in the monitor record
+    Peer.belongsTo(Service, { as: 'service', foreignKey: 'serviceUrl' })
     Peer.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'peerId' })
-    Service.belongsToMany(Peer, { through: 'peer_service', foreignKey: 'serviceId', otherKey: 'peerId' });
+    Service.hasMany(Peer, { foreignKey: 'serviceUrl', otherKey: 'peerId' })
+    Service.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'serviceUrl' })
     HealthCheck.belongsTo(Peer, { foreignKey: 'peerId' })
-    HealthCheck.belongsTo(Service, { foreignKey: 'serviceId' })
+    HealthCheck.belongsTo(Service, { foreignKey: 'serviceUrl' })
     Log.belongsTo(Peer, { foreignKey: 'peerId' })
     Log.belongsTo(Service, { foreignKey: 'serviceId' })
 
+    this.Monitor = Monitor
     this.Peer = Peer
     this.Service = Service
     this.HealthCheck = HealthCheck

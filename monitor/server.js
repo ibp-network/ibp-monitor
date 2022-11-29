@@ -53,10 +53,10 @@ var counter = 0;
       pubKey: uint8ArrayToString(peerId.publicKey, 'base64'),   // .toString()
     }), 'utf-8')
   }
-  console.debug('Our peerId', peerId.toString())
-  hh.setLocalPeerId(peerId.toString())
+  console.debug('Our monitorId', peerId.toString())
+  hh.setLocalMonitorId(peerId.toString())
   // ensure our peerId is in the DB
-  await ds.Peer.upsert({peerId: peerId.toString()})
+  await ds.Monitor.upsert({ monitorId: peerId.toString(), name: 'localhost', services: config.services }, {name: 'localhost', services: config.services})
 
   const gsub = gossipsub({
     emitSelf: true, // get our own pubsub messages
@@ -107,8 +107,16 @@ var counter = 0;
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
 
-  libp2p.addEventListener('peer:discovery', (peerId) => mh.handleDiscovery(peerId) )
-  libp2p.pubsub.addEventListener('message', (evt) => mh.handleMessage(evt) )
+  // libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
+  //   console.debug(peerId.toString(), 'has disconnected')
+  // })
+  libp2p.addEventListener('peer:discovery', async (peerId) => {
+    console.log('- in discovery: we have', libp2p.pubsub.getPeers().length, 'pubsub peers', JSON.stringify(peerId))
+    await mh.handleDiscovery(peerId)
+  })
+  libp2p.pubsub.addEventListener('message', async (evt) => {
+    await mh.handleMessage(evt)
+  })
 
   // subscribe to pubsub topics
   for (var i=0; i < config.allowedTopics.length; i++) {
@@ -123,22 +131,12 @@ var counter = 0;
     await mh.publishServices(config.services, libp2p)
   }, UPDATE_INTERVAL)
 
+  console.log('definging publishResults, we have', libp2p.getPeers().length, 'peers')
   // publish the results of our healthChecks
-  const publishResults = async () => {
-    console.debug('Publishing our healthChecks')
+  async function publishResults () {
+    console.debug('Publishing our healthChecks to', libp2p.getPeers().length, 'peers')
     libp2p.getPeers().forEach(async (peerId) => {
       console.log('our peers are:', peerId.toString())
-      // try {
-      //   const stream = await libp2p.dialProtocol(peerId, '/ibp/services')
-      //   // console.debug('stream.stat', stream.stat)
-      //   // send a direct message to each peer
-      //   await stringToStream(JSON.stringify(config.services), stream)
-      // } catch (err) {
-      //   console.warn('GOT AN ERROR')
-      //   console.error(err)
-      // }
-      // check services of our peers
-      // const services = await ds.Service.findAll({ where: { peers: { peerId: peerId.toString() } } })
       const peer = await ds.Peer.findByPk( peerId.toString(), { include: 'services' })
       // console.debug('peer', peer)
       const results = await hc.check(peer.services) || []
@@ -170,7 +168,7 @@ var counter = 0;
   // pubsub should balance the # peer connections. Each node will only healthCheck its peers.
   // results will be broadcast to all peers
   // await publishResults()
-  setInterval(async () => {
+  setInterval(async function() {
     await publishResults()
   }, UPDATE_INTERVAL)
 

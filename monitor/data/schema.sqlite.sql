@@ -36,3 +36,4 @@ create table "peer_service" (
 	"updatedAt"	DATETIME NOT NULL,
   PRIMARY KEY("peerId", "serviceId")
 );
+

@@ -3,8 +3,8 @@ import { DataTypes } from 'sequelize'
 const monitorModel = {
   // tableName: 'peers',
   definition: {
-    peerId: { type: DataTypes.STRING, primaryKey: true },
-    name: { type: DataTypes.STRING },
+    monitorId: { type: DataTypes.STRING(64), primaryKey: true },
+    name: { type: DataTypes.STRING(64) },
     services: { type: DataTypes.JSON },
   },
   options: {

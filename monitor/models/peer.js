@@ -5,6 +5,7 @@ const peerModel = {
   // pk: ['peerId'],
   definition: {
     peerId: { type: DataTypes.STRING(64), primaryKey: true },
+    serviceUrl: { type: DataTypes.STRING(132) },
     name: { type: DataTypes.STRING(64) },
   }, 
   options: {

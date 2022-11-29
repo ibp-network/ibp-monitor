@@ -23,7 +23,7 @@ class HttpHandler {
   templateDir = __dirname + '/../templates'
   // for display purposes // TODO move this to config?
   dateTimeFormat = 'YYYY.MM.DD HH:mm'
-  localPeerId = ''
+  localMonitorId = ''
 
   constructor({ datastore, app, dateTimeFormat }) {
     this.datastore = datastore
@@ -38,8 +38,8 @@ class HttpHandler {
     this.setup()
   }
 
-  setLocalPeerId (peerId) {
-    this.localPeerId = peerId
+  setLocalMonitorId (peerId) {
+    this.localMonitorId = peerId
   }
 
   setup () {
