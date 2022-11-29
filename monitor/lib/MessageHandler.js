@@ -71,11 +71,11 @@ class MessageHandler {
       case '/ibp/healthCheck':
         const record = JSON.parse(uint8ArrayToString(evt.detail.data))
         model = {
-          peerId: evt.detail.from.toString(),
-          serviceId: record.serviceId,
+          monitorId: evt.detail.from.toString(),
+          serviceUrl: record.serviceUrl,
           record
         }
-        console.log('/ibp/healthCheck from', evt.detail.from.toString(), 'for', record.serviceId)
+        console.log('/ibp/healthCheck from', evt.detail.from.toString(), 'for', record.serviceUrl)
         // console.log('handleMessage: /ibp/healthCheck', model)
         // await this.datastore.insertHealthCheck(evt.detail.from.toString(), model)
         await this.datastore.HealthCheck.create(model)
@@ -86,7 +86,7 @@ class MessageHandler {
     }
   }
 
-  // get the serviceId and then publish what you have
+  // publish services we have
   async publishServices (services = [], libp2p) {
     for (var i = 0; i < services.length; i++) {
       const service = services[i]
@@ -124,13 +124,6 @@ class MessageHandler {
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
-        const model = {
-          peerId: libp2p.peerId.toString(),
-          serviceId: result.serviceId,
-          record: result
-        }
-        // console.log('save our own /ibp/healthCheck', model)
-        await ds.HealthCheck.create(model)
       })
     }
   } // end of publishResults()

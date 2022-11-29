@@ -39,11 +39,11 @@ class HealthChecker {
       var result
       // TODO different types of service? http / substrate / ...?
       try {
-        console.debug('HealthCheck.check()', service.serviceId)
-        const provider = new WsProvider(service.url)
+        console.debug('HealthCheck.check()', service.serviceUrl)
+        const provider = new WsProvider(service.serviceUrl)
         const api = await ApiPromise.create({ provider })
         await api.isReady
-        const serviceId = await api.rpc.system.localPeerId()
+        const monitorId = await api.rpc.system.localPeerId()
         // console.log('localPeerId', localPeerId.toString())
         const chain = await api.rpc.system.chain()
         const chainType = await api.rpc.system.chainType()
@@ -58,8 +58,8 @@ class HealthChecker {
         // console.debug(health.toString())
         result = {
           // our peerId will be added by the receiver of the /ibp/healthCheck messate
-          serviceId: serviceId.toString(),
-          url: service.url,
+          monitorId: monitorId.toString(),
+          serviceUrl: service.serviceUrl,
           chain, chainType, health, networkState, syncState, version,
           performance: end - start
         }
@@ -69,11 +69,13 @@ class HealthChecker {
       } catch (err) {
         console.error(err)
         result = {
+          monitorId: monitorId.toString(),
           serviceUrl: service.serviceUrl, service, error: err
         }
       }
       results.push(result)
-      await this.datastore.Check.create(result)
+      const created = await this.datastore.HealthCheck.create(result)
+      console.debug('HealthCheck created', created)
     }
     // console.log(results)
     return results
