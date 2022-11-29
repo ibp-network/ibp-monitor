@@ -139,12 +139,16 @@ var counter = 0;
       console.log('- our peers are:', peerId.toString())
       const peer = await ds.Peer.findByPk( peerId.toString(), { include: 'service' })
       // console.debug('peer', peer)
-      const results = await hc.check([peer.service]) || []
-      console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
-      asyncForeach(results, async (result) => {
-        const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
-        // console.debug('sent message to peer', res?.toString())
-      })
+      if (peer) {
+        const results = await hc.check([peer.service]) || []
+        console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
+        asyncForeach(results, async (result) => {
+          const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
+          // console.debug('sent message to peer', res?.toString())
+        })  
+      } else {
+        console.warn('could not find peer', peerId.toString())
+      }
     }) // === end of peers update cycle ===
 
     // check our own services?

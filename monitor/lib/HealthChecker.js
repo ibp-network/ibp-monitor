@@ -36,6 +36,7 @@ class HealthChecker {
     console.debug('check() # services', services.length)
     for (var i = 0; i < services.length; i++) {
       const service = services[i]
+      var result
       // TODO different types of service? http / substrate / ...?
       try {
         console.debug('HealthCheck.check()', service.serviceId)
@@ -55,24 +56,24 @@ class HealthChecker {
         const syncState = await api.rpc.system.syncState()
         const version = await api.rpc.system.version()
         // console.debug(health.toString())
-        const result = {
+        result = {
           // our peerId will be added by the receiver of the /ibp/healthCheck messate
           serviceId: serviceId.toString(),
           url: service.url,
           chain, chainType, health, networkState, syncState, version,
           performance: end - start
         }
-        results.push(result)
         await provider.disconnect()
         // save healthCheck in storage
-        await this.datastore.Check.create(result)
         console.debug('HealthCheck.check() done')
       } catch (err) {
         console.error(err)
-        results.push({
-          url: service.url, service, error: err
-        })
+        result = {
+          serviceUrl: service.serviceUrl, service, error: err
+        }
       }
+      results.push(result)
+      await this.datastore.Check.create(result)
     }
     // console.log(results)
     return results

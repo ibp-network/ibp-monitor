@@ -61,6 +61,7 @@ class MessageHandler {
           model = services[i]
           console.log(model)
           const [x, _] = await this.datastore.Service.upsert(model)
+          await this.datastore.Peer.upsert({peerId: evt.detail.from.toString(), serviceUrl: model.serviceUrl})
           // ids.push(model.url)
         }
         // await monitor.addServices(ids)
