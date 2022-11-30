@@ -73,7 +73,7 @@ class MessageHandler {
         console.debug('upserting service:', serviceUrl)
         await this.datastore.Service.upsert({ serviceUrl })
         console.debug('upserting peer:', peerId, serviceUrl)
-        await this.datastore.Peer.upsert({ peerId, serviceUrl }) // Peer depends on Service
+        await this.datastore.Peer.upsert({ peerId, serviceUrl }, {}) // Peer depends on Service
         console.debug('upserting monitor:', monitorId)
         await this.datastore.Monitor.upsert({ monitorId })
         model = {
