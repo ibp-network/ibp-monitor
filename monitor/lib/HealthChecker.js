@@ -47,6 +47,8 @@ class HealthChecker {
         console.debug('HealthCheck.check()', service.serviceUrl)
         const provider = new WsProvider(service.serviceUrl)
         const api = await ApiPromise.create({ provider })
+        // catch & throw promise reject()
+        api.on('error', (err) => { throw(err) })
         await api.isReady
         peerId = await api.rpc.system.localPeerId()
         // console.log('localPeerId', localPeerId.toString())
