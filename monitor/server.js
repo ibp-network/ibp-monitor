@@ -13,19 +13,22 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
 
-import { config } from './config.js'
 import { DataStore } from './lib/DataStore.js'
 import { MessageHandler } from './lib/MessageHandler.js'
 import { HealthChecker } from './lib/HealthChecker.js'
 import { HttpHandler } from './lib/HttpHandler.js'
 import { asyncForeach, streamToString, stringToStream } from './lib/utils.js'
 
-const HTTP_PORT = config.httpPort || 30001
-const GOSSIP_PORT = config.listenPort || 30000
-const UPDATE_INTERVAL = config.updateInterval || 3000
+import { config } from './config.js'
+import { configLocal } from './config.local.js'
+const cfg = Object.assign(config, configLocal)
+
+const HTTP_PORT = cfg.httpPort || 30001
+const GOSSIP_PORT = cfg.listenPort || 30000
+const UPDATE_INTERVAL = cfg.updateInterval || 3000
 
 // TODO make this dns and ip4...?
-// const EXTERNAL_IP = config.externalIp || '0.0.0.0'
+// const EXTERNAL_IP = cfg.externalIp || '0.0.0.0'
 // const LISTEN_ADDRESS = `/ip4/${EXTERNAL_IP}/tcp/${GOSSIP_PORT}`
 
 const ds = new DataStore({ initialiseDb: false })
@@ -63,10 +66,10 @@ var counter = 0;
     monitorId: peerId.toString(),
     name: 'localhost',
     // multiaddrs will be updated after start()
-    // multiaddrs: config.addresses
+    // multiaddrs: cfg.addresses
   })
-  const serviceIds = config.services.map(s => s.serviceUrl)
-  config.services.forEach(async (service) => {
+  const serviceIds = cfg.services.map(s => s.serviceUrl)
+  cfg.services.forEach(async (service) => {
     await ds.Service.upsert(service)
   })
   await monitor.addServices(serviceIds)
@@ -84,7 +87,7 @@ var counter = 0;
     // scoreParams: {},
     // directPeers: [],
     // allowedTopics: [ '/fruit' ]
-    allowedTopics: config.allowedTopics
+    allowedTopics: cfg.allowedTopics
   });
 
   const peerDiscovery = [
@@ -92,9 +95,9 @@ var counter = 0;
       interval: 20e3
     })
   ]
-  if (config.bootstrapPeers && config.bootstrapPeers.length > 0) {
+  if (cfg.bootstrapPeers && cfg.bootstrapPeers.length > 0) {
     peerDiscovery.push(bootstrap({
-      list: config.bootstrapPeers,
+      list: cfg.bootstrapPeers,
       timeout: 1000, // in ms,
       tagName: 'bootstrap',
       tagValue: 50,
@@ -104,7 +107,7 @@ var counter = 0;
 
   const libp2p = await createLibp2p({
     peerId,
-    addresses: config.addresses,
+    addresses: cfg.addresses,
     transports: [  new tcp() ],
     streamMuxers: [ mplex() ],
     connectionEncryption: [  new noise() ],
@@ -115,6 +118,7 @@ var counter = 0;
 
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
+
   await ds.Monitor.update(
     { multiaddrs: libp2p.getMultiaddrs() },
     { where: { monitorId: peerId.toString() } }
@@ -124,30 +128,24 @@ var counter = 0;
     console.log('WOOT: dht peer', peer.toString())
   })
 
-  // libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
-  //   console.debug(peerId.toString(), 'has disconnected')
-  // })
   libp2p.addEventListener('peer:discovery', async (peerId) => {
-    // console.log('- in discovery: we have', libp2p.pubsub.getPeers().length, 'pubsub peers', JSON.stringify(peerId))
-    // console.debug(libp2p.peerStore.addressBook)
     console.debug('peer:discovery, we have', libp2p.getPeers().length, 'peers')
     await mh.handleDiscovery(peerId)
   })
   libp2p.pubsub.addEventListener('message', async (evt) => {
     await mh.handleMessage(evt)
   })
-
   // subscribe to pubsub topics
-  for (var i=0; i < config.allowedTopics.length; i++) {
-    console.debug('subscribing to', config.allowedTopics[i])
-    libp2p.pubsub.subscribe(config.allowedTopics[i])
+  for (var i=0; i < cfg.allowedTopics.length; i++) {
+    console.debug('subscribing to', cfg.allowedTopics[i])
+    libp2p.pubsub.subscribe(cfg.allowedTopics[i])
   }
 
   // publish our services 
-  await mh.publishServices(config.services, libp2p)
+  await mh.publishServices(cfg.services, libp2p)
   setInterval(async () => {
     console.debug('Publishing our services')
-    await mh.publishServices(config.services, libp2p)
+    await mh.publishServices(cfg.services, libp2p)
   }, UPDATE_INTERVAL)
 
   // console.log('defining publishResults, we have', libp2p.getPeers().length, 'peers')
@@ -171,19 +169,12 @@ var counter = 0;
     }) // === end of peers update cycle ===
 
     // check our own services?
-    if (config.checkOwnServices) {
+    if (cfg.checkOwnServices) {
       console.debug('checking our own services...')
-      const results = await hc.check(config.services) || []
+      const results = await hc.check(cfg.services) || []
       console.debug(`publishing our healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
-        // const model = {
-        //   peerId: libp2p.peerId.toString(),
-        //   serviceUrl: result.serviceUrl,
-        //   record: result
-        // }
-        // // console.log('save our own /ibp/healthCheck', model)
-        // await ds.HealthCheck.create(model)
       })
     }
   } // end of publishResults()

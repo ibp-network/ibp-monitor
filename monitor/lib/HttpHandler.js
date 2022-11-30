@@ -10,6 +10,8 @@ import { fileURLToPath } from 'url'
 import moment from 'moment'
 
 import { config } from '../config.js'
+import { configLocal } from '../config.local.js'
+const cfg = Object.assign(config, configLocal)
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -34,7 +36,7 @@ class HttpHandler {
         app.use(express.static('static'))
         return app
       })()
-    this.dateTimeFormat = dateTimeFormat || config.dateTimeFormat
+    this.dateTimeFormat = dateTimeFormat || cfg.dateTimeFormat
     this.setup()
   }
 
