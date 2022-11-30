@@ -34,7 +34,7 @@ class DataStore {
     const Log = sequelize.define('log', logModel.definition, { ...logModel.options, sequelize })
     // const MonitorService = sequelize.define('monitor_service', {}, { timestamps: false })
 
-    Peer.belongsTo(Service, { as: 'service', foreignKey: 'serviceUrl' })
+    Peer.hasOne(Service, { as: 'service', foreignKey: 'serviceUrl' })
     Peer.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'peerId' })
     Service.hasMany(Peer, { foreignKey: 'serviceUrl', otherKey: 'peerId' })
     Service.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'serviceUrl' })
