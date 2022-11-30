@@ -83,7 +83,7 @@ class HttpHandler {
       let { serviceUrl } = req.params
       serviceUrl = decodeURIComponent(serviceUrl)
       let tpl = this._getTemplate('service')
-      const service = await this.datastore.Service.findByPk(serviceUrl, { include: 'monitors' })
+      const service = await this.datastore.Service.findByPk(serviceUrl, { include: ['monitors', 'peers'] })
       if (!service) {
         res.send(this._notFound())
       } else {
@@ -123,7 +123,7 @@ class HttpHandler {
       console.debug('app.get(/monitor/:monitorId)', req.params)
       let { monitorId } = req.params
       let tpl = this._getTemplate('monitor')
-      const monitor = await this.datastore.Monitor.findByPk(monitorId)
+      const monitor = await this.datastore.Monitor.findByPk(monitorId, { include: 'services' })
       if (!monitor) {
         res.send(this._notFound())
       } else {
@@ -201,7 +201,7 @@ class HttpHandler {
 
   _toJson (record) {
     var ret = record
-    console.debug('record is type', typeof record)
+    // console.debug('record is type', typeof record)
     if (typeof record === 'string') {
       try { ret = JSON.parse(record)} catch (err) {
         console.warn('can not parse', record, 'to json')

@@ -26,10 +26,12 @@ const config = {
   listenPort: GOSSIP_PORT,
   // TODO: how to do this through NAT?
   // 0.0.0.0 will bind all interfaces
-  externalIp: '0.0.0.0',
-  multiAddr: [
-    `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
-  ],
+  addresses: {
+    listen: [
+      `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
+    ],
+    // announce: []
+  },
   httpPort: 30001,
   allowedTopics: [
     '/ibp',

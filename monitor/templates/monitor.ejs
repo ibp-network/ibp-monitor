@@ -6,7 +6,7 @@
     <nav class="breadcrumb" aria-label="breadcrumbs">
       <ul>
         <li><a href="/">Home</a></li>
-        <li><a href="/monitor">monitors</a></li>
+        <li><a href="/monitor">Monitors</a></li>
         <li class="is-active"><a href="#" aria-current="page"> <%= monitor.monitorId %> </a>
           <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%>
         </li>
@@ -19,12 +19,19 @@
           <th>Monitor Id</th>
           <td><%= monitor.monitorId %></td>
         </tr>
-        <!-- <tr>
-          <th>Service Url</th>
-          <td><%= monitor.serviceUrl %></td>
-        </tr> -->
+        <tr>
+          <th>Addresses</th>
+          <td><%= monitor.multiaddrs %></td>
+        </tr>
       </tbody>
     </table>
+
+    <div class="tabs">
+      <ul>
+        <li class="is-active"><a>Services</a></li>
+      </ul>
+    </div>
+    <%- include(templateDir + '/servicesTable.ejs', { services: monitor.services, columns: [] }); -%>
 
     <div class="tabs">
       <ul>

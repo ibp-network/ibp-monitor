@@ -25,8 +25,8 @@ const GOSSIP_PORT = config.listenPort || 30000
 const UPDATE_INTERVAL = config.updateInterval || 3000
 
 // TODO make this dns and ip4...?
-const EXTERNAL_IP = config.externalIp || '0.0.0.0'
-const LISTEN_ADDRESS = `/ip4/${EXTERNAL_IP}/tcp/${GOSSIP_PORT}`
+// const EXTERNAL_IP = config.externalIp || '0.0.0.0'
+// const LISTEN_ADDRESS = `/ip4/${EXTERNAL_IP}/tcp/${GOSSIP_PORT}`
 
 const ds = new DataStore({ initialiseDb: false })
 const hc = new HealthChecker({ datastore: ds })
@@ -59,7 +59,12 @@ var counter = 0;
   hc.setLocalMonitorId(peerId.toString())
   
   // ensure our monitorId is in the DB, add the multiaddrs when connected below
-  const [monitor, monCreated] = await ds.Monitor.upsert({ monitorId: peerId.toString(), name: 'localhost' })
+  const [monitor, monCreated] = await ds.Monitor.upsert({
+    monitorId: peerId.toString(),
+    name: 'localhost',
+    // multiaddrs will not be updated after start()
+    multiaddrs: config.addresses
+  })
   const serviceIds = config.services.map(s => s.serviceUrl)
   config.services.forEach(async (service) => {
     await ds.Service.upsert(service)
@@ -99,12 +104,7 @@ var counter = 0;
 
   const libp2p = await createLibp2p({
     peerId,
-    addresses: {
-      listen: [
-        // `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
-        LISTEN_ADDRESS
-      ]
-    },
+    addresses: config.addresses,
     transports: [  new tcp() ],
     streamMuxers: [ mplex() ],
     connectionEncryption: [  new noise() ],

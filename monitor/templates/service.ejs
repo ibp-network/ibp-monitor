@@ -48,6 +48,13 @@
 
     <div class="tabs">
       <ul>
+        <li class="is-active"><a>Peers</a></li>
+      </ul>
+    </div>
+    <%- include(templateDir + '/peersTable.ejs', { peers: service.peers, columns: ['peerId', 'updatedAt'] }); -%>
+
+    <div class="tabs">
+      <ul>
         <li class="is-active"><a>Checks</a></li>
       </ul>
     </div>
