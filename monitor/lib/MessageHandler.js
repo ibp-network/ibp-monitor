@@ -65,6 +65,10 @@ class MessageHandler {
       case '/ibp/healthCheck':
         const record = JSON.parse(uint8ArrayToString(evt.detail.data))
         // console.log('got healthcheck from ', evt.detail.from.toString(), record)
+        // touch the peerId behind the service Url
+        await this.datastore.Peer.upsert({peerId: record.peerId})
+        await this.datastore.Monitor.upsert({monitorId: evt.detail.from.toString()})
+        await this.datastore.Service.upsert({serviceUrl: record.serviceUrl})
         model = {
           ...record,
           monitorId: evt.detail.from.toString(),

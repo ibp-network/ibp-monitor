@@ -7,6 +7,7 @@ import { tcp } from '@libp2p/tcp'
 // import { Noise } from '@libp2p/noise' // @deprecated
 import { noise } from "@chainsafe/libp2p-noise"
 import { mplex } from '@libp2p/mplex'
+import { kadDHT } from '@libp2p/kad-dht'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
@@ -108,11 +109,16 @@ var counter = 0;
     streamMuxers: [ mplex() ],
     connectionEncryption: [  new noise() ],
     peerDiscovery,
+    dht: kadDHT(),
     pubsub: gsub
   })
 
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
+
+  libp2p.dht.addEventListener('peer', (peer) => {
+    console.log('WOOT: dht peer', peer.toString())
+  })
 
   // libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
   //   console.debug(peerId.toString(), 'has disconnected')
