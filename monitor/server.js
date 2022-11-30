@@ -150,17 +150,17 @@ var counter = 0;
     console.debug('Publishing our healthChecks for', libp2p.getPeers().length, 'peers')
     libp2p.getPeers().forEach(async (peerId) => {
       console.log('- our peers are:', peerId.toString())
-      const peer = await ds.Peer.findByPk( peerId.toString(), { include: 'service' })
+      const monitor = await ds.Monitor.findByPk(peerId.toString(), { include: 'services' })
       // console.debug('peer', peer)
-      if (peer) {
-        const results = await hc.check([peer.service]) || []
+      if (monitor) {
+        const results = await hc.check(monitor.services) || []
         console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
         asyncForeach(results, async (result) => {
           const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
           // console.debug('sent message to peer', res?.toString())
         })  
       } else {
-        console.warn('could not find peer', peerId.toString())
+        console.warn('could not find monitor', peerId.toString())
       }
     }) // === end of peers update cycle ===
 
