@@ -12,14 +12,15 @@
 git clone https://github.com/dotsama-ibp/dotsama-ibp
 cd dotsama-ibp/gossip
 npm install
+cat 'const configLocal = {}\n export { configLocal }' > config.local.js
 node server.js
 ```
 
-## TODO
+## TODO, progress
 
-- how to create your own peerId
-- peers should sign status updates
-- implement status / metrics
-- implement dataStore
+- ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
+- ~~peers should sign status updates~~ - this is configured in `libp2p.pubsub.signMessages: true`
+- ~~implement dataStore~~ - done, sqlite default, mysql tested
+- implement status / metrics - in progress
 - implememt scoring
 - implement prometheus (or similar) api

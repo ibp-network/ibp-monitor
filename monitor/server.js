@@ -129,6 +129,8 @@ var counter = 0;
   // })
   libp2p.addEventListener('peer:discovery', async (peerId) => {
     // console.log('- in discovery: we have', libp2p.pubsub.getPeers().length, 'pubsub peers', JSON.stringify(peerId))
+    // console.debug(libp2p.peerStore.addressBook)
+    console.debug('peer:discovery, we have', libp2p.getPeers().length, 'peers')
     await mh.handleDiscovery(peerId)
   })
   libp2p.pubsub.addEventListener('message', async (evt) => {

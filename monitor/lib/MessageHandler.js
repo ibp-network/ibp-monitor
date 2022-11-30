@@ -19,7 +19,8 @@ class MessageHandler {
   // libp2p.addEventListener('peer:discovery', (peerId) => {})
   async handleDiscovery (peerId) {
     // const example = {"isTrusted":false,"detail":{"id":"12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu","multiaddrs":["/ip4/127.0.0.1/tcp/30000","/ip4/192.168.1.91/tcp/30000","/ip4/192.168.1.80/tcp/30000","/ip4/10.62.0.1/tcp/30000","/ip4/172.17.0.1/tcp/30000"],"protocols":[]}}
-    console.debug('peer:discover ', peerId.detail.id.toString())
+    console.debug('peer:discovery ', peerId.detail.id.toString())
+    console.debug(JSON.stringify(peerId.detail.multiaddrs))
     try {
       const model = { monitorId: peerId.detail.id.toString(), multiaddrs: peerId.detail.multiaddrs }
       const [monitorModel, created] = await this.datastore.Monitor.upsert(model, model)

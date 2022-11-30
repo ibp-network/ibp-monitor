@@ -23,6 +23,20 @@
           <th>Addresses</th>
           <td><%= monitor.multiaddrs %></td>
         </tr>
+        <tr>
+          <th>Updated</th>
+          <td>
+            <%= moment.utc(monitor.updatedAt).format(dateTimeFormat) %>
+            (UTC, <%= moment.utc(monitor.updatedAt).fromNow() %>)
+          </td>
+        </tr>
+        <tr>
+          <th>Discovered</th>
+          <td>
+            <%= moment.utc(monitor.createdAt).format(dateTimeFormat) %>
+            (UTC, <%= moment.utc(monitor.createdAt).fromNow() %>)
+          </td>
+        </tr>
       </tbody>
     </table>
 
