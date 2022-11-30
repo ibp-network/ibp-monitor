@@ -24,7 +24,10 @@
     %>
     <tr>
       <% if (columns.includes('monitorId')) { %>
-      <td><a href="/monitor/<%= monitor.monitorId %>"><%= shortStash(monitor.monitorId) %></a></td>
+      <td>
+        <a href="/monitor/<%= monitor.monitorId %>"><%= shortStash(monitor.monitorId) %></a>
+        <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%>
+      </td>
       <% } %>
       <% if (columns.includes('services')) { %>
       <td class="has-text-centered"><%= monitor.services.length %></td>
