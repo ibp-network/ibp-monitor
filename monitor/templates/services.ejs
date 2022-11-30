@@ -19,9 +19,10 @@
         <th>Service url</th>
         <th>P.JS</th>
         <th>Name</th>
+        <th>Status</th>
         <th>Monitors</th>
+        <th>Updated</th>
         <th>Discovered</th>
-        <th>Last seen</th>
       </thead>
 
       <tbody>
@@ -33,9 +34,10 @@
               <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super>
             </a></td>
             <td><%= service.name %></td>
+            <td><%= service.status %></td>
             <td><%= service.monitors.length %></td>
-            <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
             <td><%= moment(service.updatedAt).format(dateTimeFormat) %></td>
+            <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
           </tr>
         <% }) %>
       </tbody>

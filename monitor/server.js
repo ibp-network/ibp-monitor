@@ -32,7 +32,7 @@ const UPDATE_INTERVAL = cfg.updateInterval || 3000
 // const EXTERNAL_IP = cfg.externalIp || '0.0.0.0'
 // const LISTEN_ADDRESS = `/ip4/${EXTERNAL_IP}/tcp/${GOSSIP_PORT}`
 
-const ds = new DataStore({ initialiseDb: false })
+const ds = new DataStore({ initialiseDb: false, pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
 const hh = new HttpHandler({ datastore: ds })
@@ -91,40 +91,6 @@ var counter = 0;
     allowedTopics: cfg.allowedTopics
   });
 
-  const peerDiscovery = [
-    mdns({
-      interval: 20e3
-    }),
-    bootstrap({
-      enabled: true,
-      list: cfg.bootstrapPeers,
-      timeout: 3 * 1000, // in ms,
-      tagName: 'bootstrap',
-      tagValue: 50,
-      tagTTL: 120 * 1000 // in ms
-    }),
-    pubsubPeerDiscovery({
-      interval: 10 * 1000, // in ms?
-      // topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
-      listenOnly: false
-    })
-  ]
-  // if (cfg.bootstrapPeers && cfg.bootstrapPeers.length > 0) {
-  //   console.debug('adding bootstrapPeers to peerDiscovery')
-  //   let components = {
-  //     // peerStore: new PeerStore(),
-  //   }
-  //   let bs = bootstrap({
-  //     enabled: true,
-  //     list: cfg.bootstrapPeers,
-  //     timeout: 3000, // in ms,
-  //     tagName: 'bootstrap-tag',
-  //     tagValue: 10,
-  //     tagTTL: 120000 // in ms
-  //   }) // (components)
-  //   peerDiscovery.push(bs)
-  // }
-
   const libp2p = await createLibp2p({
     peerId,
     addresses: cfg.addresses,
@@ -134,7 +100,24 @@ var counter = 0;
     connectionManager: {
       autoDial: true,
     },
-    peerDiscovery,
+    peerDiscovery: [
+      mdns({
+        interval: 20e3
+      }),
+      bootstrap({
+        enabled: true,
+        list: cfg.bootstrapPeers,
+        timeout: 3 * 1000, // in ms,
+        tagName: 'bootstrap',
+        tagValue: 50,
+        tagTTL: 120 * 1000 // in ms
+      }),
+      pubsubPeerDiscovery({
+        interval: 10 * 1000, // in ms?
+        // topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
+        listenOnly: false
+      })
+    ],
     dht: kadDHT(),
     pubsub: gsub
   })
@@ -159,6 +142,7 @@ var counter = 0;
 
   libp2p.addEventListener('peer:discovery', async (peerId) => {
     console.debug('peer:discovery, we have', libp2p.getPeers().length, 'peers')
+    console.debug('libp2p.connectionManager.listenerCount', libp2p.connectionManager.listenerCount())
     await mh.handleDiscovery(peerId)
   })
   libp2p.pubsub.addEventListener('message', async (evt) => {
@@ -200,8 +184,9 @@ var counter = 0;
     // check our own services?
     if (cfg.checkOwnServices) {
       console.debug('checking our own services...')
-      const results = await hc.check(cfg.services) || []
-      console.debug(`publishing our healthCheck: ${results.length} results to /ibp/healthCheck`)
+      const monitor = ds.Monitor.findAll({ where: { monitorId: peerId.toString() }, include: 'services' })
+      const results = await hc.check(monitor.services)
+      console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
       })
@@ -214,6 +199,11 @@ var counter = 0;
   setInterval(async function() {
     await publishResults()
   }, UPDATE_INTERVAL)
+
+  // pruning
+  setInterval(async () => {
+    await ds.prune()
+  }, cfg.pruning.interval * 1000)
 
   // start HttpHandler
   hh.listen(HTTP_PORT, () => {

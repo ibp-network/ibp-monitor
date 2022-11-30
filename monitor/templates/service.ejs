@@ -39,19 +39,25 @@
       </tbody>
     </table>
 
-    <div class="tabs">
-      <ul>
-        <li class="is-active"><a>Monitors</a></li>
-      </ul>
+    <div class="columns">
+      <div class="column">
+        <div class="tabs">
+          <ul>
+            <li class="is-active"><a>Monitors</a></li>
+          </ul>
+        </div>
+        <%- include(templateDir + '/monitorsTable.ejs', { monitors, columns: ['monitorId', 'updatedAt'] }); -%>    
+      </div>
+      <div class="column">
+        <div class="tabs">
+          <ul>
+            <li class="is-active"><a>Peers</a></li>
+          </ul>
+        </div>
+        <%- include(templateDir + '/peersTable.ejs', { peers: service.peers, columns: ['peerId', 'updatedAt'] }); -%>
+      </div>
     </div>
-    <%- include(templateDir + '/monitorsTable.ejs', { monitors, columns: ['monitorId', 'updatedAt'] }); -%>
 
-    <div class="tabs">
-      <ul>
-        <li class="is-active"><a>Peers</a></li>
-      </ul>
-    </div>
-    <%- include(templateDir + '/peersTable.ejs', { peers: service.peers, columns: ['peerId', 'updatedAt'] }); -%>
 
     <div class="tabs">
       <ul>

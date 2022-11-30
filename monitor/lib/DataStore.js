@@ -1,5 +1,6 @@
 
-import { DataTypes, Sequelize, Model } from 'sequelize'
+import moment from 'moment'
+import { DataTypes, Op, Sequelize, Model } from 'sequelize'
 
 import { monitorModel } from '../models/monitor.js'
 import { serviceModel } from '../models/service.js'
@@ -18,11 +19,14 @@ class DataStore {
   Peer = undefined
   HealthCheck = undefined
   Log = undefined
-  pruning = 90 // days // TODO activate pruning!
+  pruning = {
+    age: 90 * 24 * 60 * 60, // days as seconds
+    interval: 1 * 24 * 60 * 60 // 1 day as seconds
+  }
 
   constructor(config = {}) {
     console.debug('DataStore()', config)
-    this.pruning = config.pruning || 90
+    this.pruning = Object.assign(this.pruning, config.pruning)
     const Monitor = sequelize.define('monitor', monitorModel.definition, { ...monitorModel.options, sequelize })
     const Peer = sequelize.define('peer', peerModel.definition, { ...peerModel.options, sequelize })
     const Service = sequelize.define('service', serviceModel.definition, { ...serviceModel.options, sequelize })
@@ -84,6 +88,16 @@ class DataStore {
       level, data
     }
     return this.Log.create(model)
+  }
+
+  async prune () {
+    console.debug('DataStore.prune()', this.pruning)
+    const marker = moment().add(-(this.pruning.age), 'seconds')
+    var result
+    result = await this.HealthCheck.destroy({ where: { createdAt: { [Op.lt]: marker } } })
+    console.debug('HealthCheck.destroy', result)
+    result = await this.Service.update({ status: 'stale' }, { where: { errorCount: { [Op.gt]: 10 } } })
+    console.debug('Service.stale', result)
   }
 
 }

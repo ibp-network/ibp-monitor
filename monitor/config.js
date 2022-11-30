@@ -40,13 +40,16 @@ const config = {
   ],
   updateInterval: 30 * 1000, // 60 seconds
   bootstrapPeers: [
-    // "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
-    "/ip4/192.96.202.185/tcp/30000/p2p/12D3KooWPB6XJ32wDMRpSn7djX5uPpCrjeFg6c2hmh9uDRmsuRbw",
+    "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
   ],
   checkOwnServices: false,
   services: [
     // put these in your config.local.js
-  ]
+  ],
+  pruning: {
+    age: 90 * 24 * 60 * 60, // 90 days as seconds
+    interval: 1 * 60 * 60 // 1 hour as seconds
+  }
 }
 
 export { config }

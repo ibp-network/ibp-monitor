@@ -28,7 +28,10 @@
         <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
         <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
         <td><a href="/service/<%= encodeURIComponent(hc.serviceUrl) %> "><%= hc.serviceUrl %></a></td>
-        <td><a href="/monitor/<%= hc.monitorId %> "><%= shortStash(hc.monitorId) %></a></td>
+        <td>
+          <a href="/monitor/<%= hc.monitorId %> "><%= shortStash(hc.monitorId) %></a>
+          <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: hc.monitorId, localMonitorId }); -%>
+        </td>
         <td><%= hc.source %></td>
         <td><%= hc.record.version %></td>
         <td class="has-text-right"><%= hc.record.performance?.toFixed(4) %></td>

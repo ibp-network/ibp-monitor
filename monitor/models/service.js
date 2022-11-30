@@ -9,7 +9,8 @@ const serviceModel = {
     // // this peer will host the service
     // peerId: { type: DataTypes.STRING(64) },
     // latest stats from healthCheck
-    status: { type: DataTypes.JSON },
+    status: { type: DataTypes.STRING(16) },
+    errorCount: { type: DataTypes.INTEGER },
   },
   options: {
     tableName: 'service',
