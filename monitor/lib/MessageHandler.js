@@ -68,7 +68,7 @@ class MessageHandler {
         // console.log('got healthcheck from ', evt.detail.from.toString(), record)
         // touch the peerId behind the service Url
         await this.datastore.Service.upsert({serviceUrl: record.serviceUrl})
-        await this.datastore.Peer.upsert({peerId: record.peerId}) // Peer depends on Service
+        await this.datastore.Peer.upsert({peerId: record.peerId, serviceUrl: record.serviceUrl}) // Peer depends on Service
         await this.datastore.Monitor.upsert({monitorId: evt.detail.from.toString()})
         model = {
           ...record,
