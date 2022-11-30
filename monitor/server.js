@@ -62,8 +62,8 @@ var counter = 0;
   const [monitor, monCreated] = await ds.Monitor.upsert({
     monitorId: peerId.toString(),
     name: 'localhost',
-    // multiaddrs will not be updated after start()
-    multiaddrs: config.addresses
+    // multiaddrs will be updated after start()
+    // multiaddrs: config.addresses
   })
   const serviceIds = config.services.map(s => s.serviceUrl)
   config.services.forEach(async (service) => {
@@ -115,6 +115,10 @@ var counter = 0;
 
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
+  await ds.Monitor.update(
+    { multiaddrs: libp2p.getMultiaddrs() },
+    { where: { monitorId: peerId.toString() } }
+  )
 
   libp2p.dht.addEventListener('peer', (peer) => {
     console.log('WOOT: dht peer', peer.toString())
