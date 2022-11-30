@@ -133,6 +133,7 @@ class HealthChecker {
       }
       results.push(result)
       // comment this if we receive our own gossip messages
+      console.debug('creating healthChecK', result)
       const created = await this.datastore.HealthCheck.create(result)
       // console.debug('HealthCheck created', created)
         
