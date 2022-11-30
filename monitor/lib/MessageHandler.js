@@ -47,14 +47,17 @@ class MessageHandler {
     // console.log(evt.detail)
     // if (peerId != self.peerId) {}
     var model
+    const record = JSON.parse(uint8ArrayToString(evt.detail.data))
+    const monitorId = evt.detail.from.toString()
+
     switch (evt.detail.topic) {
 
       // a peer has published their services
       case '/ibp/services':
-        const services = JSON.parse(uint8ArrayToString(evt.detail.data)) || []
-        console.debug('/ibp/services from', evt.detail.from.toString()) //, services)
+        const services = record // JSON.parse(uint8ArrayToString(evt.detail.data)) || []
+        console.debug('/ibp/services from', monitorId) //, services)
         // `touch` the monitor model
-        let [monitor, _] = await this.datastore.Monitor.upsert({ monitorId: evt.detail.from.toString() })
+        let [monitor, _] = await this.datastore.Monitor.upsert({ monitorId })
         const serviceUrls = services.map(s => s.serviceUrl)
         services.forEach(async (service) => {
           await this.datastore.Service.upsert(service)
@@ -63,23 +66,26 @@ class MessageHandler {
         break
 
       // a peer has published some results
-      case '/ibp/healthCheck':
-        const record = JSON.parse(uint8ArrayToString(evt.detail.data))
+      case '/ibp/healthCheck':        
+        const { serviceUrl, peerId } = record
         // console.log('got healthcheck from ', evt.detail.from.toString(), record)
         // touch the peerId behind the service Url
-        await this.datastore.Service.upsert({serviceUrl: record.serviceUrl})
-        await this.datastore.Peer.upsert({peerId: record.peerId, serviceUrl: record.serviceUrl}) // Peer depends on Service
-        await this.datastore.Monitor.upsert({monitorId: evt.detail.from.toString()})
+        console.debug('upserting service:', serviceUrl)
+        await this.datastore.Service.upsert({ serviceUrl })
+        console.debug('upserting peer:', peerId, serviceUrl)
+        await this.datastore.Peer.upsert({ peerId, serviceUrl }) // Peer depends on Service
+        console.debug('upserting monitor:', monitorId)
+        await this.datastore.Monitor.upsert({ monitorId })
         model = {
           ...record,
-          monitorId: evt.detail.from.toString(),
+          monitorId,
           // serviceUrl: record.serviceUrl,
           // level: record.level || 'info',
           source: 'gossip'
           // record
         }
         // console.log('model for update', model)
-        console.log('/ibp/healthCheck from', evt.detail.from.toString(), 'for', record.serviceUrl)
+        console.log('/ibp/healthCheck from', monitorId, 'for', serviceUrl, peerId)
         // console.log('handleMessage: /ibp/healthCheck', model)
         // await this.datastore.insertHealthCheck(evt.detail.from.toString(), model)
         const created = await this.datastore.HealthCheck.create(model)
