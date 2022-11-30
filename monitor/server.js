@@ -9,6 +9,7 @@ import { noise } from "@chainsafe/libp2p-noise"
 import { mplex } from '@libp2p/mplex'
 import { kadDHT } from '@libp2p/kad-dht'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
+import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
@@ -93,17 +94,36 @@ var counter = 0;
   const peerDiscovery = [
     mdns({
       interval: 20e3
-    })
-  ]
-  if (cfg.bootstrapPeers && cfg.bootstrapPeers.length > 0) {
-    peerDiscovery.push(bootstrap({
+    }),
+    bootstrap({
+      enabled: true,
       list: cfg.bootstrapPeers,
-      timeout: 1000, // in ms,
+      timeout: 3 * 1000, // in ms,
       tagName: 'bootstrap',
       tagValue: 50,
-      tagTTL: 120000 // in ms
-    }))
-  }
+      tagTTL: 120 * 1000 // in ms
+    }),
+    pubsubPeerDiscovery({
+      interval: 10 * 1000, // in ms?
+      // topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
+      listenOnly: false
+    })
+  ]
+  // if (cfg.bootstrapPeers && cfg.bootstrapPeers.length > 0) {
+  //   console.debug('adding bootstrapPeers to peerDiscovery')
+  //   let components = {
+  //     // peerStore: new PeerStore(),
+  //   }
+  //   let bs = bootstrap({
+  //     enabled: true,
+  //     list: cfg.bootstrapPeers,
+  //     timeout: 3000, // in ms,
+  //     tagName: 'bootstrap-tag',
+  //     tagValue: 10,
+  //     tagTTL: 120000 // in ms
+  //   }) // (components)
+  //   peerDiscovery.push(bs)
+  // }
 
   const libp2p = await createLibp2p({
     peerId,
