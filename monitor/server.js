@@ -111,6 +111,9 @@ var counter = 0;
     transports: [  new tcp() ],
     streamMuxers: [ mplex() ],
     connectionEncryption: [  new noise() ],
+    connectionManager: {
+      autoDial: true,
+    },
     peerDiscovery,
     dht: kadDHT(),
     pubsub: gsub
@@ -126,6 +129,12 @@ var counter = 0;
 
   libp2p.dht.addEventListener('peer', (peer) => {
     console.log('WOOT: dht peer', peer.toString())
+  })
+  libp2p.connectionManager.addEventListener('peer:connect', (peerId) => {
+    console.debug('peer:connect', JSON.stringify(peerId))
+  })
+  libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
+    console.debug('peer:disconnect', JSON.stringify(peerId))
   })
 
   libp2p.addEventListener('peer:discovery', async (peerId) => {
