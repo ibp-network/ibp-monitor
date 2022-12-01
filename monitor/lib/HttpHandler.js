@@ -49,9 +49,9 @@ class HttpHandler {
 
     this.app.get('/', async (req, res) => {
       let tpl = this._getTemplate('index')
-      let monitorCount = this._ds.Monitor.count()
-      let serviceCount = this._ds.Service.count()
-      let checkCount = this._ds.HealthCheck.count()
+      let monitorCount = await this._ds.Monitor.count()
+      let serviceCount = await this._ds.Service.count()
+      let checkCount = await this._ds.HealthCheck.count()
       let data = {
         localMonitorId: this.localMonitorId,
         templateDir: this.templateDir,

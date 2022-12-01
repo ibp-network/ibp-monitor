@@ -57,9 +57,11 @@ class HealthChecker {
         monitorId: this.localMonitorId, // .toString(),
         serviceUrl: service.serviceUrl,
         service,
-        error: err.toString()
+        error: JSON.stringify(err)
       }
     }
+    // TODO gossip this !!
+    await this.datastore.HealthCheck.create(result)
     return Promise.resolve(result)
   }
 
@@ -133,7 +135,7 @@ class HealthChecker {
       }
       results.push(result)
       // comment this if we receive our own gossip messages
-      console.debug('creating healthChecK', result)
+      // console.debug('creating healthChecK', result)
       const created = await this.datastore.HealthCheck.create(result)
       // console.debug('HealthCheck created', created)
         

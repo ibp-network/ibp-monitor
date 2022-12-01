@@ -1,6 +1,22 @@
-<% 
-  //const columns = []
-%> 
+<%
+const levels = {
+  debug:   'grey',
+  log:     'info-dark',
+  info:    'info-dark',
+  warning: 'warning-dark',
+  error:   'danger'
+}
+const icons = {
+  debug:   'fa-magnifying-glass',
+  log:     'fa-info',
+  info:    'fa-info',
+  warning: 'fa-circle-exclamation',
+  error:   'fa-triangle-exclamation'
+}
+function getLevelClass (level) { return levels[level] }
+function getLevelIcon (level) { return icons[level] }
+
+%>
 
 <table class="table is-fullwidth has-text-centered">
   <!--
@@ -12,6 +28,7 @@
     "performance":94.72355604171753}
   -->
   <thead>
+    <th></th>
     <th class="has-text-centered">Id</th>
     <!-- <th>Sender</th> -->
     <th class="has-text-centered">Service</th>
@@ -25,6 +42,9 @@
   <tbody>
     <% healthChecks.forEach(hc => { %>
       <tr>
+        <td class="has-text-<%= getLevelClass(hc.level) %> has-text-centered">
+          <i class="fa-solid <%= getLevelIcon(hc.level) %>"></i>
+        </td>
         <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
         <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
         <td><a href="/service/<%= encodeURIComponent(hc.serviceUrl) %> "><%= hc.serviceUrl %></a></td>

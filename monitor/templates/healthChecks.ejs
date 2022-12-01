@@ -3,11 +3,11 @@
 
   <%
   const levels = {
-    debug: 'grey',
-    log: 'info',
-    info: 'info',
-    warning: 'warning',
-    error: 'danger'
+    debug:   'grey',
+    log:     'info-dark',
+    info:    'info-dark',
+    warning: 'warning-dark',
+    error:   'danger'
   }
   const icons = {
     debug:   'fa-magnifying-glass',
@@ -48,7 +48,7 @@
       <tbody>
         <% models.forEach(hc => { %>
           <tr>
-            <td class="has-background- <%= getLevelClass(hc.level) %> has-text-centered">
+            <td class="has-text-<%= getLevelClass(hc.level) %> has-text-centered">
               <i class="fa-solid <%= getLevelIcon(hc.level) %>"></i>
             </td>
             <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
