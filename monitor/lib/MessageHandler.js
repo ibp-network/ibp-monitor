@@ -74,14 +74,10 @@ class MessageHandler {
         // console.log('got healthcheck from ', evt.detail.from.toString(), record)
         // touch the peerId behind the service Url
         console.debug('upserting service:', serviceUrl)
-        await this._ds.Service.upsert({ serviceUrl })
-        // this._ds.upsert('Service', { serviceUrl })
+        await this._ds.Service.upsert({ serviceUrl, status: 'online' })
         console.debug('upserting peer:', peerId, serviceUrl)
         await this._ds.Peer.upsert({ peerId, serviceUrl }) // Peer depends on Service
-        // this._ds.upsert('Peer', { peerId, serviceUrl }) // Peer depends on Service
-        // console.debug('upserting monitor:', monitorId)
         await this._ds.Monitor.upsert({ monitorId })
-        // this._ds.upsert('Monitor', { monitorId })
         model = {
           ...record,
           monitorId,
@@ -93,9 +89,7 @@ class MessageHandler {
         // console.log('model for update', model)
         console.log('/ibp/healthCheck from', monitorId, 'for', serviceUrl, peerId)
         // console.log('handleMessage: /ibp/healthCheck', model)
-        // await this._ds.insertHealthCheck(evt.detail.from.toString(), model)
         const created = await this._ds.HealthCheck.create(model)
-        // const created = this._ds.HealthCheck.create(model)
         // console.log('created', created)
         break
 

@@ -8,12 +8,29 @@
 
 ## getting started
 (Tested on node 16)
-```
+```bash
 git clone https://github.com/dotsama-ibp/dotsama-ibp
-cd dotsama-ibp/gossip
+cd dotsama-ibp/monitor
 npm install
 cat 'const configLocal = {}\n export { configLocal }' > config.local.js
+# edit config.local.js to suit your needs
+# create the datastore
+node createDatastore.js
+# run the server
 node server.js
+```
+
+## pm2
+
+Install pm2 via https://pm2.keymetrics.io/docs/usage/quick-start/
+
+```bash
+cd dotsama-ibp/monitor
+pm2 start --name ibp-monitor server.js
+# optional
+pm2 save # to persist your jobs
+pm2 list # see the running jobs
+pm2 logs ibp-monitor
 ```
 
 ## TODO, progress
