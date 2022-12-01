@@ -30,7 +30,7 @@
       </td>
       <% } %>
       <% if (columns.includes('services')) { %>
-      <td class="has-text-centered"><%= monitor.services.length %></td>
+      <td class="has-text-centered"><%= monitor.services?.length || 0 %></td>
       <% } %>
       <td><%= moment.utc(monitor.updatedAt).format(dateTimeFormat) %> </td>
       <td><%= moment.utc(monitor.createdAt).format(dateTimeFormat) %></td>

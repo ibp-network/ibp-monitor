@@ -35,7 +35,7 @@
             </a></td>
             <td><%= service.name %></td>
             <td><%= service.status %></td>
-            <td><%= service.monitors.length %></td>
+            <td><%= service.monitors?.length || 0 %></td>
             <td><%= moment(service.updatedAt).format(dateTimeFormat) %></td>
             <td><%= moment(service.createdAt).format(dateTimeFormat) %></td>
           </tr>

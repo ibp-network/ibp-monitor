@@ -28,7 +28,7 @@ class HttpHandler {
   localMonitorId = ''
 
   constructor({ datastore, app, dateTimeFormat }) {
-    this.datastore = datastore
+    this._ds = datastore
     this.app = app 
       ? app
       : (() => {
@@ -49,9 +49,9 @@ class HttpHandler {
 
     this.app.get('/', async (req, res) => {
       let tpl = this._getTemplate('index')
-      let monitorCount = await this.datastore.Monitor.count()
-      let serviceCount = await this.datastore.Service.count()
-      let checkCount = await this.datastore.HealthCheck.count()
+      let monitorCount = this._ds.Monitor.count()
+      let serviceCount = this._ds.Service.count()
+      let checkCount = this._ds.HealthCheck.count()
       let data = {
         localMonitorId: this.localMonitorId,
         templateDir: this.templateDir,
@@ -69,7 +69,9 @@ class HttpHandler {
 
     this.app.get('/service', async (req, res) => {
       let tpl = this._getTemplate('services')
-      let models = await this.datastore.Service.findAll({ include: 'monitors' })
+      let models = await this._ds.Service.findAll({ include: 'monitors' })
+      // let models = this._ds.Service.chain().find().data()
+      // console.log('services', models)
       let data = {
         localMonitorId: this.localMonitorId,
         moment,
@@ -85,11 +87,13 @@ class HttpHandler {
       let { serviceUrl } = req.params
       serviceUrl = decodeURIComponent(serviceUrl)
       let tpl = this._getTemplate('service')
-      const service = await this.datastore.Service.findByPk(serviceUrl, { include: ['monitors', 'peers'] })
+      const service = await this._ds.Service.findByPk(serviceUrl, { include: ['monitors', 'peers'] })
+      // const service = this._ds.Service.findOne({ serviceUrl: serviceUrl }).data()
       if (!service) {
         res.send(this._notFound())
       } else {
-        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { serviceUrl }, order: [['id', 'DESC']], limit: 10 })
+        const healthChecks = await this._ds.HealthCheck.findAll({ where: { serviceUrl }, order: [['id', 'DESC']], limit: 10 })
+        // const healthChecks = this._ds.HealthCheck.chain().find({ serviceUrl }).simplesort('id', true).limit(10).data()
         healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {
           localMonitorId: this.localMonitorId,
@@ -108,7 +112,8 @@ class HttpHandler {
 
     this.app.get('/monitor', async (req, res) => {
       let tpl = this._getTemplate('monitors')
-      let monitors = await this.datastore.Monitor.findAll({include: ['services']})
+      let monitors = await this._ds.Monitor.findAll({include: ['services']})
+      // let monitors = this._ds.Monitor.chain().find().data()
       // console.log('monitors', monitors)
       let data = {
         localMonitorId: this.localMonitorId,
@@ -125,12 +130,14 @@ class HttpHandler {
       console.debug('app.get(/monitor/:monitorId)', req.params)
       let { monitorId } = req.params
       let tpl = this._getTemplate('monitor')
-      const monitor = await this.datastore.Monitor.findByPk(monitorId, { include: 'services' })
+      const monitor = await this._ds.Monitor.findByPk(monitorId, { include: 'services' })
+      // const monitor = await this._ds.Monitor.findOne({ monitorId }) // .data()
       if (!monitor) {
         res.send(this._notFound())
       } else {
-        //const services = await this.datastore.Service.findAll({ where: { monitorId } })
-        const healthChecks = await this.datastore.HealthCheck.findAll({ where: { monitorId }, order: [['id', 'DESC']], limit: 10 })
+        //const services = await this._ds.Service.findAll({ where: { monitorId } })
+        const healthChecks = await this._ds.HealthCheck.findAll({ where: { monitorId }, order: [['id', 'DESC']], limit: 10 })
+        // const healthChecks = this._ds.HealthCheck.chain().find({ monitorId }).simplesort('id', true).limit(10).data()
         healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {
           localMonitorId: this.localMonitorId,
@@ -151,8 +158,10 @@ class HttpHandler {
       let offset = Number(req.query.offset) || 0
       let limit = Number(req.query.limit) || 15
       let tpl = this._getTemplate('healthChecks')
-      let count = await this.datastore.HealthCheck.count()
-      let models = await this.datastore.HealthCheck.findAll({ order: [['id', 'DESC']], limit, offset })
+      let count = await this._ds.HealthCheck.count()
+      let models = await this._ds.HealthCheck.findAll({ order: [['id', 'DESC']], limit, offset })
+      // let count = this._ds.HealthCheck.count()
+      // let models = this._ds.HealthCheck.chain().find().simplesort('id', true).limit(limit).offset(offset).data()
       models.forEach(model => {
         model.record = this._toJson(model.record)
       })
@@ -173,7 +182,8 @@ class HttpHandler {
       let { id } = req.params
       let { raw } = req.query
       let tpl = this._getTemplate('healthCheck')
-      let model = await this.datastore.HealthCheck.findByPk(id)
+      let model = await this._ds.HealthCheck.findByPk(id)
+      // let model = this._ds.HealthCheck.findOne({ id })
       if (!model) {
         res.send(this._notFound())
       } else {

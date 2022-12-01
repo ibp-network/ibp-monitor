@@ -9,7 +9,7 @@
     <th>url</th>
   </thead>
   <tbody>
-    <% services.forEach(service => { %>
+    <% services?.forEach(service => { %>
     <tr>
       <td><a href="/service/<%= encodeURIComponent(service.serviceUrl) %>"><%= service.serviceUrl %></a></td>
       <td><%= service.name %> </td>

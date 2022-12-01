@@ -36,12 +36,17 @@ class DataStore {
 
     Peer.hasOne(Service, { as: 'service', foreignKey: 'serviceUrl' })
     Peer.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'peerId' })
-    Service.hasMany(Peer, { foreignKey: 'serviceUrl', otherKey: 'peerId' })
-    Service.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'serviceUrl' })
+
+    Service.hasMany(Peer, { foreignKey: 'serviceUrl', otherKey: 'peerId', onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
+    Service.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'serviceUrl', onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
+
     Service.belongsToMany(Monitor, { as: 'monitors', through: 'monitor_service', foreignKey: 'serviceUrl', otherKey: 'monitorId' })
     Monitor.belongsToMany(Service, { as: 'services', through: 'monitor_service', foreignKey: 'monitorId', otherKey: 'serviceUrl' })
+
+    HealthCheck.hasOne(Monitor, { foreignKey: 'monitorId' })
     HealthCheck.hasOne(Peer, { foreignKey: 'peerId' })
-    HealthCheck.belongsTo(Service, { foreignKey: 'serviceUrl' })
+    HealthCheck.hasOne(Service, { foreignKey: 'serviceUrl' })
+
     Log.belongsTo(Peer, { foreignKey: 'peerId' })
     Log.belongsTo(Service, { foreignKey: 'serviceUrl' })
 

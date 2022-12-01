@@ -5,15 +5,15 @@ import { HealthChecker } from './HealthChecker.js'
 
 class MessageHandler {
 
-  datastore = undefined //= new DataStore({ initialiseDb: true })
+  _ds = undefined //= new DataStore({ initialiseDb: true })
   api = undefined
 
   constructor(config) {
     // console.log('MessageHandler()', config)
-    this.datastore = config?.datastore || new DataStore({ initialiseDb: true })
+    this._ds = config?.datastore || new DataStore({ initialiseDb: true })
     this.api = config.api || new HealthChecker()
-    // this.datastore = new DataStore({ initialiseDb: true })
-    // console.log('MessageHandler()', this.datastore)
+    // this._ds = new DataStore({ initialiseDb: true })
+    // console.log('MessageHandler()', this._ds)
   }
 
   // libp2p.addEventListener('peer:discovery', (peerId) => {})
@@ -23,7 +23,8 @@ class MessageHandler {
     console.debug(JSON.stringify(peerId.detail.multiaddrs))
     try {
       const model = { monitorId: peerId.detail.id.toString(), multiaddrs: peerId.detail.multiaddrs }
-      const [monitorModel, created] = await this.datastore.Monitor.upsert(model, model)
+      const [monitorModel, created] = await this._ds.Monitor.upsert(model)
+      // this._ds.upsert('Monitor', { monitorId: peerId.detail.id.toString() }, {multiaddrs: peerId.detail.multiaddrs })
     } catch (err) {
       console.warn('Error trying to upsert discovered monitor', peerId.detail.id.toString())
       console.error(err)
@@ -57,11 +58,13 @@ class MessageHandler {
         const services = record // JSON.parse(uint8ArrayToString(evt.detail.data)) || []
         console.debug('/ibp/services from', monitorId) //, services)
         // `touch` the monitor model
-        let [monitor, _] = await this.datastore.Monitor.upsert({ monitorId })
-        const serviceUrls = services.map(s => s.serviceUrl)
+        let [monitor, _] = await this._ds.Monitor.upsert({ monitorId })
+        // let [monitor, _] = this._ds.upsert('Monitor', { monitorId, services: serviceUrl })
         services.forEach(async (service) => {
-          await this.datastore.Service.upsert(service)
+          await this._ds.Service.upsert(service)
+          // this._ds.upsert('Service', service)
         })
+        const serviceUrls = services.map(s => s.serviceUrl)
         await monitor.addServices(serviceUrls)      
         break
 
@@ -71,11 +74,14 @@ class MessageHandler {
         // console.log('got healthcheck from ', evt.detail.from.toString(), record)
         // touch the peerId behind the service Url
         console.debug('upserting service:', serviceUrl)
-        await this.datastore.Service.upsert({ serviceUrl })
+        await this._ds.Service.upsert({ serviceUrl })
+        // this._ds.upsert('Service', { serviceUrl })
         console.debug('upserting peer:', peerId, serviceUrl)
-        await this.datastore.Peer.upsert({ peerId, serviceUrl }, { serviceUrl }) // Peer depends on Service
-        console.debug('upserting monitor:', monitorId)
-        await this.datastore.Monitor.upsert({ monitorId })
+        await this._ds.Peer.upsert({ peerId, serviceUrl }) // Peer depends on Service
+        // this._ds.upsert('Peer', { peerId, serviceUrl }) // Peer depends on Service
+        // console.debug('upserting monitor:', monitorId)
+        await this._ds.Monitor.upsert({ monitorId })
+        // this._ds.upsert('Monitor', { monitorId })
         model = {
           ...record,
           monitorId,
@@ -87,8 +93,9 @@ class MessageHandler {
         // console.log('model for update', model)
         console.log('/ibp/healthCheck from', monitorId, 'for', serviceUrl, peerId)
         // console.log('handleMessage: /ibp/healthCheck', model)
-        // await this.datastore.insertHealthCheck(evt.detail.from.toString(), model)
-        const created = await this.datastore.HealthCheck.create(model)
+        // await this._ds.insertHealthCheck(evt.detail.from.toString(), model)
+        const created = await this._ds.HealthCheck.create(model)
+        // const created = this._ds.HealthCheck.create(model)
         // console.log('created', created)
         break
 

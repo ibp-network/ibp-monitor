@@ -33,8 +33,8 @@
           <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: hc.monitorId, localMonitorId }); -%>
         </td>
         <td><%= hc.source %></td>
-        <td><%= hc.record.version %></td>
-        <td class="has-text-right"><%= hc.record.performance?.toFixed(4) %></td>
+        <td><%= hc.record?.version || 'unknown' %></td>
+        <td class="has-text-right"><%= hc.record?.performance?.toFixed(4) %></td>
         <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
       </tr>
     <% }) %>

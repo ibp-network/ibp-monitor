@@ -15,6 +15,7 @@ import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
 
 import { DataStore } from './lib/DataStore.js'
+// import { DataStoreLoki } from './lib/DataStoreLoki.js'
 import { MessageHandler } from './lib/MessageHandler.js'
 import { HealthChecker } from './lib/HealthChecker.js'
 import { HttpHandler } from './lib/HttpHandler.js'
@@ -33,6 +34,7 @@ const UPDATE_INTERVAL = cfg.updateInterval || 3000
 // const LISTEN_ADDRESS = `/ip4/${EXTERNAL_IP}/tcp/${GOSSIP_PORT}`
 
 const ds = new DataStore({ initialiseDb: false, pruning: cfg.pruning })
+// const ds = new DataStoreLoki({ initialiseDb: false, pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
 const hh = new HttpHandler({ datastore: ds })
@@ -74,6 +76,13 @@ var counter = 0;
     await ds.Service.upsert(service)
   })
   await monitor.addServices(serviceIds)
+  // ds.upsert('Monitor',
+  //   { monitorId: peerId.toString() },
+  //   { name: 'localhost', services: cfg.services.map(s => s.serviceUrl) }
+  // ) // .data()
+  // cfg.services.forEach(service => {
+  //   ds.upsert('Service', { serviceUrl: service.serviceUrl }, service)
+  // })
 
   const gsub = gossipsub({
     emitSelf: false, // don't want our own pubsub messages
@@ -129,6 +138,10 @@ var counter = 0;
     { multiaddrs: libp2p.getMultiaddrs() },
     { where: { monitorId: peerId.toString() } }
   )
+  // ds.Monitor
+  //   .chain()
+  //   .find({ monitorId: peerId.toString() })
+  //   .update(obj => { obj.multiaddrs = libp2p.getMultiaddrs() })
 
   libp2p.dht.addEventListener('peer', (peer) => {
     console.log('WOOT: dht peer', peer.toString())
@@ -168,9 +181,10 @@ var counter = 0;
     libp2p.getPeers().forEach(async (peerId) => {
       console.log('- our peers are:', peerId.toString())
       const monitor = await ds.Monitor.findByPk(peerId.toString(), { include: 'services' })
+      // const monitor = ds.Monitor.findOne({ monitorId: peerId.toString() }).data()
       // console.debug('peer', peer)
       if (monitor) {
-        const results = await hc.check(monitor.services) || []
+        const results = await hc.check(monitor.services || [])
         console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
         asyncForeach(results, async (result) => {
           const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
@@ -185,7 +199,8 @@ var counter = 0;
     if (cfg.checkOwnServices) {
       console.debug('checking our own services...')
       const monitor = ds.Monitor.findAll({ where: { monitorId: peerId.toString() }, include: 'services' })
-      const results = await hc.check(monitor.services)
+      // const monitor = ds.Monitor.findOne({ monitorId: peerId.toString() })
+      const results = await hc.check(monitor?.services || [])
       console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
       asyncForeach(results, async (result) => {
         const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
