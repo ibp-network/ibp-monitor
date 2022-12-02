@@ -9,6 +9,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import moment from 'moment'
 
+import { PrometheusExporter } from './PrometheusExporter.js'
+
 import { config } from '../config.js'
 import { configLocal } from '../config.local.js'
 const cfg = Object.assign(config, configLocal)
@@ -37,6 +39,7 @@ class HttpHandler {
         return app
       })()
     this.dateTimeFormat = dateTimeFormat || cfg.dateTimeFormat
+    this._exporter = new PrometheusExporter(datastore)
     this.setup()
   }
 
@@ -204,6 +207,13 @@ class HttpHandler {
           res.send(page)
         }  
       }
+    })
+
+    this.app.get('/metrics/:serviceUrl', async (req, res) => {
+      let { serviceUrl } = req.params
+      console.debug('/metrics/', serviceUrl)
+      let metrics = await this._exporter.export(serviceUrl)
+      res.type('text/plain').send(metrics)
     })
   }
 

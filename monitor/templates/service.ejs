@@ -61,6 +61,12 @@
     <div class="tabs">
       <ul>
         <li class="is-active"><a>Performance</a></li>
+        <li>
+          <a href="/metrics/<%= encodeURIComponent(service.serviceUrl) %>" target="_blank">
+            Prometheus
+            &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px">
+          </a>
+        </li>
       </ul>
     </div>
     <%- include(templateDir + '/checksChart.ejs', { healthChecks }); -%>
