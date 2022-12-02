@@ -119,9 +119,9 @@ You can access the web UI on this port. (You can also NAT web traffic to this po
 ```
 
 ### Update interval
-How often your monitor service should healthCheck the services of it's peers
+How often your monitor service should healthCheck the services of its peers (5 mins is often enough). We don't want to operate a spambot network!
 ```js
-  updateInterval: 30 * 1000, // 60 seconds
+  updateInterval: 5 * 60 * 1000, // 5 mins, in milliseconds
 ```
 
 ### Services

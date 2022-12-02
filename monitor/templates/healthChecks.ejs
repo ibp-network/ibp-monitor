@@ -1,25 +1,6 @@
 
 <%- include(templateDir + '/html1.ejs'); -%>
 
-  <%
-  const levels = {
-    debug:   'grey',
-    log:     'info-dark',
-    info:    'info-dark',
-    warning: 'warning-dark',
-    error:   'danger'
-  }
-  const icons = {
-    debug:   'fa-magnifying-glass',
-    log:     'fa-info',
-    info:    'fa-info',
-    warning: 'fa-circle-exclamation',
-    error:   'fa-triangle-exclamation'
-  }
-  function getLevelClass (level) { return levels[level] }
-  function getLevelIcon (level) { return icons[level] }
-
-  %>
   <section class="section">
 
     <nav class="level">
@@ -32,44 +13,7 @@
         </nav>
       </div>
     </nav>
-
-    <table class="table is-fullwidth">
-      <thead>
-        <th> </th>
-        <th>CheckId</th>
-        <th>Service</th>
-        <th>Monitor</th>
-        <th>Source</th>
-        <th>Version</th>
-        <th class="has-text-centered">Performance (ms)</th>
-        <th>Timestamp (UCT)</th>
-      </thead>
-
-      <tbody>
-        <% models.forEach(hc => { %>
-          <tr>
-            <td class="has-text-<%= getLevelClass(hc.level) %> has-text-centered">
-              <i class="fa-solid <%= getLevelIcon(hc.level) %>"></i>
-            </td>
-            <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
-            <td>
-              <a href="/service/<%= encodeURIComponent(hc.serviceUrl) %>"><%= hc.serviceUrl %></a>
-              <a href="https://polkadot.js.org/apps/?rpc=<%= hc.serviceUrl %>" target="_blank">
-                <super><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></super></a>
-            </td>
-            <td>
-              <a href="/monitor/<%= hc.monitorId %> "><%= shortStash(hc.monitorId) %></a>
-              <% if (hc.monitorId === localMonitorId) { %><i class="fa-regular fa-circle-check"></i><% } %>
-            </td>
-            <!-- <td><%= JSON.stringify(hc.record) %> </td> -->
-            <td><%= hc.source %></td>
-            <td><%= hc.record?.version %></td>
-            <td class="has-text-centered"><%= hc.record?.performance?.toFixed(4) %></td>
-            <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
-          </tr>
-        <% }) %>
-      </tbody>
-    </table>
+    <%- include(templateDir + '/checksTable.ejs', { healthChecks: models }); -%>
 
     <nav class="pagination is-centered" role="navigation" aria-label="pagination">
       <a class="pagination-previous" href="/healthCheck<%= pagination.prev.query %>"><i class="fa-solid fa-angle-left"></i></a>

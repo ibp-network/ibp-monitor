@@ -64,11 +64,31 @@ healthChecks.reverse() // put it back!
     options: {
       responsive: true,
       maintainAspectRatio: false,
-    //   scales: {
-    //     y: {
-    //       beginAtZero: true
-    //     }
-    //   }
+      // scales: {
+      //   y: {
+      //     beginAtZero: true
+      //   }
+      // },
+      plugins: {
+        annotation: {
+          annotations: {
+            sla: {
+              type: 'line',
+              mode: 'horizontal',
+              // scaleID: 'y-axis-0',
+              yMin: 450,
+              yMax: 450,
+              borderColor: 'red', // 'rgb(75, 192, 192)',
+              borderWidth: 1,
+              // label: {
+              //   display: true,
+              //   content: 'SLA',
+              //   textAlign: 'end',
+              // }
+            }
+          }
+        }
+      }
     }
   });
 </script>

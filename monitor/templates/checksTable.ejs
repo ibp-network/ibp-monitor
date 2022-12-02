@@ -3,18 +3,20 @@ const levels = {
   debug:   'grey',
   log:     'info-dark',
   info:    'info-dark',
+  success: 'success-dark',
   warning: 'warning-dark',
   error:   'danger'
 }
 const icons = {
-  debug:   'fa-magnifying-glass',
-  log:     'fa-info',
-  info:    'fa-info',
-  warning: 'fa-circle-exclamation',
-  error:   'fa-triangle-exclamation'
+  debug:   'fa-solid fa-magnifying-glass',
+  log:     'fa-solid fa-circle-info',
+  info:    'fa-solid fa-circle-info',
+  success: 'fa-solid fa-circle-check',
+  warning: 'fa-solid fa-circle-exclamation',
+  error:   'fa-solid fa-triangle-exclamation'
 }
-function getLevelClass (level) { return levels[level] }
-function getLevelIcon (level) { return icons[level] }
+function getLevelClass (level) { return levels[level] || level }
+function getLevelIcon (level) { return icons[level] || 'fa-circle-question' }
 
 %>
 
@@ -43,7 +45,7 @@ function getLevelIcon (level) { return icons[level] }
     <% healthChecks.forEach(hc => { %>
       <tr>
         <td class="has-text-<%= getLevelClass(hc.level) %> has-text-centered">
-          <i class="fa-solid <%= getLevelIcon(hc.level) %>"></i>
+          <i class="<%= getLevelIcon(hc.level) %>"></i>
         </td>
         <td><a href="/healthCheck/<%= hc.id %>"><%= hc.id %></a></td>
         <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->

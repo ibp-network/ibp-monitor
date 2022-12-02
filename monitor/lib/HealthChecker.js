@@ -1,6 +1,10 @@
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { asyncForeach } from './utils.js'
 
+import { config } from '../config.js'
+import { configLocal } from '../config.local.js'
+const cfg = Object.assign(config, configLocal)
+
 class ProviderError extends Error {
   constructor(err) {
     super(err)
@@ -109,6 +113,7 @@ class HealthChecker {
         const networkState = await api.rpc.system.networkState
         const syncState = await api.rpc.system.syncState()
         const version = await api.rpc.system.version()
+        const timing = end - start
         // console.debug(health.toString())
         result = {
           // our peerId will be added by the receiver of the /ibp/healthCheck messate
@@ -116,12 +121,12 @@ class HealthChecker {
           serviceUrl: service.serviceUrl,
           peerId: peerId.toString(),
           source: 'check',
-          level: 'info',
+          level: timing > (cfg.performance?.sla || 500) ? 'warning' : 'success',
           record: {
             monitorId: this.localMonitorId, // .toString(),
             serviceUrl: service.serviceUrl,
             chain, chainType, health, networkState, syncState, version,
-            performance: end - start
+            performance: timing,
           }
         }
         await provider.disconnect()
