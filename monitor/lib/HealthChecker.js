@@ -57,7 +57,7 @@ class HealthChecker {
         monitorId: this.localMonitorId, // .toString(),
         serviceUrl: service.serviceUrl,
         service,
-        error: JSON.stringify(err)
+        error: JSON.parse(JSON.stringify(err))
       }
     }
     // TODO gossip this !!
