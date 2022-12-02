@@ -33,6 +33,27 @@ pm2 list # see the running jobs
 pm2 logs ibp-monitor
 ```
 
+## Managing the datastore
+
+SQLite cli is available here:
+- https://sqlite.org/download.html
+
+For x86_64, you need to download the tar.gz and compile
+```bash
+wget https://sqlite.org/2022/sqlite-autoconf-3400000.tar.gz
+tar -zf sqlite-autoconf-3400000.tar.gz
+cd sqlite-autoconf-3400000
+./configure
+make
+sudo mv sqlite3 /usr/local/bin
+```
+
+### Querying the datastore
+```bash
+cd monitor/data
+sqlite datastore.sqlite "select * from monitor"
+```
+
 ## TODO, progress
 
 - ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
