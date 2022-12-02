@@ -7,6 +7,30 @@
 
 2. edit the config.local.js as needed
 
+## A note on `peerId`
+
+The `monitor` uses libp2p to connect with other monitor peers.
+At 1st startup, each peer will generate a peerId (saved here: `keys/peerId.json`)
+
+The local peerId is printed to console at startup:
+
+```bash 
+Our monitorId 12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh
+```
+
+! use this peerId (monitorId) in the address/announce section below.
+
+Example:
+```json
+{
+  "id":"12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh",
+  "privKey":" !!! this is secret !!! ",
+  "pubKey":"CAESIGreOOZaUhD6MAOysTOZsk4FyAZQVKFCIXkKUnkm8Q2W"
+}
+```
+
+This peerId is used to sign `gossip` messages. On receipt of a `gossip` message, we validate the signature of the sender.
+
 ## Example config.local.js file
 
 ### ports for NAT & firewall config
@@ -60,6 +84,7 @@ Ex: MySQL
 ```
 
 ### listen port
+The port for libp2p
 ```js
   listenPort: GOSSIP_PORT,
 ```
@@ -68,13 +93,14 @@ Ex: MySQL
 Note: if you have `addresses` section in your local config, you need to provide `listen` and, optionally `announce` sections.
 
 - `addresses`
-  `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}` should be sufficient. The other nodes are not listening on any other protocol
+  - ``/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`` should be sufficient. The other monitor nodes are not listening on any other protocol
 
 - `announce` - use this to announce your external IP address or hostname; examples:
-  - '/ip4/192.96.202.185/tcp/30000/p2p/<peerId>'
-  - '/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/<peerId>'
+  - `'/ip4/192.96.202.185/tcp/30000/p2p/\<peerId>'` - 
+  - `'/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/\<peerId>'`
 
 You can announce on any external facing port, then NAT that port to your internal GOSSIP_PORT
+\
 You only need TCP on the external ports.
 
 ```js
