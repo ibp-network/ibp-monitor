@@ -49,6 +49,9 @@ const config = {
   pruning: {
     age: 90 * 24 * 60 * 60, // 90 days as seconds
     interval: 1 * 60 * 60 // 1 hour as seconds
+  },
+  performance: {
+    sla: 500 // ms - used for performance graph, and later for alerts
   }
 }
 
