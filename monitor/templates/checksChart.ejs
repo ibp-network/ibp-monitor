@@ -22,7 +22,7 @@ healthChecks.reverse() // put it back!
 <div class="columns">
   <div class="column is-1 is-narrow-mobile"></div>
   <div class="column">
-    <div class="is-fullwidth">
+    <div class="chart-container" style="position: relative; height:40vh;">
       <canvas id="myChart"></canvas>
     </div>
   </div>
@@ -61,12 +61,14 @@ healthChecks.reverse() // put it back!
         lineTension: 0.4,
       }]
     },
-    // options: {
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
     //   scales: {
     //     y: {
     //       beginAtZero: true
     //     }
     //   }
-    // }
+    }
   });
 </script>
