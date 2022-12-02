@@ -55,7 +55,7 @@ function getLevelIcon (level) { return icons[level] }
         <td><%= hc.source %></td>
         <td><%= hc.record?.version || 'unknown' %></td>
         <td class="has-text-right"><%= hc.record?.performance?.toFixed(4) %></td>
-        <td><%= moment(hc.createdAt).format(dateTimeFormat) %></td>
+        <td><%= moment.utc(hc.createdAt).format(dateTimeFormat) %></td>
       </tr>
     <% }) %>
   </tbody>
