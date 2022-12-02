@@ -10,15 +10,15 @@
 ## A note on `peerId`
 
 The `monitor` uses libp2p to connect with other monitor peers.
-At 1st startup, each peer will generate a peerId (saved here: `keys/peerId.json`)
+At 1st startup, each monitor will generate a peerId (saved here: `keys/peerId.json`)
 
-The local peerId is printed to console at startup:
+The local monitorId (peerId) is printed to console at startup:
 
 ```bash 
 Our monitorId 12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh
 ```
 
-! use this peerId (monitorId) in the address/announce section below.
+**!!! use this monitorId (peerId) in the `listen.announce` section below.**
 
 Example:
 ```json
