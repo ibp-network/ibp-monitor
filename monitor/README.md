@@ -56,9 +56,9 @@ sqlite datastore.sqlite "select * from monitor"
 
 ## TODO, progress
 
+- implement status / metrics - in progress
+- implememt scoring
+- ~~implement prometheus (or similar) api~~ - done, each service has a link to the prometheus data
 - ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
 - ~~peers should sign status updates~~ - this is configured in `libp2p.pubsub.signMessages: true`
 - ~~implement dataStore~~ - done, sqlite default, mysql tested
-- implement status / metrics - in progress
-- implememt scoring
-- implement prometheus (or similar) api

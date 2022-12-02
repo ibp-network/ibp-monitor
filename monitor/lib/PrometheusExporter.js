@@ -71,7 +71,7 @@ class PrometheusExporter {
       //   lines.push(`ibp_service_performance{serviceUrl="${serviceUrl}", timestamp="${moment.utc(hc.createdAt).valueOf()}"} ${record?.performance || 0}`)
       // });
     }
-    console.debug(lines)
+    // console.debug(lines)
     return lines.join('\n')
   }
 
