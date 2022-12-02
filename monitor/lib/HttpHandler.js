@@ -92,7 +92,7 @@ class HttpHandler {
       if (!service) {
         res.send(this._notFound())
       } else {
-        const healthChecks = await this._ds.HealthCheck.findAll({ where: { serviceUrl }, order: [['id', 'DESC']], limit: 10 })
+        const healthChecks = await this._ds.HealthCheck.findAll({ where: { serviceUrl }, order: [['id', 'DESC']], limit: 20 })
         // const healthChecks = this._ds.HealthCheck.chain().find({ serviceUrl }).simplesort('id', true).limit(10).data()
         healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {

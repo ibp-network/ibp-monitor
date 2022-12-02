@@ -45,7 +45,7 @@ class DataStore {
     Monitor.belongsToMany(Service, { as: 'services', through: 'monitor_service', foreignKey: 'monitorId', otherKey: 'serviceUrl' })
 
     HealthCheck.belongsTo(Monitor, { foreignKey: 'monitorId' })
-    HealthCheck.belongsTo(Peer, { foreignKey: 'peerId' })
+    HealthCheck.hasOne(Peer, { foreignKey: 'peerId' }) // possibly missing for errors
     HealthCheck.belongsTo(Service, { foreignKey: 'serviceUrl' })
 
     Log.belongsTo(Peer, { foreignKey: 'peerId' })
