@@ -69,6 +69,10 @@ class HealthChecker {
     return Promise.resolve(result)
   }
 
+  async handleApiError (...args) {
+    console.debug('handleApiError', args)
+  }
+
   /**
    * Run the HealthCheck process on each peer service
    * @param {*} services - array of services for a peer
@@ -98,6 +102,7 @@ class HealthChecker {
 
         const api = await ApiPromise.create({ provider })
         // api.on('error', function (err) { throw new ApiError(err.toString()) })
+        api.on('error', (args) => { this.handleApiError(args) })
         await api.isReady
 
         peerId = await api.rpc.system.localPeerId()
