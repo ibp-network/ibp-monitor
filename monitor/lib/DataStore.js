@@ -104,6 +104,8 @@ class DataStore {
     console.debug('HealthCheck.destroy', result)
     result = await this.Service.update({ status: 'stale' }, { where: { errorCount: { [Op.gt]: 10 } } })
     console.debug('Service.stale', result)
+    result = await this.Service.update({ status: 'stale' }, { where: { updatedAt: { [Op.lt]: marker } } })
+    console.debug('Service.stale', result)
   }
 
 }
