@@ -4,6 +4,11 @@ import { createLibp2p } from 'libp2p'
 import { bootstrap } from '@libp2p/bootstrap'
 import { mdns } from '@libp2p/mdns'
 import { tcp } from '@libp2p/tcp'
+// import { webSockets } from '@libp2p/websockets'
+// import { all as filters_all } from '@libp2p/websockets/filters'
+import { webRTCDirect } from '@libp2p/webrtc-direct'
+import wrtc from 'wrtc'
+// import { webRTCStar } from '@libp2p/webrtc-star'
 // import { Noise } from '@libp2p/noise' // @deprecated
 import { noise } from "@chainsafe/libp2p-noise"
 import { mplex } from '@libp2p/mplex'
@@ -21,6 +26,12 @@ import { HealthChecker } from './lib/HealthChecker.js'
 import { HttpHandler } from './lib/HttpHandler.js'
 import { asyncForeach, streamToString, stringToStream } from './lib/utils.js'
 
+// const star = webRTCStar()
+// const direct = webRTCDirect()
+
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
+console.log('VERSION', pkg.version)
+
 import { config } from './config.js'
 import { configLocal } from './config.local.js'
 const cfg = Object.assign(config, configLocal)
@@ -37,7 +48,7 @@ const ds = new DataStore({ initialiseDb: false, pruning: cfg.pruning })
 // const ds = new DataStoreLoki({ initialiseDb: false, pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
-const hh = new HttpHandler({ datastore: ds })
+const hh = new HttpHandler({ datastore: ds, version: pkg.version })
 
 var counter = 0;
 
@@ -103,9 +114,17 @@ var counter = 0;
   const libp2p = await createLibp2p({
     peerId,
     addresses: cfg.addresses,
-    transports: [  new tcp() ],
+    transports: [
+      new tcp(),
+      webRTCDirect({ wrtc }),
+      // webSockets({
+      //   // connect to all sockets, even insecure ones
+      //   filters: filters_all
+      // }),
+      // star.transport
+    ],
     streamMuxers: [ mplex() ],
-    connectionEncryption: [  new noise() ],
+    connectionEncryption: [ new noise() ],
     connectionManager: {
       autoDial: true,
     },

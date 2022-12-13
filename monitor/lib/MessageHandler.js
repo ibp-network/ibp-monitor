@@ -2,7 +2,7 @@ import { DataStore } from './DataStore.js'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { HealthChecker } from './HealthChecker.js'
-
+import { Op } from 'sequelize'
 class MessageHandler {
 
   _ds = undefined //= new DataStore({ initialiseDb: true })
@@ -64,8 +64,13 @@ class MessageHandler {
           await this._ds.Service.upsert(service)
           // this._ds.upsert('Service', service)
         })
-        const serviceUrls = services.map(s => s.serviceUrl)
-        await monitor.addServices(serviceUrls)      
+        var servicesToAdd = services.map(s => s.serviceUrl)
+        // console.debug('servicesToAdd', servicesToAdd)
+        var servicesToRemove = await monitor.getServices({ where: { serviceUrl: { [Op.notIn]: servicesToAdd } } })
+        servicesToRemove = servicesToRemove.map(m => m.serviceUrl)
+        // console.debug('servicesToRemove', servicesToRemove)
+        await monitor.removeServices(servicesToRemove)
+        await monitor.addServices(servicesToAdd)
         break
 
       // a peer has published some results

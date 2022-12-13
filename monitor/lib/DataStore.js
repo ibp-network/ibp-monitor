@@ -98,14 +98,19 @@ class DataStore {
 
   async prune () {
     console.debug('DataStore.prune()', this.pruning)
-    const marker = moment().add(-(this.pruning.age), 'seconds')
+    const marker = moment.utc().add(-(this.pruning.age), 'seconds')
+    console.debug('marker', marker)
     var result
-    result = await this.HealthCheck.destroy({ where: { createdAt: { [Op.lt]: marker } } })
-    console.debug('HealthCheck.destroy', result)
-    result = await this.Service.update({ status: 'stale' }, { where: { errorCount: { [Op.gt]: 10 } } })
-    console.debug('Service.stale', result)
-    result = await this.Service.update({ status: 'stale' }, { where: { updatedAt: { [Op.lt]: marker } } })
-    console.debug('Service.stale', result)
+    result = await this.HealthCheck.destroy({ where: { createdAt: { [Op.lt]: marker.format('YYYY-MM-DD HH:mm:ss') } } })
+    console.debug('HealthCheck.prune: delete', result)
+    result = await this.Service.update({ status: 'stale' }, { where: { status: {[Op.ne]: 'stale' }, errorCount: { [Op.gt]: 10 } } })
+    console.debug('Service.stale: error', result)
+    result = await this.Service.update({ status: 'stale' }, { where: { status: {[Op.ne]: 'stale' }, updatedAt: { [Op.lt]: marker } } })
+    console.debug('Service.stale: updatedAt', result)
+    // delete stale services
+    result = await this.Service.destroy({ where: { status: 'stale', updatedAt: { [Op.lt]: marker } } })
+    console.debug('Services.prune: stale', result)
+    // TODO prune stale monitors
   }
 
 }

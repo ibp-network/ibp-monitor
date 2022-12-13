@@ -24,13 +24,15 @@ class HttpHandler {
 
   app = undefined
   datastore = undefined
+  version = undefined
   templateDir = __dirname + '/../templates'
   // for display purposes // TODO move this to config?
   dateTimeFormat = 'YYYY.MM.DD HH:mm'
   localMonitorId = ''
 
-  constructor({ datastore, app, dateTimeFormat }) {
+  constructor({ datastore, app, dateTimeFormat, version }) {
     this._ds = datastore
+    this.version = version
     this.app = app 
       ? app
       : (() => {
@@ -56,6 +58,7 @@ class HttpHandler {
       let serviceCount = await this._ds.Service.count()
       let checkCount = await this._ds.HealthCheck.count()
       let data = {
+        version: this.version,
         localMonitorId: this.localMonitorId,
         templateDir: this.templateDir,
         monitorCount,
@@ -72,10 +75,11 @@ class HttpHandler {
 
     this.app.get('/service', async (req, res) => {
       let tpl = this._getTemplate('services')
-      let models = await this._ds.Service.findAll({ include: 'monitors' })
+      let models = await this._ds.Service.findAll({ include: 'monitors', order: [['name', 'ASC']] })
       // let models = this._ds.Service.chain().find().data()
       // console.log('services', models)
       let data = {
+        version: this.version,
         localMonitorId: this.localMonitorId,
         moment,
         shortStash,
@@ -99,6 +103,7 @@ class HttpHandler {
         // const healthChecks = this._ds.HealthCheck.chain().find({ serviceUrl }).simplesort('id', true).limit(10).data()
         healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {
+          version: this.version,
           localMonitorId: this.localMonitorId,
           templateDir: this.templateDir,
           moment,
@@ -119,6 +124,7 @@ class HttpHandler {
       // let monitors = this._ds.Monitor.chain().find().data()
       // console.log('monitors', monitors)
       let data = {
+        version: this.version,
         localMonitorId: this.localMonitorId,
         moment,
         shortStash,
@@ -133,7 +139,7 @@ class HttpHandler {
       console.debug('app.get(/monitor/:monitorId)', req.params)
       let { monitorId } = req.params
       let tpl = this._getTemplate('monitor')
-      const monitor = await this._ds.Monitor.findByPk(monitorId, { include: 'services' })
+      const monitor = await this._ds.Monitor.findByPk(monitorId, { include: 'services', order: [[ 'services', 'name', 'ASC' ]] })
       // const monitor = await this._ds.Monitor.findOne({ monitorId }) // .data()
       if (!monitor) {
         res.send(this._notFound())
@@ -143,6 +149,7 @@ class HttpHandler {
         // const healthChecks = this._ds.HealthCheck.chain().find({ monitorId }).simplesort('id', true).limit(10).data()
         healthChecks.forEach(check => check.record = this._toJson(check.record))
         let data = {
+          version: this.version,
           localMonitorId: this.localMonitorId,
           templateDir: this.templateDir,
           moment,
@@ -169,6 +176,7 @@ class HttpHandler {
         model.record = this._toJson(model.record)
       })
       let data = {
+        version: this.version,
         localMonitorId: this.localMonitorId,
         moment,
         shortStash,
@@ -196,6 +204,7 @@ class HttpHandler {
           res.json(model)
         } else {
           let data = {
+            version: this.version,
             localMonitorId: this.localMonitorId,
             moment,
             shortStash,
