@@ -19,6 +19,14 @@ node createDatastore.js
 # run the server
 node server.js
 ```
+## building the UI (Vue SPA)
+```bash
+cd vue-spa
+npm install
+# if you get errors for lint, run `npm install --force`
+npm run build
+# output should update/overwrite the `static` directory
+```
 
 ## pm2
 
@@ -56,9 +64,9 @@ sqlite datastore.sqlite "select * from monitor"
 
 ## TODO, progress
 
-- implement status / metrics - in progress
 - implememt scoring
 - implement alerting
+- ~~implement status / metrics~~ - some basic metrics available at /metrics/&lt;serviceUrl&gt;
 - ~~implement prometheus (or similar) api~~ - done, each service has a link to the prometheus data
 - ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
 - ~~peers should sign status updates~~ - this is configured in `libp2p.pubsub.signMessages: true`
@@ -74,3 +82,4 @@ sqlite datastore.sqlite "select * from monitor"
 - https://sequelize.org
 - https://www.chartjs.org
 - https://momentjs.com
+- vue.js

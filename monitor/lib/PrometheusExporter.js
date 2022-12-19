@@ -37,6 +37,9 @@ class PrometheusExporter {
     if (!service) {
       lines.push(`# invalid serviceUrl: ${serviceUrl}`)
     } else {
+      lines.push('# HELP ibp_service_error_count')
+      lines.push('# TYPE ibp_service_error_count counter')
+      lines.push(`ibp_service_error_count{serviceUrl="${serviceUrl}"} ${service.errorCount || 0}`)
       const checks = await this._ds.HealthCheck.findAll({ where: { serviceUrl }, order: [['id', 'DESC']], limit: 100 })
       // averages: 10, 50, 100
       let check = checks[0] || {}
