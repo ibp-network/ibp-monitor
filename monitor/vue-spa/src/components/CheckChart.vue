@@ -99,9 +99,9 @@ export default Vue.extend<IData, IMethods, IComputed, IProps>({
       console.log('length', this.data.length)
       this.labels = reversed.map((hc: any) => moment.utc(hc.createdAt).format('HH:mm') || '0')
       const period = 3.0
-      var moveMean = []
-      var mean: number
-      for (var i = 0; i < reversed.length; i++) {
+      const moveMean = []
+      let mean: number
+      for (let i = 0; i < reversed.length; i++) {
         if (i === 0) {
           moveMean.push(this.data[i])
         } else if (i === 1) {

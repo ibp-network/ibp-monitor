@@ -123,7 +123,9 @@ var counter = 0;
       // }),
       // star.transport
     ],
-    streamMuxers: [ mplex() ],
+    streamMuxers: [
+      mplex()
+    ],
     connectionEncryption: [ new noise() ],
     connectionManager: {
       autoDial: true,
@@ -143,8 +145,13 @@ var counter = 0;
       pubsubPeerDiscovery({
         interval: 10 * 1000, // in ms?
         // topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
+        topics: [
+          `ibp_monitor._peer-discovery._p2p._pubsub`,
+          '_peer-discovery._p2p._pubsub'
+        ],
         listenOnly: false
-      })
+      }),
+      // star.discovery
     ],
     dht: kadDHT(),
     pubsub: gsub
@@ -185,6 +192,12 @@ var counter = 0;
     console.debug('subscribing to', cfg.allowedTopics[i])
     libp2p.pubsub.subscribe(cfg.allowedTopics[i])
   }
+
+  libp2p.handle(['/ibp/ping'], (event) => {
+    const {stream, connection } = event;
+    // console.debug(stream, connection, protocol)
+    return mh.handleProtocol({ stream, connection, protocol: '/ibp/ping' })
+  })
 
   // publish our services 
   await mh.publishServices(cfg.services, libp2p)

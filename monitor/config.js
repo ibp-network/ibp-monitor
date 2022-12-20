@@ -1,7 +1,6 @@
 
 const GOSSIP_PORT = 30000 // 0 for development/debugging, 30000 for deployment
-// TODO work out an option for externalIp
-const EXTERNAL_IP = '8.8.8.8'
+const RTC_PORT = 30002
 
 // you can overwrite this in config.local.js
 
@@ -28,7 +27,8 @@ const config = {
   // 0.0.0.0 will bind all interfaces
   addresses: {
     listen: [
-      `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
+      `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`,
+      `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct`
     ],
     // announce: []
   },

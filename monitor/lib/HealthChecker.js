@@ -115,7 +115,16 @@ class HealthChecker {
         const health = await api.rpc.system.health()
         var end = performance.now()
         // end timer
-        const networkState = await api.rpc.system.networkState
+        // let peerCount = -1
+        // try {
+        //   peerCount = await api.rpc.net.peerCount()
+        //   console.log('peerCount ------------', peerCount)
+        //   // const peers = await api.rpc.system.peers() // unsafe RPC call
+        //   // console.log('peers ----------------', peers.toJSON())
+        // } catch(err) {
+        //   console.error(err)
+        // }
+        const networkState = api.rpc.system.networkState
         const syncState = await api.rpc.system.syncState()
         const version = await api.rpc.system.version()
         const timing = end - start
@@ -131,6 +140,7 @@ class HealthChecker {
             monitorId: this.localMonitorId, // .toString(),
             serviceUrl: service.serviceUrl,
             chain, chainType, health, networkState, syncState, version,
+            // peerCount,
             performance: timing,
           }
         }

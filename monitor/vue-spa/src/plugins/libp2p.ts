@@ -51,12 +51,15 @@ export async function Libp2pPlugin (Vue: typeof _Vue, options?: any): Promise<vo
       wrtcStar.transport
     ],
     connectionEncryption: [noise()],
-    streamMuxers: [mplex()],
+    // does web need a stream muxer?
+    // streamMuxers: [
+    //   mplex()
+    // ],
     connectionManager: {
       pollInterval: 2000
     },
     peerDiscovery: [
-      wrtcStar.discovery,
+      // wrtcStar.discovery,
       bootstrap({
         list: [
           // p2p-webrtc-direct

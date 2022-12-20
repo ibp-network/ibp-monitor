@@ -3,6 +3,8 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { HealthChecker } from './HealthChecker.js'
 import { Op } from 'sequelize'
+import { pipe } from 'it-pipe'
+import { stringToStream } from './utils.js'
 class MessageHandler {
 
   _ds = undefined //= new DataStore({ initialiseDb: true })
@@ -21,15 +23,50 @@ class MessageHandler {
     // const example = {"isTrusted":false,"detail":{"id":"12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu","multiaddrs":["/ip4/127.0.0.1/tcp/30000","/ip4/192.168.1.91/tcp/30000","/ip4/192.168.1.80/tcp/30000","/ip4/10.62.0.1/tcp/30000","/ip4/172.17.0.1/tcp/30000"],"protocols":[]}}
     console.debug('peer:discovery ', peerId.detail.id.toString())
     console.debug(JSON.stringify(peerId.detail.multiaddrs))
-    try {
-      const model = { monitorId: peerId.detail.id.toString(), multiaddrs: peerId.detail.multiaddrs }
-      const [monitorModel, created] = await this._ds.Monitor.upsert(model)
-      // this._ds.upsert('Monitor', { monitorId: peerId.detail.id.toString() }, {multiaddrs: peerId.detail.multiaddrs })
-    } catch (err) {
-      console.warn('Error trying to upsert discovered monitor', peerId.detail.id.toString())
-      console.error(err)
-    }
+    // monitors will be upserted when they publish to /ibp/service
+    // from 2022.12.14 we have browser connections, do not add them as monitors (yet...)
+    // try {
+    //   const model = { monitorId: peerId.detail.id.toString(), multiaddrs: peerId.detail.multiaddrs }
+    //   const [monitorModel, created] = await this._ds.Monitor.upsert(model)
+    //   // this._ds.upsert('Monitor', { monitorId: peerId.detail.id.toString() }, {multiaddrs: peerId.detail.multiaddrs })
+    // } catch (err) {
+    //   console.warn('Error trying to upsert discovered monitor', peerId.detail.id.toString())
+    //   console.error(err)
+    // }
     // console.debug('upsert', created, peerModel)
+  }
+
+  async handleProtocol ({ connection, stream, protocol }) {
+    console.debug('handleProtocol', protocol) // , stream, connection)
+    switch (protocol) {
+      case '/ibp/ping':
+        try {
+          // receive the message
+          console.info(`messate from ${connection.remotePeer.toString()}`)
+          var weGot = ''
+          await pipe(
+            stream,
+            async function (source) {
+              for await (const message of source) {
+                console.info(`->: ${message.toString()}`)
+                weGot = weGot + message
+              }
+            }
+          )
+          // Replies are done on new streams, so let's close this stream so we don't leak it
+          // respond with 'pong'
+          const response = stringToStream('pong:' + weGot)
+          await pipe(response, stream)
+        } catch (err) {
+          console.error(err)
+        }
+        break
+      case '/ipfs/ping/1.0.0':
+      case '/ipfs/id/push/1.0.0':
+      case '/libp2p/circuit/relay/0.1.0':
+      default:
+        return
+    }
   }
 
   /**
@@ -98,6 +135,10 @@ class MessageHandler {
         // console.log('created', created)
         break
 
+      case '/ibp/rpc':
+        // console.log()
+        // break
+  
       default:
         console.log(`received: ${uint8ArrayToString(evt.detail.data)} from ${evt.detail.from.toString()} on topic ${evt.detail.topic}`)
     }

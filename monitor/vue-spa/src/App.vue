@@ -18,6 +18,7 @@ import Footer from './components/Footer.vue'
 export default Vue.extend({
   components: {
     NavBar,
+    // eslint-disable-next-line
     Footer
   }
 })

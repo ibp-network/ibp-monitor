@@ -65,7 +65,7 @@ export default Vue.extend({
     //   return moment(value).format(this.dateTimeFormat)
     // },
     parseQuery (queryStr: string) {
-      var queryDict = {} as any
+      const queryDict = {} as any
       queryStr
         // .search()
         .substr(1)
