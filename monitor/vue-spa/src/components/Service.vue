@@ -18,6 +18,14 @@
           <td>{{service.name}}</td>
         </tr>
         <tr>
+          <th>Status</th>
+          <td>{{service.status}}</td>
+        </tr>
+        <tr>
+          <th>Error count</th>
+          <td>{{service.errorCount}}</td>
+        </tr>
+        <tr>
           <th>Polkadot.js</th>
           <td><a :href="`https://polkadot.js.org/apps/?rpc=${service.serviceUrl}`" target="_blank">
             {{service.serviceUrl}}

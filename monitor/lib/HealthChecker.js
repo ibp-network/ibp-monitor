@@ -1,4 +1,4 @@
-import { ApiPromise, WsProvider } from '@polkadot/api'
+import { ApiPromise, WsProvider, HttpProvider } from '@polkadot/api'
 import { asyncForeach } from './utils.js'
 
 import { config } from '../config.js'
@@ -54,7 +54,7 @@ class HealthChecker {
     var result = {
       monitorId: this.localMonitorId, // .toString(),
       serviceUrl: service.serviceUrl,
-      peerId: peerId ? peerId.toString() : '', // probably won't know this...?
+      peerId: peerId ? peerId.toString() : null, // probably won't know this...?
       source: 'check',
       level: 'error',
       record: {
@@ -93,7 +93,8 @@ class HealthChecker {
         console.debug('HealthCheck.check()', service.serviceUrl)
 
         // catch & throw promise reject()
-        const provider = new WsProvider(service.serviceUrl)
+        // const provider = new WsProvider(service.serviceUrl)
+        const provider = new HttpProvider(service.serviceUrl)
         provider.on('error', async (err) => {
           result = await this.handleProviderError(err, service, peerId)
           // provider.disconnect()
