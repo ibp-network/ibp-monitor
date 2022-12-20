@@ -20,6 +20,7 @@ import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
 
 import { DataStore } from './lib/DataStore.js'
+import { Op } from 'sequelize'
 // import { DataStoreLoki } from './lib/DataStoreLoki.js'
 import { MessageHandler } from './lib/MessageHandler.js'
 import { HealthChecker } from './lib/HealthChecker.js'
@@ -173,10 +174,10 @@ var counter = 0;
     console.log('WOOT: dht peer', peer.toString())
   })
   libp2p.connectionManager.addEventListener('peer:connect', (peerId) => {
-    console.debug('peer:connect', JSON.stringify(peerId))
+    console.debug('peer:connect', peerId.detail?.remotePeer.toString(), 'at', peerId.detail?.remoteAddr.toString())
   })
   libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
-    console.debug('peer:disconnect', JSON.stringify(peerId))
+    console.debug('peer:disconnect', peerId.detail?.remotePeer.toString(), 'at', peerId.detail?.remoteAddr.toString())
   })
 
   libp2p.addEventListener('peer:discovery', async (peerId) => {
@@ -210,12 +211,18 @@ var counter = 0;
   // publish the results of our healthChecks
   async function publishResults () {
     console.debug('Publishing our healthChecks for', libp2p.getPeers().length, 'peers')
-    libp2p.getPeers().forEach(async (peerId) => {
-      console.log('- our peers are:', peerId.toString())
-      const monitor = await ds.Monitor.findByPk(peerId.toString(), { include: 'services' })
+    // relying on peers to be connected is not reliable...
+    // iterate the monitors != our peerId
+    // libp2p.getPeers().forEach(async (peerId) => {
+    const monitors = await ds.Monitor.findAll({ where: { monitorId: { [Op.ne]: peerId.toString() } }, include: 'services' })
+    for (let i = 0; i < monitors.length; i++) {
+      const monitor = monitors[i]
+      // console.log('- our peers are:', peerId.toString())
+      // const monitor = await ds.Monitor.findByPk(peerId.toString(), { include: 'services' })
       // const monitor = ds.Monitor.findOne({ monitorId: peerId.toString() }).data()
       // console.debug('peer', peer)
       if (monitor) {
+        console.debug('Checking services for monitor', monitor.monitorId)
         const results = await hc.check(monitor.services || [])
         console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
         asyncForeach(results, async (result) => {
@@ -225,7 +232,7 @@ var counter = 0;
       } else {
         console.warn('could not find monitor', peerId.toString())
       }
-    }) // === end of peers update cycle ===
+    } // === end of peers update cycle ===
 
     // check our own services?
     if (cfg.checkOwnServices) {

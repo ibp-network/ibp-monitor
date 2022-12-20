@@ -73,6 +73,10 @@ class HealthChecker {
     console.debug('handleApiError', args)
   }
 
+  async handleGenericError(...args) {
+    console.debug('handleGenericError', args)
+  }
+
   /**
    * Run the HealthCheck process on each peer service
    * @param {*} services - array of services for a peer
@@ -93,20 +97,25 @@ class HealthChecker {
         console.debug('HealthCheck.check()', service.serviceUrl)
 
         // catch & throw promise reject()
-        const provider = new WsProvider(service.serviceUrl, false, {}, 1000)
+        const provider = new WsProvider(service.serviceUrl, false, {}, 10 * 1000) // 10 seconds timeout
+        // any error is 'out of context' in the handler and does not stop the `await provider.isReady` 
+        provider.on('error', async (err) => {
+          console.log('== got providerError for ', service.serviceUrl)
+          result = await this.handleProviderError(err, service, peerId)
+          // provider.disconnect()
+        })
+        console.debug('connecting to provider...')
         await provider.connect()
-        // const provider = new HttpProvider(service.serviceUrl.replace('wss://', 'https://'))
-        // provider.on('error', async (err) => {
-        //   result = await this.handleProviderError(err, service, peerId)
-        //   // provider.disconnect()
-        // })
+        console.debug('waiting for ready...')
         await provider.isReady
+        console.debug('provider is ready...')
 
         const api = await ApiPromise.create({ provider })
         // api.on('error', function (err) { throw new ApiError(err.toString()) })
         api.on('error', (args) => { this.handleApiError(args) })
         await api.isReady
 
+        console.debug('getting stats from provider / api...')
         peerId = await api.rpc.system.localPeerId()
         // console.log('localPeerId', localPeerId.toString())
         await this.datastore.Peer.upsert({ peerId: peerId.toString(), serviceUrl: service.serviceUrl})
@@ -151,16 +160,17 @@ class HealthChecker {
         // save healthCheck in storage
         console.debug('HealthCheck.check() done')
       } catch (err) {
-        // console.error(err)
+        console.warn('WE GOT AN ERROR --------------')
+        console.error(err)
         // mark the service errorCount
-        result = await this.handleProviderError(err, service, peerId)
+        result = await this.handleGenericError(err, service, peerId)
       }
       results.push(result)
       // comment this if we receive our own gossip messages
       // console.debug('creating healthChecK', result)
       const created = await this.datastore.HealthCheck.create(result)
       // console.debug('HealthCheck created', created)
-        
+      
     }
     // console.log(results)
     return results
