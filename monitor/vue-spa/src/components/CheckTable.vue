@@ -40,6 +40,7 @@
         <td>{{formatDateTime(hc.createdAt)}}</td>
       </tr>
     </tbody>
+    <Loading :loading="loading"></Loading>
   </table>
 
 </template>
@@ -50,6 +51,7 @@ import { mapState } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
 
+import Loading from './Loading.vue'
 import IsLocalMonitor from './IsLocalMonitor.vue'
 
 const levels: Record<string, string> = {
@@ -72,6 +74,7 @@ const icons: Record<string, string> = {
 export default Vue.extend({
   name: 'PeerTable',
   components: {
+    Loading,
     IsLocalMonitor
   },
   props: {
@@ -82,16 +85,19 @@ export default Vue.extend({
     },
     healthChecks: {
       type: Array
+    },
+    loading: {
+      type: Boolean
     }
   },
   computed: {
     ...mapState(['dateTimeFormat', 'localMonitorId'])
   },
-  // data () {
-  //   return {
-  //     columns: []
-  //   }
-  // },
+  data () {
+    return {
+      // columns: []
+    }
+  },
   methods: {
     shortStash: shortStash,
     formatDateTime (value: any) {

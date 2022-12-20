@@ -10,7 +10,7 @@
         </nav>
       </div>
     </nav>
-    <CheckTable :healthChecks="list" :columns="['id', 'serviceUrl', 'monitorId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
+    <CheckTable :healthChecks="list" :loading="loading" :columns="['id', 'serviceUrl', 'monitorId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
     <nav class="pagination is-centered" role="navigation" aria-label="pagination">
       <a class="pagination-previous" @click="selectPage(pagination.prev.query)"><i class="fa-solid fa-angle-left"></i></a>
       <a class="pagination-next" @click="selectPage(pagination.next.query)"><i class="fa-solid fa-angle-right"></i></a>
@@ -45,7 +45,7 @@ export default Vue.extend({
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('healthCheck', ['list', 'pagination'])
+    ...mapState('healthCheck', ['list', 'loading', 'pagination'])
   },
   data () {
     return {
