@@ -84,8 +84,8 @@ class HealthChecker {
     console.debug('check() # services', services.length)
     for (var i = 0; i < services.length; i++) {
       const service = services[i]
+      console.debug('checking service', service.serviceUrl, service.status)
       if (service.status === 'stale') continue
-      // console.debug('checking service', service)
       var result
       var peerId
       // TODO different types of service? http / substrate / ...?
@@ -93,12 +93,13 @@ class HealthChecker {
         console.debug('HealthCheck.check()', service.serviceUrl)
 
         // catch & throw promise reject()
-        // const provider = new WsProvider(service.serviceUrl)
-        const provider = new HttpProvider(service.serviceUrl)
-        provider.on('error', async (err) => {
-          result = await this.handleProviderError(err, service, peerId)
-          // provider.disconnect()
-        })
+        const provider = new WsProvider(service.serviceUrl, false, {}, 1000)
+        await provider.connect()
+        // const provider = new HttpProvider(service.serviceUrl.replace('wss://', 'https://'))
+        // provider.on('error', async (err) => {
+        //   result = await this.handleProviderError(err, service, peerId)
+        //   // provider.disconnect()
+        // })
         await provider.isReady
 
         const api = await ApiPromise.create({ provider })
