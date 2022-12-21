@@ -154,6 +154,7 @@ var counter = 0;
       }),
       // star.discovery
     ],
+    relay: cfg.relay,
     dht: kadDHT(),
     pubsub: gsub
   })
@@ -165,10 +166,6 @@ var counter = 0;
     { multiaddrs: libp2p.getMultiaddrs() },
     { where: { monitorId: peerId.toString() } }
   )
-  // ds.Monitor
-  //   .chain()
-  //   .find({ monitorId: peerId.toString() })
-  //   .update(obj => { obj.multiaddrs = libp2p.getMultiaddrs() })
 
   libp2p.dht.addEventListener('peer', (peer) => {
     console.log('WOOT: dht peer', peer.toString())
