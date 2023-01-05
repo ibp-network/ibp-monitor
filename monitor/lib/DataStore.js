@@ -38,8 +38,8 @@ class DataStore {
     Peer.hasOne(Service, { as: 'service', foreignKey: 'serviceUrl' })
     Peer.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'peerId' })
 
-    Service.hasMany(Peer, { foreignKey: 'serviceUrl', otherKey: 'peerId', onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
-    Service.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'serviceUrl', onDelete: 'NO ACTION', onUpdate: 'CASCADE' })
+    Service.hasMany(Peer, { foreignKey: 'serviceUrl', otherKey: 'peerId', onDelete: 'CASCADE', onUpdate: 'CASCADE' })
+    Service.hasMany(HealthCheck, { as: 'healthChecks', foreignKey: 'serviceUrl', onDelete: 'CASCADE', onUpdate: 'CASCADE' })
 
     Service.belongsToMany(Monitor, { as: 'monitors', through: 'monitor_service', foreignKey: 'serviceUrl', otherKey: 'monitorId' })
     Monitor.belongsToMany(Service, { as: 'services', through: 'monitor_service', foreignKey: 'monitorId', otherKey: 'serviceUrl' })
@@ -107,6 +107,8 @@ class DataStore {
     console.debug('Service.stale: error', result)
     result = await this.Service.update({ status: 'stale' }, { where: { status: {[Op.ne]: 'stale' }, updatedAt: { [Op.lt]: marker } } })
     console.debug('Service.stale: updatedAt', result)
+    // delete healthChecks for stale services
+    // result = await this.HealthCheck.destroy({ where: })
     // delete stale services
     result = await this.Service.destroy({ where: { status: 'stale', updatedAt: { [Op.lt]: marker } } })
     console.debug('Services.prune: stale', result)
