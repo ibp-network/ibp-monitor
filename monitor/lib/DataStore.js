@@ -108,6 +108,11 @@ class DataStore {
     result = await this.Service.update({ status: 'stale' }, { where: { status: {[Op.ne]: 'stale' }, updatedAt: { [Op.lt]: marker } } })
     console.debug('Service.stale: updatedAt', result)
     // delete healthChecks for stale services
+    const staleServices = this.Service.findAll({ where: { status: 'stale', updatedAt: { [Op.lt]: marker } } })
+    for(var i = 0; i < staleServices.length; i++) {
+      const svc = staleServices[i]
+      await this.HealthCheck.destroy({ where: { serviceUrl: svc.serviceUrl } })
+    }
     // result = await this.HealthCheck.destroy({ where: })
     // delete stale services
     result = await this.Service.destroy({ where: { status: 'stale', updatedAt: { [Op.lt]: marker } } })
