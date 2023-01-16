@@ -351,6 +351,7 @@ class HttpHandler {
 
     this.app.get('/metrics/:serviceUrl', async (req, res) => {
       let { serviceUrl } = req.params
+      serviceUrl = decodeURIComponent(serviceUrl)
       console.debug('/metrics/', serviceUrl)
       let metrics = await this._exporter.export(serviceUrl)
       res.type('text/plain').send(metrics)
