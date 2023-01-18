@@ -83,13 +83,13 @@ export default Vue.extend({
           name: 'Miloš | GATOTECH',
           level: 'Prospect (Pro)',
           matrix: '@gatotech:matrix.org'
-        },
-        {
-          name: 'paulo // turboflakes.io',
-          level: 'Prospect (Pro)',
-          matrix: '@turboflakes:matrix.org',
-          avatar: 'https://matrix-client.matrix.org/_matrix/media/r0/thumbnail/matrix.org/dLggqaYVuiRZlVEaBgAwfwJe?width=566&height=566&method=scale'
         }
+        // {
+        //   name: 'paulo // turboflakes.io',
+        //   level: 'Prospect (Pro)',
+        //   matrix: '@turboflakes:matrix.org',
+        //   avatar: 'https://matrix-client.matrix.org/_matrix/media/r0/thumbnail/matrix.org/dLggqaYVuiRZlVEaBgAwfwJe?width=566&height=566&method=scale'
+        // }
       ]
     }
   }
