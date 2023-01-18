@@ -1,6 +1,6 @@
 # Website for dotters.network
 
-- hosted on https://dotters.network
+- hosted on https://dotsama-ibp.metaspan.io
 
 ## get the code
 ```
