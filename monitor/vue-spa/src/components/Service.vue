@@ -60,7 +60,7 @@
           </ul>
         </div>
         <!-- <%- include(templateDir + '/peersTable.ejs', { peers: service.peers, columns: ['peerId', 'updatedAt'] }); -%> -->
-        <PeerTable :peers="service.peers" :columns="['peerId', 'updatedAt']"></PeerTable>
+        <PeerTable :peers="service.peers" :columns="['id', 'serviceUrl', 'status', 'peerId', 'updatedAt']"></PeerTable>
       </div>
     </div>
 
