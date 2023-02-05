@@ -1,0 +1,38 @@
+[Unit]
+Description="Polkadot RPC Node"
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10
+User=polkadot
+SyslogIdentifier=dot-n1
+SyslogFacility=local7
+KillSignal=SIGHUP
+ExecStart=/usr/local/sbin/polkadot \
+     --chain polkadot \
+     --rpc-port 10000 \
+     --ws-port 10001 \
+     --listen-addr /ip4/10.50.50.110/tcp/10002 \
+     --public-addr /ip4/192.96.202.170/tcp/10002 \
+     --execution wasm \
+     --wasm-execution compiled \
+     --base-path /opt/polkadot/node1/ \
+     --in-peers 10 \
+     --out-peers 10 \
+     --pruning archive \
+     --max-runtime-instances 128 \
+     --db-cache 7192 \
+     --runtime-cache-size 64 \
+     --no-hardware-benchmarks \
+     --ws-external \
+     --rpc-external \
+     --rpc-methods safe \
+     --rpc-cors all \
+     --allow-private-ipv4 \
+
+
+[Install]
+WantedBy=multi-user.target
