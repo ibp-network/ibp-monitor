@@ -89,7 +89,7 @@ class HealthChecker {
     for (var i = 0; i < services.length; i++) {
       const service = services[i]
       console.debug('checking service', service.serviceUrl, service.status)
-      if (service.status === 'stale') continue
+      if (['stale','maintenance'].includes(service.status)) continue
       var result
       var peerId
       // TODO different types of service? http / substrate / ...?
