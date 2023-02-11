@@ -220,7 +220,21 @@ var counter = 0;
       // console.debug('peer', peer)
       if (monitor) {
         console.debug('Checking services for monitor', monitor.monitorId)
-        const results = await hc.check(monitor.services || [])
+        // const results = await hc.check(monitor.services || [])
+        var results = []
+        for (let i = 0; i < monitor.services.length; i++) {
+          const service = monitor.services[i]
+          console.debug('=== service', service.serviceUrl)
+          var res = {}
+          try {
+            res = await hc.check([service])
+          } catch (err) {
+            console.debug('\n\nERROR FROM Healthcheck!!!\n\n')
+            console.error(err)
+            res = { monitorId: this.localMonitorId, serviceUrl: service.serviceUrl, source: check, record: { performance: -1 , error: err } }
+          }
+          results.push(...res)
+        }
         console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
         asyncForeach(results, async (result) => {
           const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
