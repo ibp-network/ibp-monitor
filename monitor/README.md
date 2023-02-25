@@ -25,7 +25,20 @@ cd vue-spa
 npm install
 # if you get errors for lint, run `npm install --force`
 npm run build
-# output should update/overwrite the `static` directory
+# output should update/overwrite the `../static` directory
+```
+
+## Docker
+
+```bash
+# create the docker image
+docker build -t metaspan/ibp-monitor .
+
+# run the image - test
+docker compose up
+
+# run the image - detach
+docker compose up -d
 ```
 
 ## pm2
@@ -59,7 +72,7 @@ sudo mv sqlite3 /usr/local/bin
 ### Querying the datastore
 ```bash
 cd monitor/data
-sqlite datastore.sqlite "select * from monitor"
+sqlite datastore.sqlite "select * from monitor;"
 ```
 
 ## TODO, progress
