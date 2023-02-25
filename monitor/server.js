@@ -273,7 +273,7 @@ var counter = 0;
   // start HttpHandler
   hh.listen(HTTP_PORT, () => {
     // app.listen(HTTP_PORT, () => {    
-    console.log('\nServer is running, press crtl-c to stop\n')
+    console.log(`\nServer is running on port ${HTTP_PORT}, press crtl-c to stop\n`)
     process.on('SIGINT', async () => {
       console.warn('\nControl-c detected, shutting down...')
       await libp2p.stop()

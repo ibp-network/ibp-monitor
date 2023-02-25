@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  ibp-monitor:
+    container_name: ibp-monitor
+    image: metaspan/ibp-monitor:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        RELEASE: "latest"
+    restart: on-failure
+    ports:
+      - "30000:30000"  # p2p port
+      - "30001:30001"  # http port
+    volumes:
+      - /home/derek/ibp2/monitor/config.local.js:/home/ibp/config.local.js
+      - /home/derek/ibp2/monitor/keys:/home/ibp/keys
+      - /home/derek/ibp2/monitor/data:/home/ibp/data
+    command: []
