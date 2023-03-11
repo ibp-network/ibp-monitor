@@ -248,13 +248,14 @@ var counter = 0;
     // check our own services?
     if (cfg.checkOwnServices) {
       console.debug('checking our own services...')
-      const monitor = ds.Monitor.findAll({ where: { monitorId: peerId.toString() }, include: 'services' })
-      // const monitor = ds.Monitor.findOne({ monitorId: peerId.toString() })
-      const results = await hc.check(monitor?.services || [])
-      console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
-      asyncForeach(results, async (result) => {
-        const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
-      })
+      const monitor = await ds.Monitor.findOne({ where: { monitorId: peerId.toString() }, include: 'services' })
+      if (monitor) {
+        const results = await hc.check(monitor.services || [])
+        console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
+        asyncForeach(results, async (result) => {
+          const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
+        })
+      }
     }
   } // end of publishResults()
 

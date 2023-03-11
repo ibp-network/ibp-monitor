@@ -1,2 +1,5 @@
 keys/peerId.json
 config.local.js
+package-lock.json
+node_modules
+datastore.sqlite

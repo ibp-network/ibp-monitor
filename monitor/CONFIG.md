@@ -134,7 +134,7 @@ By default, you check the services of your peers. If you also want to check your
   // {
   //   name: "Metaspan Kusama",
   //   chain: "kusama",
-  //   url: "wss://kusama-rpc.metaspan.io/ws"
+  //   serviceUrl: "wss://kusama-rpc.metaspan.io/ws"
   // },
   ],
 ```
@@ -162,7 +162,7 @@ In p2p we need to find our peers to form a network. The bootstrap peers provides
 Normally you don't need to change this
 ```js
   // bootstrapPeers: [
-  //   "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
+  //   "/dnsaddr/boot.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
   // ],
 ```
 
