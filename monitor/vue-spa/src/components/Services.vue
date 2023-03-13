@@ -21,14 +21,15 @@
         <th>Monitors</th>
         <th>Errors</th>
         <th>Updated</th>
-        <th>Discovered</th>
+        <!-- <th>Discovered</th> -->
       </thead>
 
       <tbody>
         <tr v-for="service in list" v-bind:key="service.serviceUrl">
           <td><router-link :to="`/service/${encodeURIComponent(service.serviceUrl)}`">{{service.serviceUrl}}</router-link></td>
           <td><a :href="`https://polkadot.js.org/apps/?rpc=${service.serviceUrl}`" target="_blank">
-            {{service.serviceUrl}}
+            <!-- {{service.serviceUrl}} -->
+            polkadot.js
             <small><i class="fa-solid fa-arrow-up-right-from-square"></i></small>
           </a></td>
           <td>{{service.name}}</td>
@@ -36,7 +37,7 @@
           <td>{{service.monitors?.length || 0}}</td>
           <td>{{service.errorCount || 0}}</td>
           <td>{{formatDateTime(service.updatedAt)}}</td>
-          <td>{{formatDateTime(service.createdAt)}}</td>
+          <!-- <td>{{formatDateTime(service.createdAt)}}</td> -->
         </tr>
       </tbody>
     </table>
@@ -45,22 +46,38 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import moment from 'moment'
 // import ServiceTable from './ServiceTable.vue'
 
-export default Vue.extend({
+// // eslint-disable-next-line
+// interface IData {}
+// interface IMethods {
+//   formatDateTime(value: any): string
+// }
+// interface IComputed {
+//   dateTimeFormat: string
+//   list: any[]
+// }
+// // eslint-disable-next-line
+// interface IProps {}
+
+// export default defineComponent<{}, {}, IMethods, IData, IComputed>({
+export default defineComponent({
   name: 'ServicesC',
-  components: {
-    // ServiceTable
-  },
+  // components: {
+  //   // ServiceTable
+  // },
   computed: {
     ...mapState(['dateTimeFormat']),
     ...mapState('service', ['list'])
   },
+  data () {
+    return {}
+  },
   methods: {
-    formatDateTime (value: any) {
+    formatDateTime (value: any): string {
       return moment(value).format(this.dateTimeFormat)
     }
   },

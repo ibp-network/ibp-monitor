@@ -68,7 +68,7 @@
       <ul>
         <li class="is-active"><a>Performance</a></li>
         <li>
-          <router-link :to="`/metrics/${encodeURIComponent(service.serviceUrl)}`" target="_blank">
+          <router-link :to="`/api/metrics/${encodeURIComponent(service.serviceUrl)}`" target="_blank">
             Prometheus
             &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px">
           </router-link>
@@ -91,7 +91,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import moment from 'moment'
 import PeerTable from './PeerTable.vue'
@@ -99,7 +99,7 @@ import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import MonitorTable from './MonitorTable.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ServiceC',
   components: {
     MonitorTable,

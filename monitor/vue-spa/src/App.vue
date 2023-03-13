@@ -11,11 +11,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
 
-export default Vue.extend({
+export default defineComponent({
   components: {
     NavBar,
     // eslint-disable-next-line

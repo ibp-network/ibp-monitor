@@ -1,2 +1,4 @@
 keys/peerId.json
-config.local.js
+config/config.local.js
+prototype/**
+_archive/**

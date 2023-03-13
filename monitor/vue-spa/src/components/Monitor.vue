@@ -60,13 +60,13 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import moment from 'moment'
 import CheckTable from './CheckTable.vue'
 import ServiceTable from './ServiceTable.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ServiceC',
   components: {
     ServiceTable,

@@ -1,23 +1,23 @@
 import axios from 'axios'
 import Vue from 'vue'
-import Vuex, { Module } from 'vuex'
+import { Module } from 'vuex'
 // import { ICurrency } from '../../../types'
 // import { ApiPromise, WsProvider } from '@polkadot/api'
 
-// import { IRootState } from '../../index'
+import { IState as IRootState } from '../index'
 // import { currencies } from './constants'
 // import { PolkadotState, PolkadotWindow } from './types'
 // declare let window: PolkadotWindow
-interface IState {
+export interface IState {
   list: any[]
   monitor: any
   healthChecks: any[]
 }
 
-Vue.use(Vuex)
+// Vue.use(Vuex)
 
 // const polkadot: Module<PolkadotState, IRootState> = {
-const monitor = {
+const monitor: Module<IState, IRootState> = {
   namespaced: true,
   state: {
     list: [],

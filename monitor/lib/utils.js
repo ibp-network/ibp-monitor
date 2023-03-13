@@ -1,7 +1,7 @@
-import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
-import { pipe } from 'it-pipe'
-import map from 'it-map'
+import { toString as uint8ArrayToString } from 'uint8arrays';
+import { fromString as uint8ArrayFromString } from 'uint8arrays';
+import { pipe } from 'it-pipe';
+import map from 'it-map';
 
 async function asyncForeach (array, callback) {
   for (let index = 0; index < array.length; index++) {
@@ -44,8 +44,13 @@ async function streamToString (stream) {
   return ret
 }
 
+function shortStash(stash='') {
+  return stash.slice(0, 5) + '...' + stash.slice(-5)
+}
+
 export {
   asyncForeach,
   streamToString,
-  stringToStream
+  stringToStream,
+  shortStash
 }

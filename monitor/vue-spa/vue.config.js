@@ -22,16 +22,16 @@ module.exports = defineConfig({
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:30001',
+        target: 'http://localhost:30002',
         changeOrigin: true,
         // pathRewrite: {               // added this
         //   '^/api': ''                // added this
         // },
       },
-      '/metrics': {
-        target: 'http://localhost:30001',
-        changeOrigin: true,
-      }
+      // '/metrics': {
+      //   target: 'http://localhost:30001',
+      //   changeOrigin: true,
+      // }
     }
   }
 })

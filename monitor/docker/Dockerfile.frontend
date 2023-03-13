@@ -1,0 +1,14 @@
+FROM nginx
+
+LABEL MAINTAINER="derek@metaspan.com"
+
+# Change the working directory
+WORKDIR /etc/nginx/conf.d
+
+COPY etc/nginx/ibp-monitor.conf default.conf
+# VOLUME [ "/etc/nginx" ]
+
+# TODO: decide if we're going to build the FE during docker build process
+# RUN cd vue-spa && rm -rf node_modules && npm run build
+
+EXPOSE 80

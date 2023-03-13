@@ -8,8 +8,8 @@ import { peerModel } from '../models/peer.js'
 import { healthCheckModel } from '../models/healthCheck.js'
 import { logModel } from '../models/log.js'
 
-import { config } from '../config.js'
-import { configLocal } from '../config.local.js'
+import { config } from '../config/config.js'
+import { configLocal } from '../config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 const sequelize = new Sequelize(cfg.sequelize.database, cfg.sequelize.username, cfg.sequelize.password, cfg.sequelize.options)

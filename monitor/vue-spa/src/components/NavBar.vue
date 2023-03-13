@@ -52,10 +52,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   computed: {
     ...mapState(['packageVersion', 'apiVersion'])
   },

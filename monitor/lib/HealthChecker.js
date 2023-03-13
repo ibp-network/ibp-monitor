@@ -1,8 +1,8 @@
 import { ApiPromise, WsProvider, HttpProvider } from '@polkadot/api'
 import { asyncForeach } from './utils.js'
 
-import { config } from '../config.js'
-import { configLocal } from '../config.local.js'
+import { config } from '../config/config.js'
+import { configLocal } from '../config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 class ProviderError extends Error {

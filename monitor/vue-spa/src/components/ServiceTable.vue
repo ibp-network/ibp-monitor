@@ -13,7 +13,8 @@
       <td>{{service.name}}</td>
       <td>{{service.status}}</td>
       <td><a href="https://polkadot.js.org/apps/?rpc=<%= service.serviceUrl %>" target="_blank">
-        {{service.serviceUrl}}
+        <!-- {{service.serviceUrl}} -->
+        polkadot.js
         <small><i class="fa-solid fa-arrow-up-right-from-square"></i></small>
       </a></td>
     </tr>
@@ -23,10 +24,10 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { ref, defineComponent } from 'vue'
 import { mapState } from 'vuex'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'ServiceTable',
   props: {
     services: {

@@ -18,30 +18,30 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import moment from 'moment'
 
 import { Line as LineChart } from 'vue-chartjs'
 import { Chart as ChartJS, Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale, LineController } from 'chart.js'
 ChartJS.register(Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale, LineController)
 
-interface IData {
-  chartOptions: Record<string, any>
-  labels: any[]
-  data: any[]
-  moveMean: number[]
-}
-interface IMethods {
-  makeChartData (): void
-}
-interface IComputed {
-  chartData (): any
-}
-interface IProps {
-  healthChecks: any[]
-}
+// interface IData {
+//   chartOptions: Record<string, any>
+//   labels: any[]
+//   data: any[]
+//   moveMean: number[]
+// }
+// interface IMethods {
+//   makeChartData (): void
+// }
+// interface IComputed {
+//   chartData (): any
+// }
+// interface IProps {
+//   healthChecks: any[]
+// }
 
-export default Vue.extend<IData, IMethods, IComputed, IProps>({
+export default defineComponent({
   name: 'CheckChart',
   components: { LineChart },
   props: {
@@ -51,7 +51,7 @@ export default Vue.extend<IData, IMethods, IComputed, IProps>({
     }
   },
   computed: {
-    chartData () {
+    chartData (): Record<string, any> {
       return {
         // labels: ['January', 'February', 'March'],
         // datasets: [{ data: [40, 20, 12] }]

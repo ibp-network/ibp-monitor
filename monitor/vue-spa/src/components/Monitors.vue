@@ -18,11 +18,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import MonitorTable from './MonitorTable.vue'
 
-export default Vue.extend({
+export default defineComponent({
   name: 'MonitorsC',
   components: {
     MonitorTable

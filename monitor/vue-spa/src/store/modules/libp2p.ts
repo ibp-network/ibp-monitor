@@ -1,19 +1,21 @@
 import axios from 'axios'
 import Vue from 'vue'
-import Vuex, { Module } from 'vuex'
+import { Module } from 'vuex'
+import { IState as IRootState } from '../index'
 
+// eslint-disable-next-line
 interface IState {
-  list: any[]
-  offset: number
-  limit: number
-  pagination: any
-  healthCheck: any
+  // list: any[]
+  // offset: number
+  // limit: number
+  // pagination: any
+  // healthCheck: any
   // healthChecks: any[]
 }
 
-Vue.use(Vuex)
+// Vue.use(Vuex)
 
-const libp2p = {
+const libp2p: Module<IState, IRootState> = {
   namespaced: true,
   state: {
     // list: [],

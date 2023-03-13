@@ -1,0 +1,113 @@
+version: '3'
+name: ibp-stack
+
+# PORTS
+# - 3000 - bullmq admin, http
+# - 3306 - mariadb, tcp
+# - 6379 - redis, tcp
+# - 30000 - libp2p, gossip, tcp
+# - 30001 - frontend, http
+# - 30002 - api, http
+
+services:
+  ibp-monitor-frontend:
+    container_name: ibp-monitor-frontend
+    # image: nginx
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        RELEASE: "latest"
+    ports:
+      - "30001:80"
+    volumes:
+      - ../static:/usr/share/nginx/html
+    depends_on:
+      - ibp-monitor-api
+
+  ibp-monitor-api:
+    container_name: ibp-monitor-api
+    # image: nginx
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.api
+      args:
+        RELEASE: "latest"
+        HTTP_PORT: 30002
+    # no ports, we'll proxy from frontend
+    ports:
+      - "30002:30002"
+    environment:
+      - HTTP_PORT=30002
+    volumes:
+      - ../config/config.local.js:/home/ibp/config/config.local.js
+      - ../keys:/home/ibp/keys
+    depends_on:
+      - ibp-datastore
+
+  ibp-monitor:
+    container_name: ibp-monitor
+    image: metaspan/ibp-monitor
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.server
+      args:
+        RELEASE: "latest"
+    restart: on-failure
+    depends_on:
+      - ibp-datastore
+    ports:
+      - "30000:30000"  # p2p port
+    volumes:
+      - ../config:/home/ibp/config
+      - ../keys:/home/ibp/keys
+    command: []
+
+  ibp-datastore:
+    container_name: ibp-datastore
+    image: mariadb:10.11.2
+    # no build required
+    # build:
+    #   context: ../.
+    #   dockerfile: docker/Dockerfile.mariadb
+    #   args:
+    #     RELEASE: "latest"
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: thisIsASecret
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../data/mariadb:/var/lib/mysql
+      - ../data/schema.mysql.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+
+  # MariaDB Admin utils
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+
+  redis:
+    container_name: ibp-redis
+    image: redis
+    ports:
+      - "6379:6379"
+
+  bullmq:
+    container_name: ibp-bullmq
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.bullmq
+      args:
+        RELEASE: "latest"
+    restart: on-failure
+    depends_on:
+      - ibp-datastore
+      - redis
+    ports:
+      - "3000:3000"  # http port
+    volumes:
+      # - ../config/config.local.js:/config/config.local.js
+      - ../config:/home/app/config
+    command: ["node", "workers.js"]

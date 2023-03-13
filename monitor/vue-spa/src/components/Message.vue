@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 // import { Libp2p } from 'libp2p'
 import { Keyring } from '@polkadot/keyring'
@@ -112,37 +112,38 @@ interface IAccount {
   type: string
 }
 
-interface IData {
-  injected: IPlugin[]
-  selPlugin: IPlugin
-  accounts: IAccount[]
-  selAccount: IAccount
-  peers: any[]
-  selPeer: any
-  message: string
-  result: string
-}
-interface IMethods {
-  shortStash (stash: string): string
-  allInjected (): void
-  allAccounts (): void
-  sign (): void
-  getPeers (): void
-  submit (): void
-}
-interface IComputed {
-  localMonitorId: string
-  // dateTimeFormat: string
-  filteredAccounts: IAccount[]
-}
-// eslint-disable-next-line
-interface IProps {}
+// interface IData {
+//   injected: IPlugin[]
+//   selPlugin: IPlugin
+//   accounts: IAccount[]
+//   selAccount: IAccount
+//   peers: any[]
+//   selPeer: any
+//   message: string
+//   result: string
+// }
+// interface IMethods {
+//   shortStash (stash: string): string
+//   allInjected (): void
+//   allAccounts (): void
+//   sign (): void
+//   getPeers (): void
+//   submit (): void
+// }
+// interface IComputed {
+//   localMonitorId: string
+//   // dateTimeFormat: string
+//   filteredAccounts: IAccount[]
+// }
+// // eslint-disable-next-line
+// interface IProps {}
 
-export default Vue.extend<IData, IMethods, IComputed, IProps>({
+// export default defineComponent<IData, IMethods, IComputed, IProps>({
+export default defineComponent({
   name: 'MessageC',
   computed: {
     ...mapState(['localMonitorId']),
-    filteredAccounts () {
+    filteredAccounts (): any[] {
       return this.accounts.filter((f: IAccount) => f.meta.source === this.selPlugin.name)
     }
   },
@@ -181,61 +182,64 @@ export default Vue.extend<IData, IMethods, IComputed, IProps>({
       console.debug('web3accs', web3accs)
       this.accounts = web3accs as []
     },
-    async sign () {
-      if (!this.injected) this.allInjected()
-      // const accounts = await web3Accounts();
-      const account = this.selAccount
-      const injector = await web3FromSource(account?.meta.source) // could we get this from the extension?
-      const signRaw = injector?.signer?.signRaw
-      if (signRaw) {
-        // after making sure that signRaw is defined
-        // we can use it to sign our message
-        try {
-          const { signature } = await signRaw({
-            address: account.address,
-            data: stringToHex(this.message),
-            type: 'bytes'
-          })
-          this.result = signature
-        } catch (err: any) {
-          this.result = err.toString()
-        }
-      } else {
-        this.result = 'unknown?'
-      }
-      this.getPeers()
-    },
-    async getPeers () {
-      const peers = this.$libp2p.connectionManager.getConnections()
-      console.debug(peers)
-      this.peers = peers
-    },
-    async submit () {
-      console.debug('submit()')
-      if (this.$libp2p === undefined) {
-        console.debug('libp2p not running...')
-        // let res = await libp2p.dial('/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct')
-        // consol.debug(res)
-      } else {
-        console.debug('libp2p is running...')
-        // console.debug(libp2p)
-        // let peerId = {
-        //   type: '',
-        //   multiaddrs: ['/ip4/127.0.0.1/tcp/30000/p2p/' + localMonitorId, '/ip4/127.0.0.1/tcp/9090/ws']
-        // }
-        // console.debug('peerId', peerId) // multiaddr?
-        const stream = await this.$libp2p.dialProtocol(this.selPeer.remoteAddr, '/ibp/ping')
-        try {
-          await pipe(
-            [new Uint8Array([5]), new Uint8Array([1, 2, 3, 4, 5])],
-            stream
-          )
-        } catch (err) {
-          console.warn(err)
-        }
-        console.log('listenerCount', this.$libp2p.connectionManager.listenerCount(''))
-      }
+    submit () {
+      console.log('not implemented!')
     }
+    // async sign () {
+    //   if (!this.injected) this.allInjected()
+    //   // const accounts = await web3Accounts();
+    //   const account = this.selAccount
+    //   const injector = await web3FromSource(account?.meta.source) // could we get this from the extension?
+    //   const signRaw = injector?.signer?.signRaw
+    //   if (signRaw) {
+    //     // after making sure that signRaw is defined
+    //     // we can use it to sign our message
+    //     try {
+    //       const { signature } = await signRaw({
+    //         address: account.address,
+    //         data: stringToHex(this.message),
+    //         type: 'bytes'
+    //       })
+    //       this.result = signature
+    //     } catch (err: any) {
+    //       this.result = err.toString()
+    //     }
+    //   } else {
+    //     this.result = 'unknown?'
+    //   }
+    //   this.getPeers()
+    // },
+    // async getPeers () {
+    //   const peers = this.$libp2p.connectionManager.getConnections()
+    //   console.debug(peers)
+    //   this.peers = peers
+    // },
+    // async submit () {
+    //   console.debug('submit()')
+    //   if (this.$libp2p === undefined) {
+    //     console.debug('libp2p not running...')
+    //     // let res = await libp2p.dial('/ip4/127.0.0.1/tcp/9090/http/p2p-webrtc-direct')
+    //     // consol.debug(res)
+    //   } else {
+    //     console.debug('libp2p is running...')
+    //     // console.debug(libp2p)
+    //     // let peerId = {
+    //     //   type: '',
+    //     //   multiaddrs: ['/ip4/127.0.0.1/tcp/30000/p2p/' + localMonitorId, '/ip4/127.0.0.1/tcp/9090/ws']
+    //     // }
+    //     // console.debug('peerId', peerId) // multiaddr?
+    //     const stream = await this.$libp2p.dialProtocol(this.selPeer.remoteAddr, '/ibp/ping')
+    //     try {
+    //       await pipe(
+    //         [new Uint8Array([5]), new Uint8Array([1, 2, 3, 4, 5])],
+    //         stream
+    //       )
+    //     } catch (err) {
+    //       console.warn(err)
+    //     }
+    //     console.log('listenerCount', this.$libp2p.connectionManager.listenerCount(''))
+    //   }
+    // }
   },
   async mounted () {
     const resp = await this.allInjected()

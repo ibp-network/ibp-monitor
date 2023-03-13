@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { InjectionKey } from 'vue'
+import { createStore, Store } from 'vuex'
 import axios from 'axios'
 
 import service from './modules/service'
@@ -7,10 +7,11 @@ import monitor from './modules/monitor'
 import healthCheck from './modules/healthCheck'
 import libp2p from './modules/libp2p'
 
-Vue.use(Vuex)
+// Vue.use(Vuex)
 
-interface IState {
+export interface IState {
   apiVersion: string
+  config: Record<string, any>
   monitorCount: number
   serviceCount: number
   checkCount: number
@@ -18,10 +19,12 @@ interface IState {
   dateTimeFormat: string
   localMonitorId: string
 }
+export const key: InjectionKey<Store<IState>> = Symbol('$store')
 
-export default new Vuex.Store({
+export const store = createStore({
   state: {
     apiVersion: '',
+    config: {},
     localMonitorId: '',
     monitorCount: 0,
     serviceCount: 0,
@@ -35,12 +38,16 @@ export default new Vuex.Store({
     SET_LOCAL_MONITOR_ID (state: IState, value: string) {
       state.localMonitorId = value
     },
-    SET_HOME (state: IState, { version, localMonitorId, monitorCount, serviceCount, checkCount }) {
+    SET_HOME (state: IState, { version, config, localMonitorId, monitorCount, serviceCount, checkCount }) {
       state.apiVersion = version
+      state.config = config
       state.localMonitorId = localMonitorId
       state.monitorCount = monitorCount
       state.serviceCount = serviceCount
       state.checkCount = checkCount
+    },
+    SET_CONFIG (state: IState, config: any) {
+      state.config = config
     }
   },
   actions: {
@@ -50,6 +57,10 @@ export default new Vuex.Store({
     async getHome ({ commit }) {
       const res = await axios.get('/api/home')
       commit('SET_HOME', res.data)
+    },
+    async getConfig ({ commit }) {
+      const res = await axios.get('/api/config')
+      commit('SET_CONFIG', res.data)
     }
   },
   modules: {

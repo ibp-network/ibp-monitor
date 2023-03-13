@@ -1,8 +1,8 @@
 import axios from 'axios'
-import Vue from 'vue'
-import Vuex, { Module } from 'vuex'
+import { Module } from 'vuex'
+import { IState as IRootState } from '../index'
 
-interface IState {
+export interface IState {
   list: any[]
   loading: boolean
   offset: number
@@ -12,9 +12,7 @@ interface IState {
   // healthChecks: any[]
 }
 
-Vue.use(Vuex)
-
-const healthCheck = {
+const healthCheck: Module<IState, IRootState> = {
   namespaced: true,
   state: {
     list: [],

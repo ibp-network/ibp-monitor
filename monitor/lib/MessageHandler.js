@@ -4,7 +4,7 @@ import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { HealthChecker } from './HealthChecker.js'
 import { Op } from 'sequelize'
 import { pipe } from 'it-pipe'
-import { stringToStream } from './utils.js'
+import { stringToStream, shortStash } from './utils.js'
 class MessageHandler {
 
   _ds = undefined //= new DataStore({ initialiseDb: true })
@@ -64,6 +64,8 @@ class MessageHandler {
       case '/ipfs/ping/1.0.0':
       case '/ipfs/id/push/1.0.0':
       case '/libp2p/circuit/relay/0.1.0':
+      case '/ibp/prom-data':
+        break
       default:
         return
     }
@@ -119,6 +121,7 @@ class MessageHandler {
         await this._ds.Service.upsert({ serviceUrl, status: 'online' })
         console.debug('upserting peer:', peerId, serviceUrl)
         await this._ds.Peer.upsert({ peerId, serviceUrl }) // Peer depends on Service
+        console.debug('upserting monitor', monitorId)
         await this._ds.Monitor.upsert({ monitorId })
         model = {
           ...record,
@@ -129,7 +132,7 @@ class MessageHandler {
           // record
         }
         // console.log('model for update', model)
-        console.log('/ibp/healthCheck from', monitorId, 'for', serviceUrl, peerId)
+        console.log('/ibp/healthCheck from', shortStash(monitorId), 'for', serviceUrl, peerId)
         // console.log('handleMessage: /ibp/healthCheck', model)
         const created = await this._ds.HealthCheck.create(model)
         // console.log('created', created)

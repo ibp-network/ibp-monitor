@@ -1,12 +1,19 @@
+-- in Docker, this file should be place into /docker-entrypoint-initdb.d/schema.sql
+-- it will then execute at 1st run 
+CREATE DATABASE ibp_monitor;
+USE ibp_monitor;
+-- not required, the grant will create a user
+-- CREATE USER ibp_monitor IDENTIFIED BY 'ibp_monitor';
 
 -- monitor nodes
 CREATE TABLE `monitor` (
   `monitorId` varchar(64) NOT NULL DEFAULT '',
   `name` varchar(64) DEFAULT NULL,
-  `services` text NOT NULL,
-  `multiaddrs` text NOT NULL,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
+  `status` varchar(32) DEFAULT NULL,
+  `services` text NOT NULL DEFAULT '',
+  `multiaddrs` text NOT NULL DEFAULT '',
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`monitorId`)
 );
 
@@ -15,8 +22,8 @@ CREATE TABLE `peer` (
   `peerId` varchar(64) NOT NULL DEFAULT '',
   `serviceUrl` varchar(132) NOT NULL DEFAULT '',
   `name` varchar(64) DEFAULT NULL,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`peerId`)
 );
 
@@ -27,15 +34,16 @@ CREATE TABLE `service` (
   `name` varchar(64) NOT NULL DEFAULT '',
   `chain` varchar(64) NOT NULL DEFAULT '',
   -- `peerId` varchar(64) NOT NULL DEFAULT '',
-  `status` text NOT NULL,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
+  `errorCount` int(11) unsigned DEFAULT 0,
+  `status` text NOT NULL DEFAULT '',
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`serviceUrl`)
 );
 
 -- relationship between monitor & service
 CREATE TABLE `monitor_service` (
-  `monitorId` varchar(64) NOT NULL,
+  `monitorId` varchar(64) NOT NULL DEFAULT '',
   `serviceUrl` varchar(132) NOT NULL DEFAULT '',
   `createdAt` datetime DEFAULT NULL,
   `updatedAt` datetime DEFAULT NULL,
@@ -50,7 +58,9 @@ CREATE TABLE `health_check` (
   `peerId` varchar(64) DEFAULT NULL,
   `level` varchar(10) DEFAULT NULL,
   `source` varchar(10) DEFAULT NULL,
-  `record` text,
+  `record` text NOT NULL  DEFAULT '{}',
   `createdAt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+GRANT ALL PRIVILEGES ON *.* TO 'ibp_monitor'@'%' IDENTIFIED BY 'ibp_monitor';

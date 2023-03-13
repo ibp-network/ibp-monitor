@@ -1,42 +1,15 @@
 import axios from 'axios'
-import Vue from 'vue'
-import Vuex, { Module } from 'vuex'
-// import { ICurrency } from '../../../types'
-// import { ApiPromise, WsProvider } from '@polkadot/api'
+import { Module } from 'vuex'
+import { IState as IRootState } from '../index'
 
-// import { IRootState } from '../../index'
-// import { currencies } from './constants'
-// import { PolkadotState, PolkadotWindow } from './types'
-// declare let window: PolkadotWindow
-interface IState {
+export interface IState {
   list: any[]
   service: any
   monitors: any[]
   healthChecks: any[]
 }
 
-Vue.use(Vuex)
-
-// // interface IWallet {
-// //   endpoint: string
-// // }
-// const initState: PolkadotState = {
-//   currencies: currencies,
-//   currency: currencies[0],
-//   amount: '0.001',
-//   wallet: 'EuKPqqwM5Q3jxCxGqrHcLnBM1Edv5QR5Cnzjhi1MttQWwLq',
-//   api: null,
-//   genesisHash: ''
-// }
-
-// const testWallets = {
-//   KSM: 'EuKPqqwM5Q3jxCxGqrHcLnBM1Edv5QR5Cnzjhi1MttQWwLp',
-//   DOT: '',
-//   WND: '5E4TRWDFLUbq6oQPJhW7gXHoevc2EFPmftLCxozP5r3x9y6a'
-// } as Record<string, string>
-
-// const polkadot: Module<PolkadotState, IRootState> = {
-const service = {
+const service: Module<IState, IRootState> = {
   namespaced: true,
   state: {
     list: [],

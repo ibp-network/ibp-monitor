@@ -46,7 +46,7 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
@@ -71,7 +71,7 @@ const icons: Record<string, string> = {
   error: 'fa-solid fa-triangle-exclamation'
 }
 
-export default Vue.extend({
+export default defineComponent({
   name: 'PeerTable',
   components: {
     Loading,
