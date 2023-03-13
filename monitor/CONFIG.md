@@ -1,26 +1,16 @@
-
 # How to configure the monitor
-
-1. copy config.js to config.local.js
-
-  - Do not modify config.js, this could prevent you from pulling updates from github
-
+1. copy `config/config.js` to `config/config.local.js`
+  Do not modify config.js, this could prevent you from pulling updates from github  
 2. edit the config.local.js as needed
-
 ## A note on `peerId`
-
 The `monitor` uses libp2p to connect with other monitor peers.
 At 1st startup, each monitor will generate a peerId (saved here: `keys/peerId.json`)
-
 The local monitorId (peerId) is printed to console at startup:
-
-```bash 
-Our monitorId 12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh
+```bash
+Our monitorId  12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh
 ```
-
 **!!! use this monitorId (peerId) in the `listen.announce` section below.**
-
-Example:
+Example `keys/peerId.json`:
 ```json
 {
   "id":"12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh",
@@ -28,148 +18,154 @@ Example:
   "pubKey":"CAESIGreOOZaUhD6MAOysTOZsk4FyAZQVKFCIXkKUnkm8Q2W"
 }
 ```
-
 This peerId is used to sign `gossip` messages. On receipt of a `gossip` message, we validate the signature of the sender.
-
-## Example config.local.js file
-
-### ports for NAT & firewall config
+  
+# Example config.local.js file
+WARNING: `config/config.local.js` potentially contains password and other sensitive info. This file is excluded in .gitignore. DO NOT CHECK THIS FILE IN! 
 ```js
-const GOSSIP_PORT = 30000
-const HTTP_PORT = 30001
+// TODO: check if this is useful? process.env.GOSSIP_PORT could be set in the Dockerfile?
+const  GOSSIP_PORT = 30000`
 ```
-
-### Timezone & DateTime format
-Configure the timezone for your server.
-Sequelize will always store dates in UTC.
-The web UI will display dates / timestamps in this dateTimeFormat
+  
 ```js
-  timezone: 'Europe/London',
-  dateTimeFormat: 'DD/MM/YYYY HH:mm',
+// TODO: check if this is useful? process.env.HTTP_PORT could be set in the Dockerfile?
+const  HTTP_PORT = process.env.HTTP_PORT || 30001`
 ```
-
-### Datastore config
-- https://sequelize.org/docs/v6/getting-started/
-
-Ex: SQLite
+  
 ```js
-  sequelize: {
-    databasename: '',
-    username: '',
-    password: '',
-    options: {
-      dialect: 'sqlite',
-      storage: './data/datastore.sqlite',
-      logging: false // log SQL statements to console
-    }
+// This is the dateTime format used on the user interface
+dateTimeFormat: 'DD/MM/YYYY HH:mm',`
+```
+```js
+// Connection to the datastore
+sequelize: {
+  databasename: 'ibp_monitor',
+  username: 'ibp_monitor',
+  password: 'ibp_monitor',
+  options: {
+    dialect: 'mariadb',
+    // hostname = docker service name
+    host: 'ibp-datastore',
+    port: 3306
   }
+}
 ```
-
-Ex: MySQL
+  
 ```js
-  sequelize: {
-    database: 'ibp_dev',
-    username: 'ibp_dev',
-    password: 'ibp_dev',
-    options: {
-      dialect: 'mysql',
-      dialectOptions: {
-        // Your mysql2 options here
-        host: '192.168.1.200',
-        port: '3306'
-      },
-      logging: false, // console.log // logging fn
-    }
-  },
+// Connection to Redis
+redis: {
+// hostname = docker service name
+host: 'ibp-redis',
+port: 6379
+},
 ```
-
-### listen port
-The port for libp2p
+  
 ```js
-  listenPort: GOSSIP_PORT,
+// @deprecated: the peerId is calculated at 1st run
+peerId: {
+// each member should register a known peerId
+},
 ```
-
-### addresses
-Note: if you have `addresses` section in your local config, you need to provide `listen` and, optionally `announce` sections.
-
-- `addresses`
-  - ``/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`` should be sufficient. The other monitor nodes are not listening on any other protocol
-
-- `announce` - use this to announce your external IP address or hostname; examples:
-  - `'/ip4/192.96.202.185/tcp/30000/p2p/\<peerId>'` - 
-  - `'/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/\<peerId>'`
-
-You can announce on any external facing port, then NAT that port to your internal GOSSIP_PORT
-\
-You only need TCP on the external ports.
-
+  
 ```js
-  addresses: {
-    listen: [
-      `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`
-    ],
-    // announce: []
-  },
+// List of other monitors (peerId is printed on startup)
+knownPeers: [
+// TODO: list all peers/members public keys...?
+// Not currently used.
+],
+// TODO: amend lib/MessageHandler to check `cfg.knownPeersOnly` when gossip messages.
+knownPeersOnly: false,
 ```
-
-### httpPort
-You can access the web UI on this port. (You can also NAT web traffic to this port as needed)
+  
 ```js
-  httpPort: HTTP_PORT,
+// http port for frontend
+httpPort: HTTP_PORT,
 ```
-
-### Update interval
-How often your monitor service should healthCheck the services of its peers (5 mins is often enough). We don't want to operate a spambot network!
 ```js
-  updateInterval: 5 * 60 * 1000, // 5 mins, in milliseconds
+// tcp port for gossip
+listenPort: GOSSIP_PORT,
 ```
-
-### Services
-
-Advertise your services here! Peers (other monitors) will use this list to run healthChecks and gossip performance to the network
-By default, you check the services of your peers. If you also want to check your own services, amend `checkOwnServices`
 ```js
-  checkOwnServices: false,
-  services: [
-  // {
-  //   name: "Metaspan Kusama",
-  //   chain: "kusama",
-  //   url: "wss://kusama-rpc.metaspan.io/ws"
-  // },
-  ],
+// config for libp2p
+addresses: {
+listen: [
+  '/ip4/0.0.0.0/tcp/${GOSSIP_PORT}',
+  // `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct` // not used!
+],
+announce: [
+  // your monitor's external ip address, p2p port and peerId
+  `/ip4/31.22.13.147/tcp/${GOSSIP_PORT}/p2p/12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh`,
+]
+},
 ```
-
-### Datastore Pruning
 ```js
-  pruning: {
-    age: 90 * 24 * 60 * 60, // 90 days as seconds
-    interval: 1 * 60 * 60 // 1 hour as seconds
-  },
+// allowed topics (channels) for the p2p protocol
+allowedTopics: [
+  // TBC
+  '/ibp',
+  // publish a list of services
+  '/ibp/services',
+  // publish a list of results
+  '/ibp/healthCheck'
+],
 ```
-
-### Allowed Topics
-This section should not be changed unless you know what you're doing with libp2p. Better just to exclude it from your config.local.js
+  
 ```js
-  // allowedTopics: [
-  //   '/ibp',
-  //   '/ibp/services',
-  //   '/ibp/healthCheck'
-  // ],
+// how often to advertise our services and perform healthchecks
+updateInterval: 30 * 1000, // 30 seconds
 ```
-
-### Bootstrap peers
-In p2p we need to find our peers to form a network. The bootstrap peers provides a starting point.
-Normally you don't need to change this
 ```js
-  // bootstrapPeers: [
-  //   "/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu",
-  // ],
+// where to find bootstrap peers (monitors)
+bootstrapPeers: [
+  '/ip4/31.22.13.147/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
+  '/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
+],
 ```
-
-### SLA
-TBC
 ```js
-  performance: {
-    sla: 500 // ms - used for performance graph, and later for alerts
-  }
+// should we healthCheck our own services?
+checkOwnServices: false,
+```
+```js
+// should we healthCheck services of other monitors?
+checkOtherServices: true,
+```
+```js
+// send out results to p2p peers
+gossipResults: true,
+```
+  
+```js
+// libp2p: allow our node to relay messages to other nodes
+relay: {
+  enabled: false
+},
+```
+  
+```js
+// IMPORTANT
+// these services will be advertised to other nodes
+services: [
+// put these in your config.local.js
+{
+  serviceUrl:  "wss://ibp-rpc.metaspan.io/westend",
+  name:  "Metaspan Westend RPC",
+  chain:  "westend",
+},
+],
+```
+  
+```js
+// prune the datastore
+pruning: {
+  // age of message
+  age: 90 * 24 * 60 * 60, // 90 days as seconds
+  // how often to prune
+  interval: 1 * 60 * 60  // 1 hour as seconds
+},
+```
+```js
+// not used: TODO, implement full SLA monitoring
+performance: {
+  sla: 500  // ms - used for performance graph, and later for alerts
+}
 ```

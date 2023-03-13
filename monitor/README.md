@@ -47,12 +47,12 @@ Notes:
 - if you chose another database you need to create your own installation / docker container, and amend the `./config/config.local.js` with appropriate DB connection details.
 
 ## Initialise the datastore
-
-Manually, run the ./data/schema.mysql.sql script
-Or (after editing the `config/config.local.js` file)
+The MariaDB docker container will initialise the datastore from the `./data/schema.mysql.sql` file.
+For development, you can trigger the following script:
 ```bash
 node createDatastore.js
 ```
+Or, manually, run the ./data/schema.mysql.sql script in your fav SQL client. (after editing the `config/config.local.js` file)
 
 # Manual / Development
 
@@ -187,22 +187,16 @@ node server.js
 
 
 
-# optional
-
+### optional
+```
 pm2 save  # to persist your jobs
-
 pm2 list  # see the running jobs
-
 pm2 logs  ibp-monitor
-
 ```
 
   
 
 ## Managing the datastore
-
-```
-
 
   
 
@@ -221,7 +215,10 @@ pm2 logs  ibp-monitor
 -  ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
 
 -  ~~peers should sign status updates~~ - this is configured in `libp2p.pubsub.signMessages: true`
- 
+
+
+
+  
 
 ## Kudos
 
