@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  boot-test:
+    image: parity/polkadot
+
+    ports:
+      - "9444:9444"
+    environment:
+      - name=value
+    

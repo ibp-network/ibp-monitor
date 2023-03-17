@@ -1,0 +1,17 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "dotter.ibp",
+      "database": "${workspaceFolder:dotters.network}/gossip/data/datastore.sqlite"
+    },
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "ibp-monitor",
+      "database": "${workspaceFolder:dotters.network}/monitor/data/datastore.sqlite"
+    }
+  ],
+  "sqltools.useNodeRuntime": true
+}
