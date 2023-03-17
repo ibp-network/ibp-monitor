@@ -214,9 +214,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     await mh.publishServices(cfg.services, libp2p)
   }, UPDATE_INTERVAL)
 
-  // console.log('defining publishResults, we have', libp2p.getPeers().length, 'peers')
-  // publish the results of our healthChecks
-
+  // publish the results of our healthChecks via libp2p
   const q_health_check = new Queue('health_check', queueOpts);
   const queueEvents = new QueueEvents('health_check', queueOpts);
   queueEvents.on('completed', async ({ jobId }) => {
@@ -245,7 +243,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     console.log('Queue failed', event, listener, id)
   })
 
-  async function publishResults () {
+  async function healthCheckJobs () {
     console.debug('Performing our healthChecks for', libp2p.getPeers().length, 'peers')
     // relying on peers to be connected is not reliable...
     // iterate the monitors != our peerId
@@ -317,16 +315,15 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
         }
       })
     }
-  } // end of publishResults()
+  } // end of healthCheckJobs()
 
   console.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL/1000} seconds`)
 
-  // TODO: move this to worker
-  // pubsub should balance the # peer connections. Each node will only healthCheck its peers.
+  // TODO: move healthCheckJobs to worker
   // results will be broadcast to all peers
-  await publishResults()
+  await healthCheckJobs()
   setInterval(async function() {
-    await publishResults()
+    await healthCheckJobs()
   }, UPDATE_INTERVAL)
 
   // TODO move pruning to worker
