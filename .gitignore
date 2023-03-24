@@ -1,4 +1,5 @@
 keys/peerId.json
 config/config.local.js
+data/mariadb/**
 prototype/**
 _archive/**
