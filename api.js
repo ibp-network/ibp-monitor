@@ -1,5 +1,6 @@
 
 import fs from 'fs'
+import axios from 'axios'
 // import { createLibp2p } from 'libp2p'
 // import { bootstrap } from '@libp2p/bootstrap'
 // import { mdns } from '@libp2p/mdns'
@@ -55,6 +56,29 @@ const hh = new HttpHandler({ datastore: ds, version: pkg.version })
   }
   console.debug('Our monitorId', peerId.toString())
   hh.setLocalMonitorId(peerId.toString())
+
+  // TODO move this to a worker?
+  async function updateMembers() {
+    console.debug('api.js: updateMembers()...')
+    // get updated members.json
+    const membersResp = await axios.get('https://raw.githubusercontent.com/ibp-network/config/main/members.json')
+    // console.debug(membersResp)
+    if (membersResp.data) {
+      for ( const [memberId, data] of Object.entries(membersResp.data.members)) {
+        console.log('upserting Member', memberId)
+        const {name, website, logo, membership, current_level, level_timestamp, services_address, region, latitude, longitude, payments } = data
+        const record = {
+          memberId,
+          name, website, logo, membership, current_level, level_timestamp: level_timestamp[current_level], services_address, region, latitude, longitude
+        }
+        ds.Member.upsert(record)
+      }
+    }
+  }
+  await updateMembers()
+  setInterval(async () => {
+    await updateMembers()
+  }, 30 * 60 * 1000) // 30 mins as millis
 
   // start HttpHandler
   hh.listen(HTTP_PORT, () => {

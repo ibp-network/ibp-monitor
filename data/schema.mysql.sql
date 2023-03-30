@@ -17,6 +17,25 @@ CREATE TABLE `monitor` (
   PRIMARY KEY (`monitorId`)
 );
 
+-- members
+CREATE TABLE `member` (
+  `memberId` varchar(64) NOT NULL DEFAULT '',
+  `name` varchar(64) DEFAULT NULL,
+  `status` varchar(32) DEFAULT NULL,
+  `website` varchar(64) DEFAULT NULL,
+  `logo` varchar(254) DEFAULT NULL,
+  `membership` varchar(64) DEFAULT NULL,
+  `current_level` varchar(64) DEFAULT NULL,
+  `level_timestamp` varchar(64) DEFAULT NULL,
+  `services_address` varchar(64) DEFAULT NULL,
+  `region` varchar(64) DEFAULT NULL,
+  `latitude` varchar(64) DEFAULT NULL,
+  `longitude` varchar(64) DEFAULT NULL,
+  `createdAt` datetime DEFAULT NULL,
+  `updatedAt` datetime DEFAULT NULL,
+  PRIMARY KEY (`memberId`)
+);
+
 -- peers, providing [poss. loadbalanced] features behind a service url
 CREATE TABLE `peer` (
   `peerId` varchar(64) NOT NULL DEFAULT '',
@@ -31,6 +50,7 @@ CREATE TABLE `peer` (
 CREATE TABLE `service` (
   -- `serviceId` varchar(64) NOT NULL DEFAULT '',
   `serviceUrl` varchar(132) NOT NULL DEFAULT '',
+  `memberId` varchar(32) NOT NULL DEFAULT '',
   `name` varchar(64) NOT NULL DEFAULT '',
   `chain` varchar(64) NOT NULL DEFAULT '',
   -- `peerId` varchar(64) NOT NULL DEFAULT '',
