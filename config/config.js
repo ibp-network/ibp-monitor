@@ -9,7 +9,7 @@ const HTTP_PORT = process.env.HTTP_PORT || 30001
 const config = {
   dateTimeFormat: 'DD/MM/YYYY HH:mm',
   sequelize: {
-    databasename: 'ibp_monitor',
+    database: 'ibp_monitor',
     username: 'ibp_monitor',
     password: 'ibp_monitor',
     options: {
