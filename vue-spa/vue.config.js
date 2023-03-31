@@ -13,9 +13,7 @@ module.exports = defineConfig({
   configureWebpack: {
     plugins: [
       new DefinePlugin({
-        'process.env': {
-          PACKAGE_VERSION: '"' + version + '"'
-        }
+        'process.env.PACKAGE_VERSION': '"' + version + '"'
       })
     ]
   },

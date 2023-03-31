@@ -22,6 +22,10 @@
           <td>{{service.status}}</td>
         </tr>
         <tr>
+          <th>Member</th>
+          <td><router-link :to="`/member/${service.memberId}`">{{service.memberId}}</router-link></td>
+        </tr>
+        <tr>
           <th>Error count</th>
           <td>{{service.errorCount}}</td>
         </tr>

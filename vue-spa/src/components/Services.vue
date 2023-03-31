@@ -11,36 +11,7 @@
       </div>
     </nav>
 
-    <!-- <ServiceTable></ServiceTable> -->
-    <table class="table is-fullwidth">
-      <thead>
-        <th>Service url</th>
-        <th>P.JS</th>
-        <th>Name</th>
-        <th>Status</th>
-        <th>Monitors</th>
-        <th>Errors</th>
-        <th>Updated</th>
-        <!-- <th>Discovered</th> -->
-      </thead>
-
-      <tbody>
-        <tr v-for="service in list" v-bind:key="service.serviceUrl">
-          <td><router-link :to="`/service/${encodeURIComponent(service.serviceUrl)}`">{{service.serviceUrl}}</router-link></td>
-          <td><a :href="`https://polkadot.js.org/apps/?rpc=${service.serviceUrl}`" target="_blank">
-            <!-- {{service.serviceUrl}} -->
-            polkadot.js
-            <small><i class="fa-solid fa-arrow-up-right-from-square"></i></small>
-          </a></td>
-          <td>{{service.name}}</td>
-          <td>{{service.status}}</td>
-          <td>{{service.monitors?.length || 0}}</td>
-          <td>{{service.errorCount || 0}}</td>
-          <td>{{formatDateTime(service.updatedAt)}}</td>
-          <!-- <td>{{formatDateTime(service.createdAt)}}</td> -->
-        </tr>
-      </tbody>
-    </table>
+    <ServiceTable :services="list" :columns="['serviceUrl', 'pjs', 'name', 'memberLink', 'status', 'monitors']"></ServiceTable>
 
   </section>
 </template>
@@ -49,7 +20,7 @@
 import { defineComponent } from 'vue'
 import { mapState } from 'vuex'
 import moment from 'moment'
-// import ServiceTable from './ServiceTable.vue'
+import ServiceTable from './ServiceTable.vue'
 
 // // eslint-disable-next-line
 // interface IData {}
@@ -66,9 +37,9 @@ import moment from 'moment'
 // export default defineComponent<{}, {}, IMethods, IData, IComputed>({
 export default defineComponent({
   name: 'ServicesC',
-  // components: {
-  //   // ServiceTable
-  // },
+  components: {
+    ServiceTable
+  },
   computed: {
     ...mapState(['dateTimeFormat']),
     ...mapState('service', ['list'])

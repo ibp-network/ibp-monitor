@@ -3,9 +3,14 @@
     <br>
     <!-- <div class="nav-right nav-menu is-active">this is a sidebar</div> -->
     <NavBar></NavBar>
-      <transition name="fade" mode="out-in">
+      <!-- <transition name="fade" mode="out-in">
         <router-view/>
-      </transition>
+      </transition> -->
+      <router-view v-slot="{ Component}">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     <Footer></Footer>
   </div>
 </template>

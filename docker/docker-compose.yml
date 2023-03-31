@@ -88,13 +88,13 @@ services:
   #   ports:
   #     - 8080:8080
 
-  redis:
+  ibp-redis:
     container_name: ibp-redis
     image: redis
     ports:
       - "6379:6379"
 
-  bullmq:
+  ibp-bullmq:
     container_name: ibp-bullmq
     build:
       context: ../.
@@ -104,7 +104,7 @@ services:
     restart: on-failure
     depends_on:
       - ibp-datastore
-      - redis
+      - ibp-redis
     ports:
       - "3000:3000"  # http port
     volumes:

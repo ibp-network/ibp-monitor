@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/components/Home.vue'
 import Config from '@/components/Config.vue'
 import Services from '@/components/Services.vue'
+import Members from '@/components/Members.vue'
+import Member from '@/components/Member.vue'
 import Service from '@/components/Service.vue'
 import Monitors from '@/components/Monitors.vue'
 import Monitor from '@/components/Monitor.vue'
@@ -21,6 +23,16 @@ export default createRouter({
       path: '/config',
       name: 'config',
       component: Config
+    },
+    {
+      path: '/member',
+      name: 'Members',
+      component: Members
+    },
+    {
+      path: '/member/:memberId',
+      name: 'Member',
+      component: Member
     },
     {
       path: '/service',

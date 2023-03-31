@@ -9,6 +9,8 @@ import '@/assets/main.scss'
 // import { Libp2pPlugin } from './plugins/libp2p'
 // Vue.use(Libp2pPlugin, {})
 
+import vuetify from './plugins/vuetify'
+console.debug('vuetify', vuetify)
 // Vue.config.productionTip = false
 
 // const app = createApp({
@@ -20,6 +22,7 @@ const app = createApp(App)
 app.provide('$store', store)
 app.use(store)
 app.use(router)
+app.use(vuetify)
 // app.use(store, key)
 
 app.mount('#app')
