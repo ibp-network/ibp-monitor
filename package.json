@@ -15,7 +15,7 @@
     "@chainsafe/libp2p-gossipsub": "^6.2.0",
     "@chainsafe/libp2p-noise": "^11.0.1",
     "@libp2p/bootstrap": "^6.0.0",
-    "@libp2p/kad-dht": "^7.0.3",
+    "@libp2p/kad-dht": "^8.0.5",
     "@libp2p/mdns": "^7.0.0",
     "@libp2p/mplex": "^7.1.1",
     "@libp2p/peer-id-factory": "^2.0.2",
