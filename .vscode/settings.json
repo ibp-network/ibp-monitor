@@ -13,5 +13,6 @@
       "database": "${workspaceFolder:dotters.network}/monitor/data/datastore.sqlite"
     }
   ],
-  "sqltools.useNodeRuntime": true
+  "sqltools.useNodeRuntime": true,
+  "editor.tabSize": 2
 }

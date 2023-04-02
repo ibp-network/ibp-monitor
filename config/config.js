@@ -16,7 +16,8 @@ const config = {
       dialect: 'mariadb',
       // hostname = docker service name
       host: 'ibp-datastore',
-      port: 3306
+      port: 3306,
+      logging: true
     }
   },
   redis: {

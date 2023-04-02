@@ -10,21 +10,50 @@ name: ibp-stack
 # - 30002 - api, http
 
 services:
-  ibp-monitor-frontend:
-    container_name: ibp-monitor-frontend
-    # image: nginx
-    build:
-      context: ../.
-      dockerfile: docker/Dockerfile.frontend
-      args:
-        RELEASE: "latest"
+  ibp-redis:
+    container_name: ibp-redis
+    image: redis
     ports:
-      - "30001:80"
+      - "6379:6379"
+  ibp-datastore:
+    container_name: ibp-datastore
+    image: mariadb:10.11.2
+    # no build required
+    # build:
+    #   context: ../.
+    #   dockerfile: docker/Dockerfile.mariadb
+    #   args:
+    #     RELEASE: "latest"
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=thisIsASecret
+      - MARIADB_USER=ibp_monitor
+      - MARIADB_PASSWORD=ibp_monitor
+      - MARIADB_DATABASE=ibp_monitor
+    ports:
+      - "3306:3306"
     volumes:
-      - ../static:/usr/share/nginx/html
+      - ../data/mariadb:/var/lib/mysql
+  wait-for-datastore-ready:
+    container_name: wait-for-datastore-ready
+    image: jwilder/dockerize:0.6.1
     depends_on:
-      - ibp-monitor-api
-
+      - ibp-datastore
+    command: 'dockerize -wait=tcp://ibp-datastore:3306'
+  ibp-datastore-init:
+    container_name: ibp-datastore-init
+    image: node:16-slim
+    restart: on-failure
+    volumes:
+      - ../:/ibp-monitor
+    depends_on:
+      wait-for-datastore-ready:
+        condition: service_completed_successfully
+    command: >
+      bash -c "sleep 1
+      && cd /ibp-monitor
+      && npm install
+      && node createDatastore.js"
   ibp-monitor-api:
     container_name: ibp-monitor-api
     # image: nginx
@@ -43,8 +72,22 @@ services:
       - ../config/config.local.js:/home/ibp/config/config.local.js
       - ../keys:/home/ibp/keys
     depends_on:
-      - ibp-datastore
-
+      ibp-datastore-init:
+        condition: service_completed_successfully
+  ibp-monitor-frontend:
+    container_name: ibp-monitor-frontend
+    # image: nginx
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.frontend
+      args:
+        RELEASE: "latest"
+    ports:
+      - "30001:80"
+    volumes:
+      - ../static:/usr/share/nginx/html
+    depends_on:
+      - ibp-monitor-api
   ibp-monitor:
     container_name: ibp-monitor
     image: metaspan/ibp-monitor
@@ -55,45 +98,14 @@ services:
         RELEASE: "latest"
     restart: on-failure
     depends_on:
-      - ibp-datastore
+      ibp-datastore-init:
+        condition: service_completed_successfully
     ports:
       - "30000:30000"  # p2p port
     volumes:
       - ../config:/home/ibp/config
       - ../keys:/home/ibp/keys
     command: []
-
-  ibp-datastore:
-    container_name: ibp-datastore
-    image: mariadb:10.11.2
-    # no build required
-    # build:
-    #   context: ../.
-    #   dockerfile: docker/Dockerfile.mariadb
-    #   args:
-    #     RELEASE: "latest"
-    restart: unless-stopped
-    environment:
-      MARIADB_ROOT_PASSWORD: thisIsASecret
-    ports:
-      - "3306:3306"
-    volumes:
-      - ../data/mariadb:/var/lib/mysql
-      - ../data/schema.mysql.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-
-  # MariaDB Admin utils
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - 8080:8080
-
-  ibp-redis:
-    container_name: ibp-redis
-    image: redis
-    ports:
-      - "6379:6379"
-
   ibp-bullmq:
     container_name: ibp-bullmq
     build:
@@ -103,8 +115,10 @@ services:
         RELEASE: "latest"
     restart: on-failure
     depends_on:
-      - ibp-datastore
-      - ibp-redis
+      ibp-datastore-init:
+        condition: service_completed_successfully
+      ibp-redis:
+        condition: service_started
     ports:
       - "3000:3000"  # http port
     volumes:

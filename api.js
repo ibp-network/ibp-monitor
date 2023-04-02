@@ -73,8 +73,10 @@ const hh = new HttpHandler({ datastore: ds, version: pkg.version })
         }
         await ds.Member.upsert(record)
         // member endpoints
-        for ( const [serviceId, serviceUrl] of Object.entries(data.endpoints)) {
-          await ds.Service.upsert({ serviceUrl, name: `${data.name} - ${serviceId}`, memberId })
+        if (data.endpoints) {
+          for (const [serviceId, serviceUrl] of Object.entries(data.endpoints)) {
+            await ds.Service.upsert({ serviceUrl, name: `${data.name} - ${serviceId}`, memberId })
+          }
         }
       }
     }

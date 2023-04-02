@@ -1,5 +1,5 @@
 {
-  "name": "gossip",
+  "name": "ibp-monitor",
   "version": "1.2.0a",
   "description": "",
   "main": "index.js",

@@ -6,7 +6,7 @@ LABEL MAINTAINER="derek@metaspan.com"
 WORKDIR /data
 
 ENV dialect=mysql
-ENV MARIADB_ROOT_PASSWD=thisIsASecret
+ENV MARIADB_ROOT_PASSWORD=thisIsASecret
 ENV MARIADB_USER=ibp_monitor
 ENV MARIADB_PASSWORD=ibp_monitor
 ENV MARIADB_DATABASE=ibp_monitor
