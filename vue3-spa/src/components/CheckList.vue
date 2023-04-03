@@ -15,7 +15,7 @@
       </template>
 
       <v-list-item-title>
-        <span class="text-caption">#{{ hc.id }}.</span> {{ hc.serviceUrl }}
+        <span class="text-caption">#{{ hc.id }}.</span> {{ hc.serviceId }},  {{ hc.memberId }}
       </v-list-item-title>
       <v-list-item-subtitle>
         at {{formatDateTime(hc.createdAt)}}, by: {{shortStash(hc.monitorId)}} ({{hc.source}})

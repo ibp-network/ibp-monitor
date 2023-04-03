@@ -2,6 +2,7 @@ import { InjectionKey } from 'vue'
 import { createStore, Store } from 'vuex'
 import axios from 'axios'
 
+import domain from './modules/domain'
 import member from './modules/member'
 import service from './modules/service'
 import monitor from './modules/monitor'
@@ -71,6 +72,13 @@ export const store = createStore({
     }
   },
   actions: {
+    async init({ dispatch, commit }) {
+      dispatch('domain/getList', {}, { root: true })
+      dispatch('member/getList', {}, { root: true })
+      dispatch('service/getList', {}, { root: true })
+      const res = await axios.get('/api/home')
+      commit('SET_HOME', res.data)
+    },
     setLocalMonitorId ({ commit }: any, value: string) {
       commit('SET_LOCAL_MONITOR_ID', value)
     },
@@ -90,6 +98,7 @@ export const store = createStore({
     }
   },
   modules: {
+    domain,
     member,
     service,
     monitor,

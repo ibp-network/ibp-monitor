@@ -6,7 +6,7 @@
       <v-toolbar-title>Checks</v-toolbar-title>
     </v-toolbar>
 
-    <CheckTable v-if="$vuetify.display.width > 599" :healthChecks="list" :loading="loading" :columns="['id', 'serviceUrl', 'monitorId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
+    <CheckTable v-if="$vuetify.display.width > 599" :healthChecks="list" :loading="loading" :columns="['id', 'serviceId', 'memberId', 'monitorId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
     <CheckList v-if="$vuetify.display.width < 600" :healthChecks="list"></CheckList>
 
     <nav class="pagination is-centered" role="navigation" aria-label="pagination">

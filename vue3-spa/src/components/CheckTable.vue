@@ -12,12 +12,12 @@
     <thead>
       <th></th>
       <th class="has-text-centered">Id</th>
-      <!-- <th>Sender</th> -->
-      <th v-if="columns.includes('serviceUrl')" class="has-text-centered">Service</th>
+      <th v-if="columns.includes('serviceId')" class="has-text-centered">Service</th>
+      <th v-if="columns.includes('memberId')" class="has-text-centered">Member</th>
       <th v-if="columns.includes('monitorId')" class="has-text-centered">Monitor</th>
-      <th class="has-text-centered">Source</th>
-      <th class="has-text-centered">Version</th>
-      <th class="has-text-right">
+      <th v-if="columns.includes('source')" class="has-text-centered">Source</th>
+      <th v-if="columns.includes('version')" class="has-text-centered">Version</th>
+      <th v-if="columns.includes('performance')" class="has-text-right">
         <span class="d-none d-md-inline">Performance</span>
         <span class="d-inline d-md-none">Perf.</span> 
         (ms)
@@ -36,15 +36,16 @@
         </td>
         <td><router-link :to="`/healthCheck/${hc.id}`">{{hc.id}}</router-link></td>
         <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
-        <td v-if="columns.includes('serviceUrl')"><router-link :to="`/service/${encodeURIComponent(hc.serviceUrl)}`">{{hc.serviceUrl}}</router-link></td>
+        <td v-if="columns.includes('serviceId')"><router-link :to="`/service/${hc.serviceId}`">{{hc.serviceId}}</router-link></td>
+        <td v-if="columns.includes('memberId')"><router-link :to="`/member/${hc.memberId}`">{{hc.memberId}}</router-link></td>
         <td v-if="columns.includes('monitorId')">
           <router-link :to="`/monitor/${hc.monitorId}`">{{shortStash(hc.monitorId)}}</router-link>
           <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: hc.monitorId, localMonitorId }); -%> -->
           <sup><IsLocalMonitor :monitorId="hc.monitorId"></IsLocalMonitor></sup>
         </td>
-        <td>{{hc.source}}</td>
-        <td>{{hc.record?.version || 'unknown'}}</td>
-        <td class="has-text-right">{{hc.record?.performance?.toFixed(4)}}</td>
+        <td v-if="columns.includes('source')">{{hc.source}}</td>
+        <td v-if="columns.includes('version')">{{hc.record?.version || 'unknown'}}</td>
+        <td v-if="columns.includes('performance')" class="has-text-right">{{hc.record?.performance?.toFixed(4)}}</td>
         <td>{{formatDateTime(hc.createdAt)}}</td>
       </tr>
     </tbody>

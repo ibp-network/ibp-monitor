@@ -6,6 +6,7 @@ import { IState as IRootState } from '../index'
 export interface IState {
   list: any[]
   model: any
+  endpoints: Record<string, any>
   healthChecks: any[]
 }
 
@@ -16,6 +17,7 @@ const member: Module<IState, IRootState> = {
   state: {
     list: [],
     model: {},
+    endpoints: {},
     healthChecks: []
   },
   mutations: {
@@ -25,6 +27,14 @@ const member: Module<IState, IRootState> = {
     SET_MODEL (state: IState, value: any) {
       console.debug('SET_MODEL()', value)
       state.model = value
+    },
+    SET_ENDPOINTS (state: IState, value: any) {
+      console.debug('SET_ENDPOINTS()', value)
+      state.endpoints = value
+    },
+    SET_HEALTHCHECKS (state: IState, value: any) {
+      console.debug('SET_HEALTHCHECKS()', value)
+      state.healthChecks = value
     }
   },
   actions: {
@@ -34,8 +44,12 @@ const member: Module<IState, IRootState> = {
     },
     async setModel ({ state, commit }: any, memberId: string) {
       const res = await axios.get(`/api/member/${memberId}`)
-      commit('SET_MODEL', { ...res.data.member, healthChecks: res.data.healthChecks })
-    }
+      commit('SET_MODEL', { ...res.data.member, healthChecks: res.data.healthChecks, endpoints: res.data.endpoints })
+    },
+    async getChecks ({ commit, dispatch }: any, memberId: string) {
+      const res = await axios.get(`/api/member/${memberId}/healthChecks`)
+      commit('SET_HEALTHCHECKS', res.data.healthChecks)
+    },
   }
 }
 

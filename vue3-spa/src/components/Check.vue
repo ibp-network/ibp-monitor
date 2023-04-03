@@ -11,17 +11,25 @@
     </nav> -->
     <v-toolbar>
       <v-btn icon to="/healthCheck"><v-icon size="small">mdi-chevron-left</v-icon></v-btn>
-      <v-toolbar-title>{{ healthCheck?.id }} ({{ healthCheck?.serviceUrl }})</v-toolbar-title>
+      <v-toolbar-title>{{ healthCheck?.id }} ({{ healthCheck?.serviceId }})</v-toolbar-title>
     </v-toolbar>
 
     <table class="table">
       <tr>
         <th>Service</th>
-        <td><router-link :to="`/service/${encodeURIComponent(healthCheck.serviceUrl)}`">{{healthCheck.serviceUrl}}</router-link></td>
+        <td><router-link :to="`/service/${healthCheck.serviceId}`">{{healthCheck.serviceId}}</router-link></td>
+      </tr>
+      <tr>
+        <th>Member2</th>
+        <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">{{healthCheck.memberId}}</td>
       </tr>
       <tr>
         <th>Monitor</th>
         <td><router-link :to="`/monitor/${healthCheck.monitorId}`">{{shortStash(healthCheck.monitorId)}}</router-link></td>
+      </tr>
+      <tr>
+        <th>Performance</th>
+        <td>{{healthCheck.record?.performance?.toFixed(2)}} ms</td>
       </tr>
     </table>
     <div class="tabs">
@@ -62,6 +70,10 @@ export default defineComponent({
     moment: moment,
     healthCheckAsJSON () {
       return JSON.stringify(this.healthCheck, null, 4)
+    },
+    gotoMember(memberId: string) {
+      // console.debug('gotoMember()', memberId)
+      this.$router.push({ path: `/member/${memberId}`, params: { memberId }, query: { tab: 'checks' } })
     }
   },
   created () {

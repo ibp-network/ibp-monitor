@@ -2,22 +2,21 @@ import { DataTypes } from 'sequelize'
 
 const serviceModel = {
   definition: {
-    // serviceId: { type: DataTypes.STRING(64), primaryKey: true },
-    serviceUrl: { type: DataTypes.STRING(132), primaryKey: true },
-    memberId: { type: DataTypes.STRING(64) },
+    id: { type: DataTypes.STRING(32), primaryKey: true },
+    type: { type: DataTypes.STRING(32) },
     name: { type: DataTypes.STRING(64) },
-    chain: { type: DataTypes.STRING(64) },
-    // // this peer will host the service
-    // peerId: { type: DataTypes.STRING(64) },
-    // latest stats from healthCheck
+    endpoint: { type: DataTypes.STRING(64) },
+    level_required: { type: DataTypes.INTEGER },
+    parachain: { type: DataTypes.BOOLEAN },
+    parentId: { type: DataTypes.STRING(32) },
     status: { type: DataTypes.STRING(16) },
-    errorCount: { type: DataTypes.INTEGER },
+    logo: { type: DataTypes.STRING(256) },
   },
   options: {
     tableName: 'service',
-    timestamps: true,
-    createdAt: true,
-    updatedAt: true
+    // timestamps: true,
+    createdAt: false,
+    updatedAt: false
   }
 }
 

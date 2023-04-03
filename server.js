@@ -81,28 +81,6 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     }), 'utf-8')
   }
   console.debug('Our monitorId', peerId.toString())
-  // hh.setLocalMonitorId(peerId.toString())
-  hc.setLocalMonitorId(peerId.toString())
-
-  // ensure our monitorId is in the DB, add the multiaddrs when connected below
-  const [monitor, monCreated] = await ds.Monitor.upsert({
-    monitorId: peerId.toString(),
-    name: 'localhost',
-    // multiaddrs will be updated after start()
-    // multiaddrs: cfg.addresses
-  })
-  const serviceIds = cfg.services.map(s => s.serviceUrl)
-  cfg.services.forEach(async (service) => {
-    await ds.Service.upsert(service)
-  })
-  await monitor.addServices(serviceIds)
-  // ds.upsert('Monitor',
-  //   { monitorId: peerId.toString() },
-  //   { name: 'localhost', services: cfg.services.map(s => s.serviceUrl) }
-  // ) // .data()
-  // cfg.services.forEach(service => {
-  //   ds.upsert('Service', { serviceUrl: service.serviceUrl }, service)
-  // })
 
   const gsub = gossipsub({
     emitSelf: false, // don't want our own pubsub messages
@@ -206,124 +184,77 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     return mh.handleProtocol({ stream, connection, protocol: '/ibp/ping' })
   })
 
-  // publish our services 
-  console.debug('Publishing our services')
-  await mh.publishServices(cfg.services, libp2p)
-  setInterval(async () => {
-    console.debug('Publishing our services')
-    await mh.publishServices(cfg.services, libp2p)
-  }, UPDATE_INTERVAL)
+  // // publish our services 
+  // console.debug('Publishing our services')
+  // await mh.publishServices(cfg.services, libp2p)
+  // setInterval(async () => {
+  //   console.debug('Publishing our services')
+  //   await mh.publishServices(cfg.services, libp2p)
+  // }, UPDATE_INTERVAL)
 
-  // publish the results of our healthChecks via libp2p
-  const q_health_check = new Queue('health_check', queueOpts);
-  const queueEvents = new QueueEvents('health_check', queueOpts);
-  queueEvents.on('completed', async ({ jobId }) => {
-    const job = await Job.fromId(q_health_check, jobId);
-    // console.log(job.data, job.returnvalue);
-    const { service } = job.data
+  // publish the results of our checkService via libp2p
+  const checkServiceQueue = new Queue('checkService', queueOpts);
+  const checkServiceEvents = new QueueEvents('checkService', queueOpts);
+  const handleCheckServiceResult = async ({ jobId }) => {
+    const job = await Job.fromId(checkServiceQueue, jobId)
+    console.log('handleCheckServiceResult', jobId, job.returnvalue);
+    const { member, service } = job.data
     const result = job.returnvalue
-    // mark service as online
-    if (result.level !== 'error') {
-      await ds.Service.update({ status: 'online' }, { where: { serviceUrl: service.serviceUrl } })
-    } else {
-      await ds.Service.update({ errorCount: Sequelize.literal('errorCount + 1') }, { where: { serviceUrl: service.serviceUrl } })
-    }
-    // log the peerId for the serviceUrl
-    if (result.peerId) await ds.Peer.upsert({ peerId: result.peerId, serviceUrl: service.serviceUrl})
-    ds.HealthCheck.create(result)
+    await ds.HealthCheck.create(result)
     if (cfg.gossipResults) {
-      console.debug(`[gossip] publishing healthCheck: ${service.serviceUrl} ${result.level} to /ibp/healthCheck`)
+      console.debug(`[gossip] publishing healthCheck: ${member.id} ${service.id} ${result.level} to /ibp/healthCheck`)
       const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
     }
-  });
-  queueEvents.on('error', (args) => {
-    console.log('Queue error', args)
-  })
-  queueEvents.on('failed', (event, listener, id) => {
-    console.log('Queue failed', event, listener, id)
-  })
+  }
+  checkServiceQueue.on('completed', handleCheckServiceResult);
+  checkServiceQueue.on('error', (args) => { console.log('Queue error', args) })
+  checkServiceQueue.on('failed', (event, listener, id) => { console.log('Queue failed', event, listener, id) })
+  checkServiceEvents.on('completed', handleCheckServiceResult)
 
-  async function healthCheckJobs () {
-    console.debug('Performing our healthChecks for', libp2p.getPeers().length, 'peers')
-    // relying on peers to be connected is not reliable...
-    // iterate the monitors != our peerId
+  async function checkServiceJobs () {
 
-    if (cfg.checkOtherServices) {
-      const monitors = await ds.Monitor.findAll({ where: { monitorId: { [Op.ne]: peerId.toString() } }, include: 'services' })
-      for (let i = 0; i < monitors.length; i++) {
-        const monitor = monitors[i]
-        // console.log('- our peers are:', peerId.toString())
-        // const monitor = await ds.Monitor.findByPk(peerId.toString(), { include: 'services' })
-        // const monitor = ds.Monitor.findOne({ monitorId: peerId.toString() }).data()
-        // console.debug('peer', peer)
-        if (monitor) {
-          console.debug('Checking services for monitor', monitor.monitorId)
-          // const results = await hc.check(monitor.services || [])
-          for (let i = 0; i < monitor.services.length; i++) {
-            const service = monitor.services[i]
-            console.debug('--> service', service.serviceUrl)
-            // check if stalled
-            const activeJobs = await q_health_check.getActive() 
-            const activeJob = activeJobs.find(j => j.data.service.serviceUrl === service.serviceUrl)
-            if (activeJob) {
-              const deadline = moment(activeJob.timestamp).add(60, 'seconds')
-              if (moment() > deadline) {
-                console.log(activeJob.id, 'Job seems stale, discarding!')
-                activeJob.log('Job seems stale, discarding!')
-                // activeJob.discard()
-                try {
-                  const moved = await activeJob.moveToFailed({message: 'Stale job after 60s'}, null)
-                  console.log('moved', moved)
-                } catch (err) {
-                  console.log('could not move stale job...')
-                }
-              }
-            }
-            // check if there is a job in the queue?
-            const waiting = await q_health_check.getWaiting()
-            const job = waiting.find(w => w.data.service.serviceUrl === service.serviceUrl)
-            if(job) {
-              console.log('   ', 'already in the queue, id:', job.id)
-            } else {
-              q_health_check.add('health_check', { service, monitorId: peerId.toString() }, { repeat: false, ...jobRetention })
-            }
+    // from now on all monitors check all services
+    const domains = await ds.Domain.findAll({ where: { status: 'active' } })
+    const members = await ds.Member.findAll({ where: { status: 'active' } })
+    const services = await ds.Service.findAll({ where: { status: 'active' } })
+
+    for (let h = 0; h < domains.length; h++) {
+      const domain = domains[h]
+      for (let j = 0; j < services.length; j++) {
+        const service = services[j]
+        // check if this service is required for this domain
+        if (service.level_required < domain.level_required) continue
+        for (let i = 0; i < members.length; i++) {
+            const member = members[i]
+          // check if member should be running service?
+          if(member.curret_level < service.level_required) continue
+          // check if there is currently an active job for this member/service
+          const activeJobs = await checkServiceQueue.getActive()
+          const waitingJobs = await checkServiceQueue.getWaiting()
+          const activeJob = activeJobs.find(j => j.data.service.id === service.id && j.data.member.id === member.id)
+          const waitingJob = waitingJobs.find(j => j.data.service.id === service.id && j.data.member.id === member.id)
+          if (activeJob) {
+            console.warn('WARNING: active job, skipping check for', member.id, service.id)
+          } else if (waitingJob) {
+            console.warn('WARNING: waiting job, skipping check for', member.id, service.id)
+          } else {
+            console.debug('Creating new job for', member.id, service.id)
+            checkServiceQueue.add('checkService', {
+              domain, member, service, monitorId: peerId.toString() 
+            }, { repeat: false, ...jobRetention })
           }
-          // console.debug(`publishing healthCheck: ${results.length} results to /ibp/healthCheck`)
-          // asyncForeach(results, async (result) => {
-          //   const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
-          //   // console.debug('sent message to peer', res?.toString())
-          // })  
-        } else {
-          console.warn('could not find monitor', peerId.toString())
         }
-      } // === end of peers update cycle ===
+      }
     }
-
-    // check our own services?
-    if (cfg.checkOwnServices) {
-      console.debug('checking our own services...')
-      const monitor = await ds.Monitor.findOne({ where: { monitorId: peerId.toString() }, include: 'services' })
-      monitor.services.forEach(async (service) => {
-        console.debug('--> service', service.serviceUrl)
-        // check if there is a job in the queue?
-        const waiting = await q_health_check.getWaiting()
-        const job = waiting.find(w => w.data.service.serviceUrl === service.serviceUrl)
-        if(job) {
-          console.log('   ', 'already in the queue, id:', job.id)
-        } else {
-          q_health_check.add('health_check', { service, monitorId: peerId.toString() }, { repeat: false, ...jobRetention })
-        }
-      })
-    }
-  } // end of healthCheckJobs()
+  }
 
   console.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL/1000} seconds`)
 
   // TODO: move healthCheckJobs to worker
-  // results will be broadcast to all peers
-  await healthCheckJobs()
+  // if cfg.gossipResults, results will be broadcast to all peers
+  await checkServiceJobs()
   setInterval(async function() {
-    await healthCheckJobs()
+    await checkServiceJobs()
   }, UPDATE_INTERVAL)
 
   // TODO move pruning to worker

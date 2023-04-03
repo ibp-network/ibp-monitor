@@ -5,7 +5,7 @@ import { IState as IRootState } from '../index'
 export interface IState {
   list: any[]
   service: any
-  monitors: any[]
+  // monitors: any[]
   healthChecks: any[]
 }
 
@@ -14,7 +14,7 @@ const service: Module<IState, IRootState> = {
   state: {
     list: [],
     service: {},
-    monitors: [],
+    // monitors: [],
     healthChecks: []
   },
   mutations: {
@@ -25,10 +25,10 @@ const service: Module<IState, IRootState> = {
       console.debug('SET_SERVICE()', value)
       state.service = value
     },
-    SET_MONITORS (state: IState, value: any) {
-      console.debug('SET_MONITORS()', value)
-      state.monitors = value
-    },
+    // SET_MONITORS (state: IState, value: any) {
+    //   console.debug('SET_MONITORS()', value)
+    //   state.monitors = value
+    // },
     SET_HEALTH_CHECKS (state: IState, value: any) {
       console.debug('SET_HEALTH_CHECKS()', value)
       state.healthChecks = value

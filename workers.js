@@ -16,6 +16,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 
 import { asyncForeach } from './lib/utils.js'
 import { f_health_check } from './bullmq/functions/f_health_check.js'
+import { checkService } from './bullmq/functions/f-check-service.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'
 // import { f_w3f_exposures_update } from './workers/w3f-exposures-update.js'
@@ -39,6 +40,7 @@ const qOpts = {
 
 const jobs = [
   'health_check',
+  'checkService',
   // '1kv_nominations_update',
   // '1kv_nominators_update',
   // 'w3f_exposures_update',
@@ -63,7 +65,7 @@ async function onFailed (job, event) {
 }
 
 const q_health_check = new Queue('health_check', qOpts)
-// const q_1kv_nominations_update = new Queue('1kv_nominations_update', qOpts)
+const q_checkService = new Queue('checkService', qOpts)
 // const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
 // const q_w3f_exposures_update = new Queue('w3f_exposures_update', qOpts)
 // const q_w3f_nominators_update = new Queue('w3f_nominators_update', qOpts)
@@ -74,7 +76,7 @@ const q_health_check = new Queue('health_check', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
 const w_health_check = new Worker('health_check', f_health_check, qOpts)
-// const w_1kv_nominations_update = new Worker('1kv_nominations_update', f_1kv_nominations_update, qOpts)
+const w_checkService = new Worker('checkService', checkService, qOpts)
 // const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
 // const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
 // const w_w3f_nominators_update = new Worker('w3f_nominators_update', f_w3f_nominators_update, qOpts)
@@ -117,33 +119,34 @@ async function clearQueue (jobname) {
     await asyncForeach(jobs, clearQueue)
   }
 
-  async function addJobs() {
-  //   asyncForEach(chains, async (CHAIN, idx, arr) => {
-  //     const jOpts = { CHAIN }
-  //     await q_health_check.add(`1kv_candidates_${CHAIN}`, jOpts,
-  //       { repeat: { pattern: '00,30 * * * *' }, ...jobRetention })
-  //     // await q_1kv_nominations_update.add(`1kv_nominations_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '01,31 * * * *' }, ...jobRetention })
-  //     // await q_1kv_nominators_update.add(`1kv_nominators_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '02,32 * * * *' }, ...jobRetention })
-  //     // await q_w3f_exposures_update.add(`w3f_exposures_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '03,33 * * * *' }, ...jobRetention })
-  //     // await q_w3f_nominators_update.add(`w3f_nominators_${CHAIN}`, jOpts,
-  //     //   // once per hour
-  //     //   { repeat: { pattern: '04 * * * *' }, ...jobRetention })
-  //     // await q_w3f_pools_update.add(`w3f_pools_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '05,35 * * * *' }, ...jobRetention })
-  //     // await q_w3f_validator_location_stats_update.add(`w3f_validator_location_stats_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '06,36 * * * *' }, ...jobRetention })
-  //     // await q_w3f_validators_update.add(`w3f_validators_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
-  //     // await q_w3f_nominations_update.add(`w3f_nominations_${CHAIN}`, jOpts,
-  //     //   { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
-  //   })
-  }
+  // jobs will be added by server.js
+  // async function addJobs() {
+  // //   asyncForEach(chains, async (CHAIN, idx, arr) => {
+  // //     const jOpts = { CHAIN }
+  // //     await q_health_check.add(`1kv_candidates_${CHAIN}`, jOpts,
+  // //       { repeat: { pattern: '00,30 * * * *' }, ...jobRetention })
+  // //     // await q_1kv_nominations_update.add(`1kv_nominations_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '01,31 * * * *' }, ...jobRetention })
+  // //     // await q_1kv_nominators_update.add(`1kv_nominators_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '02,32 * * * *' }, ...jobRetention })
+  // //     // await q_w3f_exposures_update.add(`w3f_exposures_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '03,33 * * * *' }, ...jobRetention })
+  // //     // await q_w3f_nominators_update.add(`w3f_nominators_${CHAIN}`, jOpts,
+  // //     //   // once per hour
+  // //     //   { repeat: { pattern: '04 * * * *' }, ...jobRetention })
+  // //     // await q_w3f_pools_update.add(`w3f_pools_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '05,35 * * * *' }, ...jobRetention })
+  // //     // await q_w3f_validator_location_stats_update.add(`w3f_validator_location_stats_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '06,36 * * * *' }, ...jobRetention })
+  // //     // await q_w3f_validators_update.add(`w3f_validators_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
+  // //     // await q_w3f_nominations_update.add(`w3f_nominations_${CHAIN}`, jOpts,
+  // //     //   { repeat: { pattern: '07,37 * * * *' }, ...jobRetention })
+  // //   })
+  // }
 
   await clearQueues()
-  await addJobs()
+  // await addJobs()
 
   const serverAdapter = new ExpressAdapter();
   serverAdapter.setBasePath('/admin/queues');
@@ -151,7 +154,7 @@ async function clearQueue (jobname) {
   const { setQueues, replaceQueues } = createBullBoard({
     queues: [
       new BullMQAdapter(q_health_check, { readOnlyMode: false }),
-      // new BullMQAdapter(q_1kv_nominations_update, { readOnlyMode: false }),
+      new BullMQAdapter(q_checkService, { readOnlyMode: false }),
       // new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_nominators_update, { readOnlyMode: false }),

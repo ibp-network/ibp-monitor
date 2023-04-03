@@ -12,8 +12,8 @@
       <v-toolbar-title>Members</v-toolbar-title>
     </v-toolbar>
 
-    <MemberList v-if="showList" class="d-inline s-sm-none" :members="list"  :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp', 'services']"></MemberList>
-    <MemberTable v-if="!showList" :members="list" :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp', 'services']"></MemberTable>
+    <MemberList v-if="showList" :list="list" class="d-inline s-sm-none"></MemberList>
+    <MemberTable v-if="!showList" :list="list" :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp']"></MemberTable>
 
   </v-container>
 </template>
@@ -37,7 +37,7 @@ export default defineComponent({
   computed: {
     ...mapState('member', ['list']),
     showList () {
-      console.debug('width', this.$vuetify.display.width)
+      // console.debug('width', this.$vuetify.display.width)
       return (this.$vuetify.display.width < 600)
     }
   },

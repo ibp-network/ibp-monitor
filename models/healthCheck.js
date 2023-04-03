@@ -5,6 +5,8 @@ const healthCheckModel = {
   definition: {
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     // dateTime: { type: DataTypes.STRING },
+    memberId: { type: DataTypes.STRING(32) },
+    serviceId: { type: DataTypes.STRING(32) },
     monitorId: { type: DataTypes.STRING(64) },
     serviceUrl: { type: DataTypes.STRING(64) },
     peerId: { type: DataTypes.STRING(64) }, // networkId of the validator

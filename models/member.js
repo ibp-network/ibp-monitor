@@ -4,7 +4,7 @@ const memberModel = {
   // tableName: 'peers',
   // pk: ['peerId'],
   definition: {
-    memberId: { type: DataTypes.STRING(64), primaryKey: true },
+    id: { type: DataTypes.STRING(64), primaryKey: true },
     name: { type: DataTypes.STRING(64) },
     website: { type: DataTypes.STRING(64) },
     logo: { type: DataTypes.STRING(256) },

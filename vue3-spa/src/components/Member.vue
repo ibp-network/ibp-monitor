@@ -1,13 +1,6 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
 
-    <!-- <v-breadcrumbs>
-      <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item to="/member">Members</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item><b>{{member.name}}</b></v-breadcrumbs-item>
-    </v-breadcrumbs> -->
     <v-toolbar>
       <v-btn icon to="/member"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ member.name || 'Member' }}</v-toolbar-title>
@@ -19,25 +12,29 @@
     <v-row>
       <v-col cols="8">
         <table density="compact" class="table is-bordered">
-      <tbody>
-        <tr>
-          <th>Name</th>
-          <td>{{member.name}}</td>
-        </tr>
-        <tr>
-          <th>Status</th>
-          <td>{{member.membership}}-{{member.current_level}}</td>
-        </tr>
-        <tr>
-          <th>Discovered</th>
-          <td>{{formatDateTime(member.createdAt)}}</td>
-        </tr>
-        <tr>
-          <th>Updated</th>
-          <td>{{formatDateTime(member.updatedAt)}}</td>
-        </tr>
-      </tbody>
-    </table>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>{{member.name}}</td>
+            </tr>
+            <tr>
+              <th>Membership</th>
+              <td>{{member.membership}}-{{member.current_level}}</td>
+            </tr>
+            <!-- <tr>
+              <th>Status</th>
+              <td>{{member.status}}</td>
+            </tr> -->
+            <tr>
+              <th>Discovered</th>
+              <td>{{formatDateTime(member.createdAt)}}</td>
+            </tr>
+            <tr>
+              <th>Updated</th>
+              <td>{{formatDateTime(member.updatedAt)}}</td>
+            </tr>
+          </tbody>
+        </table>
 
       </v-col>
       <v-col cols="4" fill-height class="text-center">
@@ -47,41 +44,66 @@
       </v-col>
     </v-row>
 
-    <v-tabs>
-      <v-tab>Services</v-tab>
+    <v-tabs v-model="activeTab">
+      <v-tab value="services">Provides</v-tab>
+      <v-tab value="checks">Healthchecks</v-tab>
+      <!-- <v-tab>{{ activeTab }}</v-tab> -->
     </v-tabs>
-    <ServiceTable v-if="$vuetify.display.width > 599" :services="member.services" :columns="['serviceUrl', 'name', 'pjs', 'updatedAt']"></ServiceTable>
-    <ServiceList v-if="$vuetify.display.width < 600" :services="member.services"></ServiceList>
+    <!-- <MemberServiceTable v-if="$vuetify.display.width > 599" :member="member" :columns="['serviceId', 'name', 'pjs']"></MemberServiceTable> -->
+    <v-window v-model="activeTab">
+      <v-window-item value="services">
+        <ServiceTable v-if="$vuetify.display.width > 599" :member="member" :services="servicesForMember" :columns="['logo', 'name', 'serviceId', 'pjs']"></ServiceTable>
+        <ServiceList v-if="$vuetify.display.width < 600" :member="member" :services="servicesForMember"></ServiceList>
+      </v-window-item>
+      <v-window-item value="checks">
+        <CheckTable v-if="$vuetify.display.width > 599" :health-checks="healthChecks" :columns="['id', 'serviceId', 'performance']"></CheckTable>
+        <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
+      </v-window-item>
+    </v-window>
   </v-container>
 
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 // import PeerTable from './PeerTable.vue'
 // import CheckChart from './CheckChart.vue'
-// import CheckTable from './CheckTable.vue'
+import CheckTable from './CheckTable.vue'
+import CheckList from './CheckList.vue'
 import ServiceTable from './ServiceTable.vue'
 import ServiceList from './ServiceList.vue'
+import { IService } from './types'
 
 export default defineComponent({
   name: 'MemberC',
   components: {
     ServiceTable,
-    ServiceList
-  //   PeerTable,
-  //   CheckChart,
-  //   CheckTable
+    ServiceList,
+    CheckTable,
+    CheckList
   },
-  setup () {
+  props: {
+    tab: {
+      type: String,
+      default: 'services'
+    }
+  },
+  setup (props) {
     const store = useStore()
-    return { store }
+    const propTab = props.tab
+    const activeTab = ref(propTab)
+    return { store, activeTab }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('member', { member: 'model' })
+    ...mapState('domain', { domains: 'list' }),
+    ...mapState('service', { services: 'list' }),
+    ...mapState('member', { member: 'model', healthChecks: 'healthChecks' }),
+    servicesForMember() {
+      return this.services.filter((f: IService) => f.level_required <= this.member.current_level)
+    }
   },
   methods: {
     formatDateTime (value: any) {
@@ -103,6 +125,9 @@ export default defineComponent({
         behavior: 'smooth'
       })
     })
+    var id = this.member.id || this.$route.params.memberId
+    this.store.dispatch('member/getChecks', id)
+    this.activeTab = this.$route.params.tab?.toString() || 'services'
   }
 })
 </script>

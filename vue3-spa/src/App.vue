@@ -4,7 +4,7 @@
     <NavBar></NavBar>
     <v-main>
       <router-view v-slot="{ Component}">
-        <transition name="fade" mode="out-in" :duration="100">
+        <transition name="fade" mode="out-in" :duration="150">
           <component :is="Component" />
         </transition>
       </router-view>
@@ -31,7 +31,7 @@ export default defineComponent({
     Footer
   },
   setup () {
-    useStore().dispatch('getHome')
+    useStore().dispatch('init')
   }
 })
 

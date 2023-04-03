@@ -1,16 +1,9 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
 
-    <!-- <v-breadcrumbs>
-      <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item to="/service">Services</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item><b>{{service.serviceUrl}}</b></v-breadcrumbs-item>
-    </v-breadcrumbs> -->
     <v-toolbar>
       <v-btn icon to="/service"><v-icon>mdi-chevron-left</v-icon></v-btn>
-      <v-toolbar-title>{{ service.serviceUrl || 'Service' }}</v-toolbar-title>
+      <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
     </v-toolbar>
 
     <table class="table is-fullwidth">
@@ -20,76 +13,70 @@
           <td>{{service.name}}</td>
         </tr>
         <tr>
-          <th>Url</th>
-          <td>{{service.serviceUrl}}</td>
+          <th>Level Required</th>
+          <td>{{service.level_required}}</td>
         </tr>
         <tr>
           <th>Status</th>
           <td>{{service.status}}</td>
         </tr>
-        <tr>
-          <th>Member</th>
-          <td><router-link :to="`/member/${service.memberId}`">{{service.memberId}}</router-link></td>
+        <tr v-if="service.parachain">
+          <th>Parachain</th>
+          <td>Yes (on: <a @click="gotoService(service.parentId)">{{service.parentId}}</a>)</td>
         </tr>
-        <tr>
+        <!-- <tr>
           <th>Error count</th>
           <td>{{service.errorCount}}</td>
-        </tr>
-        <tr>
+        </tr> -->
+        <tr v-if="service.status ==='active'">
           <th>Polkadot.js</th>
-          <td><a :href="`https://polkadot.js.org/apps/?rpc=${service.serviceUrl}`" target="_blank">
-            {{service.serviceUrl}}
-            <sup><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></sup>
-          </a></td>
+          <td>
+            <div v-for="domain in domains" v-bind:key="domain.id" v-show="domain.level_required >= service.level_required">
+              <a :href="`https://polkadot.js.org/apps/?rpc=wss://${domain.id}/${service.endpoint}`" target="_blank">
+                wss://{{ domain.id }}/{{ service.endpoint }}            
+              </a> (level: {{ domain.level_required }})
+            </div>
+            <!-- <a v-show="service.status==='active'" :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.dotters.network/${service.endpoint}`" target="_blank">
+              IBP.1: wss://rpc.dotters.network/{{ service.endpoint }}
+            </a>
+            <br>
+            <a v-show="service.status==='active'" :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.ibp.network/${service.endpoint}`" target="_blank">
+              IBP.2:  wss://rpc.ibp.network/{{ service.endpoint }}
+            </a> -->
+          </td>
         </tr>
-        <tr>
-          <th>Discovered</th>
-          <td>{{formatDateTime(service.createdAt)}}</td>
-        </tr>
-        <tr>
-          <th>Updated</th>
-          <td>{{formatDateTime(service.updatedAt)}}</td>
-        </tr>
+
       </tbody>
     </table>
 
-    <v-row>
-      <v-col class="col-6 col-sm-12">
-        <v-tabs>
-          <v-tab>Monitors</v-tab>
-        </v-tabs>
-        <MonitorTable v-if="$vuetify.display.width > 599" :monitors="service.monitors" :columns="['monitorId', 'updatedAt']"></MonitorTable>
-        <MonitorList v-if="$vuetify.display.width < 600" :monitors="service.monitors"></MonitorList>
-      </v-col>
-      <v-col class="col-6 col-sm-12">
-        <v-tabs>
-          <v-tab>Peers</v-tab>
-        </v-tabs>
-        <PeerTable :peers="service.peers" :columns="['id', 'serviceUrl', 'status', 'peerId', 'updatedAt']"></PeerTable>
-      </v-col>
-    </v-row>
-
-    <v-tabs>
-      <v-tab>Performance</v-tab>
-      <v-tab>
-        <router-link :to="`/api/metrics/${encodeURIComponent(service.serviceUrl)}`" target="_blank">
-            Prometheus
-            &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px">
-          </router-link>
-      </v-tab>
+    <v-tabs v-model="activeTab">
+      <v-tab value="performance">Performance</v-tab>
+      <v-tab value="members">Providers</v-tab>
+      <v-tab value="checks">HealthChecks</v-tab>
     </v-tabs>
 
-    <!-- <%- include(templateDir + '/checksChart.ejs', { healthChecks }); -%> -->
-    <CheckChart :healthChecks="service.healthChecks"></CheckChart>
-
-    <v-tabs>
-      <v-tab>
-        Checks
-      </v-tab>
-    </v-tabs>
-    <!-- <%- include(templateDir + '/checksTable.ejs', { healthChecks }); -%> -->
-    <CheckTable v-if="$vuetify.display.width > 599" :healthChecks="service.healthChecks" :columns="['id', 'monitorId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
-    <CheckList v-if="$vuetify.display.width < 600" :healthChecks="service.healthChecks"></CheckList>
+    <!-- <v-window v-model="activeTab" direction="false">
+    <v-window-item value="performance"> -->
+    <v-container v-show="activeTab==='performance'">
+      <a :href="`/api/metrics/${service.id}`" target="_blank">
+        Prometheus
+        &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px">
+      </a>
+      <CheckChart :healthChecks="service.healthChecks"></CheckChart>
+    </v-container>
+    <!-- </v-window-item>
+    <v-window-item value="members"> -->
+    <v-container v-show="activeTab==='members'">
+      <MemberList :list="membersForService"></MemberList>
+    </v-container>
+    <!-- </v-window-item>
+    <v-window-item value="checks"> -->
+    <v-container v-show="activeTab==='checks'">
+      <CheckTable v-if="$vuetify.display.width > 599" :healthChecks="service.healthChecks" :columns="['id', 'memberId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
+      <CheckList v-if="$vuetify.display.width < 600" :healthChecks="service.healthChecks"></CheckList>
+      <!-- </v-window-item>
+    </v-window> -->
+    </v-container>
 
   </v-container>
 
@@ -99,16 +86,21 @@
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
+import MemberList from './MemberList.vue'
+import MemberTable from './MemberTable.vue'
 import PeerTable from './PeerTable.vue'
 import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
 import MonitorTable from './MonitorTable.vue'
 import MonitorList from './MonitorList.vue'
+import { IMember } from './types'
 
 export default defineComponent({
   name: 'ServiceC',
   components: {
+    MemberList,
+    MemberTable,
     MonitorTable,
     MonitorList,
     PeerTable,
@@ -122,13 +114,32 @@ export default defineComponent({
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('service', ['service'])
+    ...mapState('service', ['service']),
+    ...mapState('member', { members: 'list' }),
+    ...mapState('domain', { domains: 'list' }),
+    membersForService (): IMember[] {
+      return this.members.filter ((m: IMember) => m.current_level >= this.service.level_required)
+    }
+  },
+  watch: {
+    service (newVal) {
+      console.debug('watch.service', newVal)
+    }
   },
   methods: {
+    gotoService(serviceId: string) {
+      this.store.dispatch('service/setService', serviceId)
+      this.$router.push(`/service/${serviceId}`)
+    },
     formatDateTime (value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
     moment: moment
+  },
+  data () {
+    return {
+      activeTab: 'performance'
+    }
   },
   created () {
     console.debug(this.$route.params)

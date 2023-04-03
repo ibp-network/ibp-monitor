@@ -12,7 +12,7 @@
       <v-toolbar-title>Services</v-toolbar-title>
     </v-toolbar>
 
-    <ServiceTable  v-if="$vuetify.display.width > 599" :services="list" :columns="['serviceUrl', 'pjs', 'name', 'memberLink', 'status', 'monitors']"></ServiceTable>
+    <ServiceTable  v-if="$vuetify.display.width > 599" :services="list" :columns="['logo', 'endpoint', 'pjs', 'name', 'status']"></ServiceTable>
     <ServiceList v-if="$vuetify.display.width < 600" :services="list"></ServiceList>
   </v-container>
 </template>

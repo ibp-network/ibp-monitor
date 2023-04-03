@@ -1,9 +1,9 @@
 <template>
 
   <v-list lines="three">
-    <v-list-item v-for="member in members" v-bind:key="member.memberId"
+    <v-list-item v-for="member in list" v-bind:key="member.id"
       style="cursor: pointer;"
-      @click="gotoMember(member.memberId)">
+      @click="gotoMember(member.id)">
 
       <!-- Logo -->
       <template v-slot:prepend>
@@ -16,7 +16,7 @@
 
       <!-- memberID -->
       <v-list-item-title>
-        {{member.name}} ({{member.memberId}})
+        {{member.name}} ({{member.id}})
       </v-list-item-title>
 
       <v-list-item-subtitle>
@@ -56,8 +56,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
-import { useStore } from 'vuex'
+import { defineComponent, computed, PropType } from 'vue'
+import { useStore, mapState } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
 import { IMember } from './types'
@@ -65,8 +65,7 @@ import { IMember } from './types'
 export default defineComponent({
   name: 'MemberTable',
   props: {
-    members: {
-      // type: Array
+    list: {
       type: Object as PropType<[IMember]>, 
     },
     columns: {
@@ -75,12 +74,11 @@ export default defineComponent({
       // services?
     }
   },
-  // computed: {
-  //   ...mapState(['dateTimeFormat'])
-  // },
   setup () {
     const store = useStore()
-    return { store }
+    return {
+      store
+    }
   },
   data() {
     return {

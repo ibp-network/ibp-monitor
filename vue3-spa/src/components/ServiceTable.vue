@@ -2,33 +2,33 @@
 
 <table class="table is-fullwidth">
   <thead>
-    <th v-if="columns.includes('serviceUrl')">Service URL</th>
+    <th v-if="columns.includes('logo')"></th>
     <th v-if="columns.includes('name')">Name</th>
-    <th v-if="columns.includes('memberId')">MemberId</th>
-    <th v-if="columns.includes('memberLink')">Member</th>
+    <th v-if="columns.includes('serviceId')">Service Id</th>
+    <th v-if="columns.includes('status')">Endpoint</th>
     <th v-if="columns.includes('status')">Status</th>
-    <th v-if="columns.includes('pjs')">P.JS</th>
-    <th v-if="columns.includes('monitors')">Monitors</th>
-    <th v-if="columns.includes('errors')">Errors</th>
-    <th v-if="columns.includes('updated')">Updated</th>
+    <th v-if="columns.includes('pjs')" colspan="2" class="text-center">P.JS</th>
   </thead>
   <tbody>
-    <tr v-for="service in services" v-bind:key="service.serviceUrl">
-      <td v-if="columns.includes('serviceUrl')" style="cursor: pointer"><a @click="gotoService(service.serviceUrl)">{{ service.serviceUrl }}</a></td>
-      <td v-if="columns.includes('name')" style="cursor: pointer">{{service.name}}</td>
-      <td v-if="columns.includes('memberId')">{{service.memberId}}</td>
-      <td v-if="columns.includes('memberLink')">
-        <router-link :to="`/member/${service.memberId}`">{{service.memberId}}</router-link>
+    <tr v-for="service in services" v-bind:key="service.id"  @click="gotoService(service.id)">
+      <td v-if="columns.includes('logo')" style="cursor: pointer">
+        <v-avatar size="x-small">
+          <v-img :src="service.logo"></v-img>
+        </v-avatar>
       </td>
+      <td v-if="columns.includes('name')" style="cursor: pointer">{{service.name}}</td>
+      <td v-if="columns.includes('serviceId')" style="cursor: pointer">{{ service.id }}</td>
+      <td v-if="columns.includes('endpoint')">{{service.endpoint}}</td>
       <td v-if="columns.includes('status')">{{service.status}}</td>
-      <td v-if="columns.includes('pjs')"><a :href="`https://polkadot.js.org/apps/?rpc=${service.serviceUrl}`" target="_blank">
-        <!-- {{service.serviceUrl}} -->
-        polkadot.js
-        <small><i class="fa-solid fa-arrow-up-right-from-square"></i></small>
+
+      <td v-if="columns.includes('pjs')">
+        <a v-if="service.status === 'active'" @click.stop :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.dotters.network/${service.endpoint}`" target="_blank">
+          IBP.1
+        <!-- <small><i class="fa-solid fa-arrow-up-right-from-square"></i></small> -->
       </a></td>
-      <td v-if="columns.includes('monitors')">{{service.monitors?.length || 0}}</td>
-      <td v-if="columns.includes('errors')">{{service.errorCount || 0}}</td>
-      <td v-if="columns.includes('updated')">{{formatDateTime(service.updatedAt)}}</td>
+      <td>
+        <a v-if="service.status === 'active'" @click.stop :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.ibp.network/${service.endpoint}`" target="_blank">IBP.2</a>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -55,7 +55,8 @@ export default defineComponent({
     }
   },
   computed: {
-    ...mapState(['dateTimeFormat'])
+    ...mapState(['dateTimeFormat']),
+    ...mapState('domain', { domains: 'list' })
   },
   methods: {
     gotoService (serviceUrl: string) {

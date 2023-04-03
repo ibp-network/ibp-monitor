@@ -1,13 +1,24 @@
-
-export interface IService {
+export interface IEndpoint {
+  memberId: string
+  serviceId: string
   serviceUrl: string
   name: string
-  memberId: string
-  status: string
+  chain: string
   errorCount: number
-  monitors: [IMonitor]
+  status: string
   createdAt: any
   updatedAt: any
+}
+
+export interface IService {
+  id: string
+  name: string
+  endpoint: string
+  level_required: number
+  parachain: boolean
+  parentId: string
+  status: string
+  logo: string
 }
 
 export interface IMonitor {
@@ -21,7 +32,8 @@ export interface IMonitor {
 export interface IHealthCheck {
   id: number
   level: string
-  serviceUrl: string
+  serviceId: string
+  memberId: string
   monitorId: string
   source: string
   record: any
@@ -30,14 +42,15 @@ export interface IHealthCheck {
 }
 
 export interface IMember {
-  memberId: string
+  id: string
   name: string
   logo: string
   membership: string
   region: string
   current_level: any
   level_timestamp: any
-  services: [IService]
+  // services: [IService]
+  endpoints: [IEndpoint]
   createdAt: any
   updatedAt: any
 }

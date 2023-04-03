@@ -14,7 +14,7 @@
       <th v-if="columns.includes('createdAt')">Discovered</th>
     </thead>
     <tbody>
-      <tr v-for="member in members" v-bind:key="member.memberId"  style="cursor: pointer" @click="gotoMember(member.memberId)">
+      <tr v-for="member in list" v-bind:key="member.id"  style="cursor: pointer" @click="gotoMember(member.id)">
         <!-- Logo -->
         <td v-if="columns.includes('logo')">
           <!-- <a @click="gotoMember(member.memberId)"> -->
@@ -26,7 +26,7 @@
         <!-- memberID -->
         <td v-if="columns.includes('memberId')">
           <!-- <a @click="gotoMember(member.memberId)"> -->
-            {{member.memberId}}
+            {{member.id}}
           <!-- </a> -->
         </td>
         <!-- Name -->
@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent, computed, PropType } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
@@ -59,8 +59,7 @@ import { IMember } from './types'
 export default defineComponent({
   name: 'MemberTable',
   props: {
-    members: {
-      // type: Array
+    list: {
       type: Object as PropType<[IMember]>, 
     },
     columns: {
@@ -74,7 +73,8 @@ export default defineComponent({
     return { store }
   },
   computed: {
-    ...mapState(['regions'])
+    ...mapState(['regions']),
+    // ...mapState('member', ['list'])
   },
   data() {
     return {

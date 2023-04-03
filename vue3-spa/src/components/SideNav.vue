@@ -24,12 +24,12 @@
           <v-icon>mdi-server</v-icon>
         </template>
         Services</v-list-item>
-      <v-list-item to="/endpoint">
+      <!-- <v-list-item to="/endpoint">
         <template v-slot:prepend>
           <v-icon>mdi-connection</v-icon>
         </template>
         Endpoints
-      </v-list-item>
+      </v-list-item> -->
       <v-list-item to="/monitor">
         <template v-slot:prepend>
           <v-icon>mdi-monitor-eye</v-icon>

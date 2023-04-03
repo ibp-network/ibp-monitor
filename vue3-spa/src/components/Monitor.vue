@@ -46,13 +46,6 @@
     </table>
 
     <v-tabs>
-      <v-tab>Services</v-tab>
-    </v-tabs>
-    <!-- <%- include(templateDir + '/servicesTable.ejs', { services: monitor.services, columns: [] }); -%> -->
-    <ServiceTable v-if="$vuetify.display.width > 599" :services="monitor.services" :columns="['id','serviceUrl']"></ServiceTable>
-    <ServiceList v-if="$vuetify.display.width < 600" :services="monitor.services"></ServiceList>
-
-    <v-tabs>
       <v-tab>Checks</v-tab>
     </v-tabs>
     <!-- <%- include(templateDir + '/checksTable.ejs', { healthChecks }); -%> -->
