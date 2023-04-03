@@ -9,10 +9,18 @@ USE ibp_monitor;
 CREATE TABLE `domain` (
   `id` varchar(132) NOT NULL DEFAULT '',
   `level_required` int(2) NOT NULL DEFAULT 0,
+  `status` varchar(10) DEFAULT NULL,
   -- `createdAt` datetime DEFAULT NULL,
   -- `updatedAt` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
+
+INSERT INTO `domain` (`id`, `level_required`, `status`)
+VALUES
+	('rpc.dotters.network', 3, 'active'),
+	('rpc.ibp.network', 3, 'active'),
+	('sys.dotters.network', 5, 'active'),
+	('sys.ibp.network', 5, 'active');
 
 -- monitor nodes
 CREATE TABLE `monitor` (
@@ -103,7 +111,7 @@ CREATE TABLE `service` (
   `parachain` tinyint(1) DEFAULT NULL,
   `parentId` varchar(32) DEFAULT NULL,
   `status` varchar(32) NOT NULL DEFAULT '',
-  `logo` varchar(256) NOT NULL DEFAULT '',
+  `logo` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`id`)
 );
 

@@ -66,7 +66,7 @@ export default defineComponent({
   name: 'MemberTable',
   props: {
     list: {
-      type: Object as PropType<[IMember]>, 
+      type: Object as PropType<IMember[]>, 
     },
     columns: {
       type: Array,

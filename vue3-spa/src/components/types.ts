@@ -49,7 +49,7 @@ export interface IMember {
   region: string
   current_level: any
   level_timestamp: any
-  // services: [IService]
+  services: [IService]
   endpoints: [IEndpoint]
   createdAt: any
   updatedAt: any
