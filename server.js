@@ -1,4 +1,3 @@
-
 import fs from 'fs'
 import moment from 'moment'
 import { createLibp2p } from 'libp2p'
@@ -11,7 +10,7 @@ import { tcp } from '@libp2p/tcp'
 // import wrtc from 'wrtc'
 // import { webRTCStar } from '@libp2p/webrtc-star'
 // import { Noise } from '@libp2p/noise' // @deprecated
-import { noise } from "@chainsafe/libp2p-noise"
+import { noise } from '@chainsafe/libp2p-noise'
 import { mplex } from '@libp2p/mplex'
 import { kadDHT } from '@libp2p/kad-dht'
 import { gossipsub } from '@chainsafe/libp2p-gossipsub'
@@ -20,18 +19,17 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
 
-import { DataStore } from './lib/DataStore.js'
+import { DataStore } from './data/data_store.js'
 import { Op, Sequelize } from 'sequelize'
 // import { DataStoreLoki } from './lib/DataStoreLoki.js'
-import { MessageHandler } from './lib/MessageHandler.js'
-import { HealthChecker } from './lib/HealthChecker.js'
-// import { HttpHandler } from './lib/HttpHandler.js'
+import { MessageHandler } from './lib/message_handler.js'
+import { HealthChecker } from './lib/health_checker.js'
 import { asyncForeach, streamToString, stringToStream } from './lib/utils.js'
 
 // const star = webRTCStar()
 // const direct = webRTCDirect()
 
-import { Job, QueueEvents, Queue } from 'bullmq';
+import { Job, QueueEvents, Queue } from 'bullmq'
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
 console.log('VERSION', pkg.version)
@@ -41,7 +39,7 @@ import { configLocal } from './config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 const queueOpts = {
-  connection: cfg.redis
+  connection: cfg.redis,
 }
 const jobRetention = {
   timeout: 60 * 1000, // active jobs timeout after 60 seconds
@@ -51,7 +49,7 @@ const jobRetention = {
   },
   removeOnFail: {
     age: 5 * 24 * 60 * 60, // keep up to 5 * 24 hours (in millis)
-  }
+  },
 }
 
 // not used, we listen on the port(s) in cfg.addresses
@@ -59,13 +57,12 @@ const jobRetention = {
 
 const UPDATE_INTERVAL = cfg.updateInterval || 5 * 60 * 1000 // 5 mins, in millis
 
-const ds = new DataStore({ initialiseDb: false, pruning: cfg.pruning })
+const ds = new DataStore({ pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
 // const hh = new HttpHandler({ datastore: ds, version: pkg.version })
 
 ;(async () => {
-
   // get PeerId
   var peerId
   if (fs.existsSync('./keys/peerId.json')) {
@@ -74,11 +71,15 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     peerId = await createFromJSON(pidJson)
   } else {
     peerId = await createEd25519PeerId()
-    fs.writeFileSync('./keys/peerId.json', JSON.stringify({
-      id: peerId.toString(),
-      privKey: uint8ArrayToString(peerId.privateKey, 'base64'), // .toString(),
-      pubKey: uint8ArrayToString(peerId.publicKey, 'base64'),   // .toString()
-    }), 'utf-8')
+    fs.writeFileSync(
+      './keys/peerId.json',
+      JSON.stringify({
+        id: peerId.toString(),
+        privKey: uint8ArrayToString(peerId.privateKey, 'base64'), // .toString(),
+        pubKey: uint8ArrayToString(peerId.publicKey, 'base64'), // .toString()
+      }),
+      'utf-8'
+    )
   }
   console.debug('Our monitorId', peerId.toString())
 
@@ -95,8 +96,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     // scoreParams: {},
     // directPeers: [],
     // allowedTopics: [ '/fruit' ]
-    allowedTopics: cfg.allowedTopics
-  });
+    allowedTopics: cfg.allowedTopics,
+  })
 
   const libp2p = await createLibp2p({
     peerId,
@@ -110,16 +111,14 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       // }),
       // star.transport
     ],
-    streamMuxers: [
-      mplex()
-    ],
-    connectionEncryption: [ new noise() ],
+    streamMuxers: [mplex()],
+    connectionEncryption: [new noise()],
     connectionManager: {
       autoDial: true,
     },
     peerDiscovery: [
       mdns({
-        interval: 20e3
+        interval: 20e3,
       }),
       bootstrap({
         enabled: true,
@@ -127,133 +126,162 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
         timeout: 3 * 1000, // in ms,
         tagName: 'bootstrap',
         tagValue: 50,
-        tagTTL: 120 * 1000 // in ms
+        tagTTL: 120 * 1000, // in ms
       }),
       pubsubPeerDiscovery({
         interval: 10 * 1000, // in ms?
         // topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
-        topics: [
-          `ibp_monitor._peer-discovery._p2p._pubsub`,
-          '_peer-discovery._p2p._pubsub'
-        ],
-        listenOnly: false
+        topics: [`ibp_monitor._peer-discovery._p2p._pubsub`, '_peer-discovery._p2p._pubsub'],
+        listenOnly: false,
       }),
       // star.discovery
     ],
     relay: cfg.relay,
     dht: kadDHT(),
-    pubsub: gsub
+    pubsub: gsub,
   })
 
   await libp2p.start()
   console.debug(libp2p.getMultiaddrs())
 
   // update our monitor record with computed multiAddrs
-  await ds.Monitor.update(
-    { multiaddrs: libp2p.getMultiaddrs() },
-    { where: { monitorId: peerId.toString() } }
-  )
+  await ds.Monitor.upsert({
+    id: peerId.toString(),
+    name: 'local',
+    multiaddress: libp2p.getMultiaddrs(),
+  })
 
   libp2p.dht.addEventListener('peer', (peer) => {
     console.log('WOOT: dht peer', peer.toString())
   })
   libp2p.connectionManager.addEventListener('peer:connect', (peerId) => {
-    console.debug('peer:connect', peerId.detail?.remotePeer.toString(), 'at', peerId.detail?.remoteAddr.toString())
+    console.debug(
+      'peer:connect',
+      peerId.detail?.remotePeer.toString(),
+      'at',
+      peerId.detail?.remoteAddr.toString()
+    )
   })
   libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
-    console.debug('peer:disconnect', peerId.detail?.remotePeer.toString(), 'at', peerId.detail?.remoteAddr.toString())
+    console.debug(
+      'peer:disconnect',
+      peerId.detail?.remotePeer.toString(),
+      'at',
+      peerId.detail?.remoteAddr.toString()
+    )
   })
 
   libp2p.addEventListener('peer:discovery', async (peerId) => {
     console.debug('peer:discovery, we have', libp2p.getPeers().length, 'peers')
-    console.debug('libp2p.connectionManager.listenerCount', libp2p.connectionManager.listenerCount())
+    console.debug(
+      'libp2p.connectionManager.listenerCount',
+      libp2p.connectionManager.listenerCount()
+    )
     await mh.handleDiscovery(peerId)
   })
+
   libp2p.pubsub.addEventListener('message', async (evt) => {
     await mh.handleMessage(evt)
   })
+
   // subscribe to pubsub topics
-  for (var i=0; i < cfg.allowedTopics.length; i++) {
+  for (var i = 0; i < cfg.allowedTopics.length; i++) {
     console.debug('subscribing to', cfg.allowedTopics[i])
     libp2p.pubsub.subscribe(cfg.allowedTopics[i])
   }
 
   libp2p.handle(['/ibp/ping'], (event) => {
-    const {stream, connection } = event;
+    const { stream, connection } = event
     // console.debug(stream, connection, protocol)
     return mh.handleProtocol({ stream, connection, protocol: '/ibp/ping' })
   })
 
-  // // publish our services 
-  // console.debug('Publishing our services')
-  // await mh.publishServices(cfg.services, libp2p)
-  // setInterval(async () => {
-  //   console.debug('Publishing our services')
-  //   await mh.publishServices(cfg.services, libp2p)
-  // }, UPDATE_INTERVAL)
-
   // publish the results of our checkService via libp2p
-  const checkServiceQueue = new Queue('checkService', queueOpts);
-  const checkServiceEvents = new QueueEvents('checkService', queueOpts);
+  const checkServiceQueue = new Queue('checkService', queueOpts)
+  const checkServiceEvents = new QueueEvents('checkService', queueOpts)
   const handleCheckServiceResult = async ({ jobId }) => {
     const job = await Job.fromId(checkServiceQueue, jobId)
-    console.log('handleCheckServiceResult', jobId, job.returnvalue);
+    console.log('handleCheckServiceResult', jobId, job.returnvalue)
+    if (!job.returnvalue) { return }
     const { member, service } = job.data
     const result = job.returnvalue
+    // upsert member service node
+    if (result.peerId) {
+      let memberService = await ds.MemberService.findOne({ where: {serviceId: service.id}})
+      await ds.MemberServiceNode.upsert({
+        peerId: result.peerId,
+        memberServiceId: memberService.id,
+        name: null,
+      })
+    }
+    // insert health check
     await ds.HealthCheck.create(result)
     if (cfg.gossipResults) {
-      console.debug(`[gossip] publishing healthCheck: ${member.id} ${service.id} ${result.level} to /ibp/healthCheck`)
-      const res = await libp2p.pubsub.publish('/ibp/healthCheck', uint8ArrayFromString(JSON.stringify(result)))
+      console.debug(
+        `[gossip] publishing healthCheck: ${member.id} ${service.id} to /ibp/healthCheck`
+      )
+      const res = await libp2p.pubsub.publish(
+        '/ibp/healthCheck',
+        uint8ArrayFromString(JSON.stringify(result))
+      )
     }
   }
-  checkServiceQueue.on('completed', handleCheckServiceResult);
-  checkServiceQueue.on('error', (args) => { console.log('Queue error', args) })
-  checkServiceQueue.on('failed', (event, listener, id) => { console.log('Queue failed', event, listener, id) })
+  checkServiceQueue.on('completed', handleCheckServiceResult)
+  checkServiceQueue.on('error', (args) => {
+    console.log('Check service queue error', args)
+  })
+  checkServiceQueue.on('failed', (event, listener, id) => {
+    console.log('Queue failed', event, listener, id)
+  })
   checkServiceEvents.on('completed', handleCheckServiceResult)
 
-  async function checkServiceJobs () {
-
+  async function checkServiceJobs() {
     // from now on all monitors check all services
-    const domains = await ds.Domain.findAll({ where: { status: 'active' } })
-    const members = await ds.Member.findAll({ where: { status: 'active' } })
-    const services = await ds.Service.findAll({ where: { status: 'active' } })
-
-    for (let h = 0; h < domains.length; h++) {
-      const domain = domains[h]
-      for (let j = 0; j < services.length; j++) {
-        const service = services[j]
-        // check if this service is required for this domain
-        if (service.level_required < domain.level_required) continue
-        for (let i = 0; i < members.length; i++) {
-            const member = members[i]
-          // check if member should be running service?
-          if(member.curret_level < service.level_required) continue
-          // check if there is currently an active job for this member/service
-          const activeJobs = await checkServiceQueue.getActive()
-          const waitingJobs = await checkServiceQueue.getWaiting()
-          const activeJob = activeJobs.find(j => j.data.service.id === service.id && j.data.member.id === member.id)
-          const waitingJob = waitingJobs.find(j => j.data.service.id === service.id && j.data.member.id === member.id)
-          if (activeJob) {
-            console.warn('WARNING: active job, skipping check for', member.id, service.id)
-          } else if (waitingJob) {
-            console.warn('WARNING: waiting job, skipping check for', member.id, service.id)
-          } else {
-            console.debug('Creating new job for', member.id, service.id)
-            checkServiceQueue.add('checkService', {
-              domain, member, service, monitorId: peerId.toString() 
-            }, { repeat: false, ...jobRetention })
-          }
+    const services = await ds.Service.findAll({ where: { type: 'rpc', status: 'active' } })
+    const members = await ds.Member.findAll({
+      where: { status: 'active' },
+      include: ['membershipLevel'],
+    })
+    for (let service of services) {
+      for (let member of members) {
+        if (member.membershipLevelId < service.membershipLevelId) {
+          continue
+        }
+        const activeJobs = await checkServiceQueue.getActive()
+        const waitingJobs = await checkServiceQueue.getWaiting()
+        const activeJob = activeJobs.find(
+          (j) => j.data.service.id === service.id && j.data.member.id === member.id
+        )
+        const waitingJob = waitingJobs.find(
+          (j) => j.data.service.id === service.id && j.data.member.id === member.id
+        )
+        if (activeJob) {
+          console.warn('WARNING: active job, skipping check for ', member.id, service.id)
+        } else if (waitingJob) {
+          console.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
+        } else {
+          console.debug('Creating new [checkService] job for', member.id, service.id)
+          checkServiceQueue.add(
+            'checkService',
+            {
+              subdomain: member.membershipLevel.subdomain,
+              member,
+              service,
+              monitorId: peerId.toString(),
+            },
+            { repeat: false, ...jobRetention }
+          )
         }
       }
     }
   }
 
-  console.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL/1000} seconds`)
+  console.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL / 1000} seconds`)
 
   // TODO: move healthCheckJobs to worker
   // if cfg.gossipResults, results will be broadcast to all peers
   await checkServiceJobs()
-  setInterval(async function() {
+  setInterval(async function () {
     await checkServiceJobs()
   }, UPDATE_INTERVAL)
 
@@ -262,5 +290,4 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   setInterval(async () => {
     await ds.prune()
   }, cfg.pruning.interval * 1000)
-
 })()

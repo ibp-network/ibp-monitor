@@ -7,16 +7,14 @@ const monitorModel = {
     name: { type: DataTypes.STRING(64) },
     // services: { type: DataTypes.JSON },
     status: { type: DataTypes.STRING(16) },
-    multiaddrs: { type: DataTypes.JSON }
+    multiaddrs: { type: DataTypes.JSON },
   },
   options: {
     tableName: 'monitor',
     timestamps: true,
     createdAt: true,
-    updatedAt: true
-  }
+    updatedAt: true,
+  },
 }
 
-export {
-  monitorModel
-}
+export { monitorModel }

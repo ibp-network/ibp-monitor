@@ -15,8 +15,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 // import axios from 'axios'
 
 import { asyncForeach } from './lib/utils.js'
-import { f_health_check } from './bullmq/functions/f_health_check.js'
-import { checkService } from './bullmq/functions/f-check-service.js'
+import { checkService } from './bullmq/functions/f_check_service.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'
 // import { f_w3f_exposures_update } from './workers/w3f-exposures-update.js'
@@ -27,7 +26,7 @@ import { checkService } from './bullmq/functions/f-check-service.js'
 // import { f_w3f_nominations_update } from './workers/w3f-nominations-update.js'
 // import { f_dock_auto_payout } from './functions/f_dock_auto_payout.js'
 
-console.debug("cfg.redis", cfg.redis)
+console.debug('cfg.redis', cfg.redis)
 
 const qOpts = {
   // connection to Redis
@@ -35,11 +34,11 @@ const qOpts = {
   //   host: "localhost",
   //   port: 6379
   // }
-  connection: cfg.redis
-};
+  connection: cfg.redis,
+}
 
 const jobs = [
-  'health_check',
+  // 'health_check',
   'checkService',
   // '1kv_nominations_update',
   // '1kv_nominators_update',
@@ -52,20 +51,20 @@ const jobs = [
   // 'dock_auto_payout'
 ]
 
-async function onError (job, err) {
+async function onError(job, err) {
   const errStr = `ERROR: ${job}: ` + typeof err === 'string' ? err : JSON.stringify(err)
   // await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
   console.log(errStr)
 }
 
-async function onFailed (job, event) {
+async function onFailed(job, event) {
   const errStr = `FAILED: ${job}: ` + typeof event === 'string' ? event : JSON.stringify(event)
   // await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
   console.log(errStr)
 }
 
-const q_health_check = new Queue('health_check', qOpts)
 const q_checkService = new Queue('checkService', qOpts)
+// const q_health_check = new Queue('health_check', qOpts)
 // const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
 // const q_w3f_exposures_update = new Queue('w3f_exposures_update', qOpts)
 // const q_w3f_nominators_update = new Queue('w3f_nominators_update', qOpts)
@@ -75,8 +74,8 @@ const q_checkService = new Queue('checkService', qOpts)
 // const q_w3f_nominations_update = new Queue('w3f_nominations_update', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
-const w_health_check = new Worker('health_check', f_health_check, qOpts)
 const w_checkService = new Worker('checkService', checkService, qOpts)
+// const w_health_check = new Worker('health_check', f_health_check, qOpts)
 // const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
 // const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
 // const w_w3f_nominators_update = new Worker('w3f_nominators_update', f_w3f_nominators_update, qOpts)
@@ -87,7 +86,7 @@ const w_checkService = new Worker('checkService', checkService, qOpts)
 // const w_dock_auto_payout = new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
 
 // handle all error/failed
-jobs.forEach(job => {
+jobs.forEach((job) => {
   const worker = eval(`w_${job}`)
   worker.on('error', (err) => onError(job, err))
   worker.on('failed', (event) => onFailed(job, event))
@@ -103,7 +102,7 @@ jobs.forEach(job => {
 //   }
 // }
 
-async function clearQueue (jobname) {
+async function clearQueue(jobname) {
   let qname = eval(`q_${jobname}`)
   await qname.pause()
   // // Removes all jobs that are waiting or delayed, but not active, completed or failed
@@ -112,10 +111,9 @@ async function clearQueue (jobname) {
   await qname.resume()
 }
 
-(async () => {
-
+;(async () => {
   // on startup, drain the queues and start again
-  async function clearQueues () {
+  async function clearQueues() {
     await asyncForeach(jobs, clearQueue)
   }
 
@@ -148,12 +146,12 @@ async function clearQueue (jobname) {
   await clearQueues()
   // await addJobs()
 
-  const serverAdapter = new ExpressAdapter();
-  serverAdapter.setBasePath('/admin/queues');
+  const serverAdapter = new ExpressAdapter()
+  serverAdapter.setBasePath('/admin/queues')
   // const queueMQ = new QueueMQ()
   const { setQueues, replaceQueues } = createBullBoard({
     queues: [
-      new BullMQAdapter(q_health_check, { readOnlyMode: false }),
+      // new BullMQAdapter(q_health_check, { readOnlyMode: false }),
       new BullMQAdapter(q_checkService, { readOnlyMode: false }),
       // new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
@@ -166,12 +164,11 @@ async function clearQueue (jobname) {
     ],
     serverAdapter: serverAdapter,
   })
-  const app = express();
-  app.use('/admin/queues', serverAdapter.getRouter());
+  const app = express()
+  app.use('/admin/queues', serverAdapter.getRouter())
   app.listen(3000, () => {
-    console.log('Running on 3000...');
-    console.log('For the UI, open http://localhost:3000/admin/queues');
+    console.log('Running on 3000...')
+    console.log('For the UI, open http://localhost:3000/admin/queues')
     // console.log('Make sure Redis is running on port 6379 by default');
-  });
-  
+  })
 })()

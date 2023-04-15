@@ -1,20 +1,14 @@
 <template>
-
-<div class="columns">
-  <div class="column is-1 is-narrow-mobile"></div>
-  <div class="column">
-    <div class="chart-container" style="position: relative; height:40vh;">
-      <!-- <canvas id="myChart"></canvas> -->
-      <LineChart
-        id="myChart"
-        :options="chartOptions"
-        :data="chartData"
-      ></LineChart>
+  <div class="columns">
+    <div class="column is-1 is-narrow-mobile"></div>
+    <div class="column">
+      <div class="chart-container" style="position: relative; height: 40vh">
+        <!-- <canvas id="myChart"></canvas> -->
+        <LineChart id="myChart" :options="chartOptions" :data="chartData"></LineChart>
+      </div>
     </div>
+    <div class="column is-1 is-narrow-mobile"></div>
   </div>
-  <div class="column is-1 is-narrow-mobile"></div>
-</div>
-
 </template>
 
 <script lang="ts">
@@ -22,8 +16,27 @@ import { defineComponent } from 'vue'
 import moment from 'moment'
 
 import { Line as LineChart } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale, LineController } from 'chart.js'
-ChartJS.register(Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale, LineController)
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  LineController,
+} from 'chart.js'
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  LineController
+)
 
 // interface IData {
 //   chartOptions: Record<string, any>
@@ -47,52 +60,57 @@ export default defineComponent({
   props: {
     healthChecks: {
       type: Array,
-      default: () => { return [] }
-    }
+      default: () => {
+        return []
+      },
+    },
   },
   computed: {
-    chartData (): Record<string, any> {
+    chartData(): Record<string, any> {
       return {
         // labels: ['January', 'February', 'March'],
         // datasets: [{ data: [40, 20, 12] }]
         labels: this.labels, // <%-JSON.stringify(labels) %>,
-        datasets: [{
-          label: 'Service performance (ms)',
-          // data: [12, 19, 3, 5, 2, 3],
-          data: this.data,
-          borderColor: 'darkblue',
-          backgroundColor: 'blue',
-          borderWidth: 2,
-          lineTension: 0.2
-        }, {
-          label: 'Moving Average',
-          data: this.moveMean,
-          borderColor: 'darkgreen',
-          backgroundColor: 'green',
-          borderWidth: 1,
-          lineTension: 0.2
-        }]
+        datasets: [
+          {
+            label: 'Service performance (ms)',
+            // data: [12, 19, 3, 5, 2, 3],
+            data: this.data,
+            borderColor: 'darkblue',
+            backgroundColor: 'blue',
+            borderWidth: 2,
+            lineTension: 0.2,
+          },
+          {
+            label: 'Moving Average',
+            data: this.moveMean,
+            borderColor: 'darkgreen',
+            backgroundColor: 'green',
+            borderWidth: 1,
+            lineTension: 0.2,
+          },
+        ],
       } as any
-    }
+    },
   },
   watch: {
-    healthChecks () {
+    healthChecks() {
       this.makeChartData()
-    }
+    },
   },
-  data () {
+  data() {
     return {
       chartOptions: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
       },
       data: [] as any[],
       labels: [] as string[],
-      moveMean: [] as number[]
+      moveMean: [] as number[],
     }
   },
   methods: {
-    makeChartData () {
+    makeChartData() {
       console.debug('makeChartData()')
       const reversed = [...this.healthChecks].reverse() || []
       this.data = reversed.map((hc: any) => hc.record?.performance || 0)
@@ -141,13 +159,13 @@ export default defineComponent({
       //   }]
       // } as any
       console.debug(this.chartData)
-    }
+    },
   },
-  mounted () {
+  mounted() {
     console.debug('CheckChart.vue: mounted()', this.healthChecks)
     // eslint-disable-next-line
     this.makeChartData()
     // this.healthChecks.reverse() // put it back!
-  }
+  },
 })
 </script>

@@ -5,7 +5,6 @@ services:
     image: parity/polkadot
 
     ports:
-      - "9444:9444"
+      - '9444:9444'
     environment:
       - name=value
-    

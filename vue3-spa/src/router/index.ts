@@ -33,33 +33,33 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: Home
+    component: Home,
   },
   {
     path: '/config',
     name: 'config',
-    component: Config
+    component: Config,
   },
   {
     path: '/member',
     name: 'Members',
-    component: Members
+    component: Members,
   },
   {
     path: '/member/:memberId',
     name: 'Member',
-    component: Member
+    component: Member,
   },
   {
     path: '/service',
     name: 'Services',
-    component: Services
+    component: Services,
   },
   {
     path: '/service/:serviceUrl',
     name: 'Service',
     component: Service,
-    props: true
+    props: true,
   },
   { path: '/endpoint', name: 'Endpoints', component: Endpoints },
   { path: '/endpoint/:endpointUrl', name: 'Endpoint', component: Endpoint, props: true },
@@ -68,18 +68,18 @@ const routes = [
   {
     path: '/healthCheck',
     name: 'Checks',
-    component: Checks
+    component: Checks,
   },
   {
     path: '/healthCheck/:id',
     name: 'Check',
     component: Check,
-    props: true
+    props: true,
   },
   {
     path: '/sign',
     name: 'Sign',
-    component: Message
+    component: Message,
   },
   // {
   //   path: '/about',

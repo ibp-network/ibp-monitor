@@ -1,8 +1,7 @@
 <template>
-
   <v-app-bar color="rgb(54,54,54)">
     <v-app-bar-title>
-      <v-btn color="white" to="/" style="min-height: 25px;">
+      <v-btn color="white" to="/" style="min-height: 25px">
         <v-img src="/image/IBP2.png" width="28" height="28"></v-img>
         &nbsp;IBP Dashboard
       </v-btn>
@@ -43,9 +42,12 @@
     </v-toolbar-items>
     <v-spacer></v-spacer>
 
-    <v-app-bar-nav-icon color="white" class="d-flex d-sm-none" @click="toggleNavBar()"></v-app-bar-nav-icon>
+    <v-app-bar-nav-icon
+      color="white"
+      class="d-flex d-sm-none"
+      @click="toggleNavBar()"
+    ></v-app-bar-nav-icon>
   </v-app-bar>
-
 </template>
 
 <script lang="ts">
@@ -53,31 +55,31 @@ import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 
 export default defineComponent({
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
   computed: {
-    ...mapState(['packageVersion', 'apiVersion'])
+    ...mapState(['packageVersion', 'apiVersion']),
   },
-  data () {
+  data() {
     return {
-      isActive: false
+      isActive: false,
     }
   },
   methods: {
-    toggleNavBar () {
+    toggleNavBar() {
       this.isActive = !this.isActive
       this.store.dispatch('toggleSideBar')
     },
-    navTo (route: string) {
+    navTo(route: string) {
       this.isActive = false
       // console.debug(this.$route)
       if (this.$route.path !== route) {
         this.$router.push(route)
       }
-    }
-  }
+    },
+  },
 })
 </script>
 

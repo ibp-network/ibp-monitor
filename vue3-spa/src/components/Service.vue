@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
-
     <v-toolbar>
       <v-btn icon to="/service"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
@@ -10,31 +9,42 @@
       <tbody>
         <tr>
           <th>Name</th>
-          <td>{{service.name}}</td>
+          <td>{{ service.name }}</td>
         </tr>
         <tr>
           <th>Level Required</th>
-          <td>{{service.level_required}}</td>
+          <td>{{ service.level_required }}</td>
         </tr>
         <tr>
           <th>Status</th>
-          <td>{{service.status}}</td>
+          <td>{{ service.status }}</td>
         </tr>
         <tr v-if="service.parachain">
           <th>Parachain</th>
-          <td>Yes (on: <a @click="gotoService(service.parentId)">{{service.parentId}}</a>)</td>
+          <td>
+            Yes (on: <a @click="gotoService(service.parentId)">{{ service.parentId }}</a
+            >)
+          </td>
         </tr>
         <!-- <tr>
           <th>Error count</th>
           <td>{{service.errorCount}}</td>
         </tr> -->
-        <tr v-if="service.status ==='active'">
+        <tr v-if="service.status === 'active'">
           <th>Polkadot.js</th>
           <td>
-            <div v-for="domain in domains" v-bind:key="domain.id" v-show="domain.level_required >= service.level_required">
-              <a :href="`https://polkadot.js.org/apps/?rpc=wss://${domain.id}/${service.endpoint}`" target="_blank">
-                wss://{{ domain.id }}/{{ service.endpoint }}            
-              </a> (level: {{ domain.level_required }})
+            <div
+              v-for="domain in domains"
+              v-bind:key="domain.id"
+              v-show="domain.level_required >= service.level_required"
+            >
+              <a
+                :href="`https://polkadot.js.org/apps/?rpc=wss://${domain.id}/${service.endpoint}`"
+                target="_blank"
+              >
+                wss://{{ domain.id }}/{{ service.endpoint }}
+              </a>
+              (level: {{ domain.level_required }})
             </div>
             <!-- <a v-show="service.status==='active'" :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.dotters.network/${service.endpoint}`" target="_blank">
               IBP.1: wss://rpc.dotters.network/{{ service.endpoint }}
@@ -45,7 +55,6 @@
             </a> -->
           </td>
         </tr>
-
       </tbody>
     </table>
 
@@ -57,29 +66,33 @@
 
     <!-- <v-window v-model="activeTab" direction="false">
     <v-window-item value="performance"> -->
-    <v-container v-show="activeTab==='performance'">
+    <v-container v-show="activeTab === 'performance'">
       <a :href="`/api/metrics/${service.id}`" target="_blank">
-        Prometheus
-        &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px">
+        Prometheus &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px" />
       </a>
       <CheckChart :healthChecks="service.healthChecks"></CheckChart>
     </v-container>
     <!-- </v-window-item>
     <v-window-item value="members"> -->
-    <v-container v-show="activeTab==='members'">
+    <v-container v-show="activeTab === 'members'">
       <MemberList :list="membersForService"></MemberList>
     </v-container>
     <!-- </v-window-item>
     <v-window-item value="checks"> -->
-    <v-container v-show="activeTab==='checks'">
-      <CheckTable v-if="$vuetify.display.width > 599" :healthChecks="service.healthChecks" :columns="['id', 'memberId', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
-      <CheckList v-if="$vuetify.display.width < 600" :healthChecks="service.healthChecks"></CheckList>
+    <v-container v-show="activeTab === 'checks'">
+      <CheckTable
+        v-if="$vuetify.display.width > 599"
+        :healthChecks="service.healthChecks"
+        :columns="['id', 'memberId', 'source', 'version', 'performance', 'updatedAt']"
+      ></CheckTable>
+      <CheckList
+        v-if="$vuetify.display.width < 600"
+        :healthChecks="service.healthChecks"
+      ></CheckList>
       <!-- </v-window-item>
     </v-window> -->
     </v-container>
-
   </v-container>
-
 </template>
 
 <script lang="ts">
@@ -106,9 +119,9 @@ export default defineComponent({
     PeerTable,
     CheckChart,
     CheckTable,
-    CheckList
+    CheckList,
   },
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
@@ -117,42 +130,42 @@ export default defineComponent({
     ...mapState('service', ['service']),
     ...mapState('member', { members: 'list' }),
     ...mapState('domain', { domains: 'list' }),
-    membersForService (): IMember[] {
-      return this.members.filter ((m: IMember) => m.current_level >= this.service.level_required)
-    }
+    membersForService(): IMember[] {
+      return this.members.filter((m: IMember) => m.current_level >= this.service.level_required)
+    },
   },
   watch: {
-    service (newVal) {
+    service(newVal) {
       console.debug('watch.service', newVal)
-    }
+    },
   },
   methods: {
     gotoService(serviceId: string) {
       this.store.dispatch('service/setService', serviceId)
       this.$router.push(`/service/${serviceId}`)
     },
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    moment: moment
+    moment: moment,
   },
-  data () {
+  data() {
     return {
-      activeTab: 'performance'
+      activeTab: 'performance',
     }
   },
-  created () {
+  created() {
     console.debug(this.$route.params)
     this.store.dispatch('service/setService', this.$route.params.serviceUrl)
   },
-  mounted () {
+  mounted() {
     this.$nextTick(() => {
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
     })
-  }
+  },
 })
 </script>

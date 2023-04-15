@@ -6,9 +6,8 @@
         <li class="is-active">&nbsp;&nbsp;Config</li>
       </ul>
     </nav>
-<pre>{{ config }}</pre>
+    <pre>{{ config }}</pre>
   </section>
-
 </template>
 
 <script lang="ts">
@@ -20,10 +19,10 @@ export default defineComponent({
   name: 'ServiceC',
   components: {},
   computed: {
-    ...mapState(['config'])
+    ...mapState(['config']),
   },
-  created () {
+  created() {
     console.debug('Config.vue created')
-  }
+  },
 })
 </script>

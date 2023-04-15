@@ -12,8 +12,8 @@ export default defineConfig({
     outDir: '../static',
   },
   plugins: [
-    vue({ 
-      template: { transformAssetUrls }
+    vue({
+      template: { transformAssetUrls },
     }),
     // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({
@@ -23,27 +23,19 @@ export default defineConfig({
   define: { 'process.env': {} },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
-    extensions: [
-      '.js',
-      '.json',
-      '.jsx',
-      '.mjs',
-      '.ts',
-      '.tsx',
-      '.vue',
-    ],
+    extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
   server: {
     port: 30001,
     // https://vitejs.dev/config/server-options.html#server-proxy
     proxy: {
-      '/api': 'http://localhost:30002'
+      '/api': 'http://localhost:30002',
       // '/api': {
       //   target: 'http://localhost/30002',
       //   changeOrigin: true
       // }
-    }
+    },
   },
 })

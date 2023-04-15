@@ -1,9 +1,9 @@
 <template>
   <v-app>
-    <SideNav></SideNAv>
+    <SideNav></SideNav>
     <NavBar></NavBar>
     <v-main>
-      <router-view v-slot="{ Component}">
+      <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in" :duration="150">
           <component :is="Component" />
         </transition>
@@ -15,7 +15,6 @@
 </template>
 
 <script lang="ts">
-
 import { defineComponent } from 'vue'
 import { useStore } from 'vuex'
 import NavBar from './components/NavBar.vue'
@@ -28,11 +27,10 @@ export default defineComponent({
     NavBar,
     SideNav,
     // eslint-disable-next-line
-    Footer
+    Footer,
   },
-  setup () {
+  setup() {
     useStore().dispatch('init')
-  }
+  },
 })
-
 </script>

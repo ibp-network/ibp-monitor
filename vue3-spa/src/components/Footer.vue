@@ -2,7 +2,10 @@
   <v-footer app color="rgb(54,54,54)">
     <v-toolbar density="compact" color="rgb(54,54,54)">
       <span style="color: white">
-        <sup><small><i class="fa-regular fa-circle-check"></i></small></sup> Local MonitorId:
+        <sup
+          ><small><i class="fa-regular fa-circle-check"></i></small
+        ></sup>
+        Local MonitorId:
         <router-link :to="`/monitor/${localMonitorId}`">{{ localMonitorId }}</router-link>
       </span>
 
@@ -11,17 +14,17 @@
       <v-btn color="white" text>
         <small>
           <!-- <small> -->
-          ui: {{packageVersion}} <br>
+          ui: {{ packageVersion }} <br />
           api: {{ apiVersion }}
           <!-- </small> -->
         </small>
       </v-btn>
 
       <!-- <v-avatar sizze="x-small"> -->
-        <v-btn icon color="white" href="https://github.com/ibp-network/ibp-monitor" target="_blank">
-          <!-- <img src="/image/github-logo.png" width="24" height="24">&nbsp;github -->
-          <v-icon>mdi-github</v-icon>
-        </v-btn>
+      <v-btn icon color="white" href="https://github.com/ibp-network/ibp-monitor" target="_blank">
+        <!-- <img src="/image/github-logo.png" width="24" height="24">&nbsp;github -->
+        <v-icon>mdi-github</v-icon>
+      </v-btn>
       <!-- </v-avatar> -->
 
       <!--
@@ -38,7 +41,7 @@
       </a>
     </div>
     -->
-  </v-toolbar>
+    </v-toolbar>
   </v-footer>
 </template>
 
@@ -49,7 +52,7 @@ import { mapState } from 'vuex'
 export default defineComponent({
   name: 'FooterC',
   computed: {
-    ...mapState(['packageVersion', 'apiVersion', 'localMonitorId'])
-  }
+    ...mapState(['packageVersion', 'apiVersion', 'localMonitorId']),
+  },
 })
 </script>

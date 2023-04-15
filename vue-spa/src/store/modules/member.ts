@@ -16,27 +16,27 @@ const member: Module<IState, IRootState> = {
   state: {
     list: [],
     model: {},
-    healthChecks: []
+    healthChecks: [],
   },
   mutations: {
-    SET_LIST (state: IState, list: any[]) {
+    SET_LIST(state: IState, list: any[]) {
       state.list = list
     },
-    SET_MODEL (state: IState, value: any) {
+    SET_MODEL(state: IState, value: any) {
       console.debug('SET_MODEL()', value)
       state.model = value
-    }
+    },
   },
   actions: {
-    async getList ({ commit, dispatch }: any) {
+    async getList({ commit, dispatch }: any) {
       const res = await axios.get('/api/member')
       commit('SET_LIST', res.data.members)
     },
-    async setModel ({ state, commit }: any, memberId: string) {
+    async setModel({ state, commit }: any, memberId: string) {
       const res = await axios.get(`/api/member/${memberId}`)
       commit('SET_MODEL', { ...res.data.member, healthChecks: res.data.healthChecks })
-    }
-  }
+    },
+  },
 }
 
 export default member

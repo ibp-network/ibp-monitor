@@ -21,10 +21,8 @@ const memberModel = {
     tableName: 'member',
     timestamps: true,
     createdAt: true,
-    updatedAt: true
-  }
+    updatedAt: true,
+  },
 }
 
-export {
-  memberModel
-}
+export { memberModel }

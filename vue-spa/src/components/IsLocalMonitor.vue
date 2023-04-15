@@ -9,13 +9,13 @@ import { mapState } from 'vuex'
 export default defineComponent({
   name: 'IsLocalMonitor',
   computed: {
-    ...mapState(['localMonitorId'])
+    ...mapState(['localMonitorId']),
   },
   props: {
     monitorId: {
-      type: String
-    }
-  }
+      type: String,
+    },
+  },
   // mounted () {
   //   console.debug('IsLocalMonitor', this.localMonitorId === this.monitorId, this.localMonitorId, this.monitorId)
   // }

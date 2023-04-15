@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="ma-0 pa-0">
-
     <!-- <v-breadcrumbs class="d-none d-sm-flex">
       <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
       <v-breadcrumbs-divider></v-breadcrumbs-divider>
@@ -13,8 +12,11 @@
     </v-toolbar>
 
     <MemberList v-if="showList" :list="list" class="d-inline s-sm-none"></MemberList>
-    <MemberTable v-if="!showList" :list="list" :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp']"></MemberTable>
-
+    <MemberTable
+      v-if="!showList"
+      :list="list"
+      :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp']"
+    ></MemberTable>
   </v-container>
 </template>
 
@@ -28,21 +30,21 @@ export default defineComponent({
   name: 'MonitorsC',
   components: {
     MemberTable,
-    MemberList
+    MemberList,
   },
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
   computed: {
     ...mapState('member', ['list']),
-    showList () {
+    showList() {
       // console.debug('width', this.$vuetify.display.width)
-      return (this.$vuetify.display.width < 600)
-    }
+      return this.$vuetify.display.width < 600
+    },
   },
-  created () {
+  created() {
     this.store.dispatch('member/getList')
-  }
+  },
 })
 </script>

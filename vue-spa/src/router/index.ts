@@ -17,60 +17,60 @@ export default createRouter({
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: Home,
     },
     {
       path: '/config',
       name: 'config',
-      component: Config
+      component: Config,
     },
     {
       path: '/member',
       name: 'Members',
-      component: Members
+      component: Members,
     },
     {
       path: '/member/:memberId',
       name: 'Member',
-      component: Member
+      component: Member,
     },
     {
       path: '/service',
       name: 'Services',
-      component: Services
+      component: Services,
     },
     {
       path: '/service/:serviceUrl',
       name: 'Service',
       component: Service,
-      props: true
+      props: true,
     },
     {
       path: '/monitor',
       name: 'Monitors',
-      component: Monitors
+      component: Monitors,
     },
     {
       path: '/monitor/:monitorId',
       name: 'Monitor',
       component: Monitor,
-      props: true
+      props: true,
     },
     {
       path: '/healthCheck',
       name: 'Checks',
-      component: Checks
+      component: Checks,
     },
     {
       path: '/healthCheck/:id',
       name: 'Check',
       component: Check,
-      props: true
+      props: true,
     },
     {
       path: '/sign',
       name: 'Sign',
-      component: Message
+      component: Message,
     },
     {
       path: '/about',
@@ -78,7 +78,7 @@ export default createRouter({
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-    }
-  ]
+      component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue'),
+    },
+  ],
 })

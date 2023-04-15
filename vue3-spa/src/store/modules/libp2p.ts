@@ -56,19 +56,19 @@ const libp2p: Module<IState, IRootState> = {
     //   const res = await axios.get(`/api/healthCheck/${monitorId}`)
     //   commit('SET_HEALTH_CHECK', res.data.model)
     // }
-    peerDiscovery ({ commit }: any, event: any) {
+    peerDiscovery({ commit }: any, event: any) {
       console.debug('peerDiscovery()', event.detail.id.toString())
     },
-    peerConnect ({ commit }: any, event: any) {
+    peerConnect({ commit }: any, event: any) {
       console.debug('peerConnect()', event.detail.remotePeer.toString())
     },
-    peerDisconnect ({ commit }: any, event: any) {
+    peerDisconnect({ commit }: any, event: any) {
       console.debug('peerDisconnect()', event)
     },
-    pubsubMessage ({ commit }: any, message: any) {
+    pubsubMessage({ commit }: any, message: any) {
       console.debug('peerDisconnect()', message)
-    }
-  }
+    },
+  },
 }
 
 export default libp2p

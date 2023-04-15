@@ -17,9 +17,9 @@ services:
       context: ../.
       dockerfile: docker/Dockerfile.frontend
       args:
-        RELEASE: "latest"
+        RELEASE: 'latest'
     ports:
-      - "30001:80"
+      - '30001:80'
     volumes:
       - ../static:/usr/share/nginx/html
     depends_on:
@@ -32,11 +32,11 @@ services:
       context: ../.
       dockerfile: docker/Dockerfile.api
       args:
-        RELEASE: "latest"
+        RELEASE: 'latest'
         HTTP_PORT: 30002
     # no ports, we'll proxy from frontend
     ports:
-      - "30002:30002"
+      - '30002:30002'
     environment:
       - HTTP_PORT=30002
     volumes:
@@ -52,12 +52,12 @@ services:
       context: ../.
       dockerfile: docker/Dockerfile.server
       args:
-        RELEASE: "latest"
+        RELEASE: 'latest'
     restart: on-failure
     depends_on:
       - ibp-datastore
     ports:
-      - "30000:30000"  # p2p port
+      - '30000:30000' # p2p port
     volumes:
       - ../config:/home/ibp/config
       - ../keys:/home/ibp/keys
@@ -76,7 +76,7 @@ services:
     environment:
       MARIADB_ROOT_PASSWORD: thisIsASecret
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - ../data/mariadb:/var/lib/mysql
       - ../data/schema.mysql.sql:/docker-entrypoint-initdb.d/schema.sql:ro
@@ -92,7 +92,7 @@ services:
     container_name: ibp-redis
     image: redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
 
   ibp-bullmq:
     container_name: ibp-bullmq
@@ -100,14 +100,14 @@ services:
       context: ../.
       dockerfile: docker/Dockerfile.bullmq
       args:
-        RELEASE: "latest"
+        RELEASE: 'latest'
     restart: on-failure
     depends_on:
       - ibp-datastore
       - ibp-redis
     ports:
-      - "3000:3000"  # http port
+      - '3000:3000' # http port
     volumes:
       # - ../config/config.local.js:/config/config.local.js
       - ../config:/home/app/config
-    command: ["node", "workers.js"]
+    command: ['node', 'workers.js']

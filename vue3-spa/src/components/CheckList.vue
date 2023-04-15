@@ -1,5 +1,4 @@
 <template>
-
   <v-list lines="two">
     <!--
       {"peerId":"12D3KooWR87dpwfWdg8nQVx243ugPM66vFCcVVQCUu7Cn733YY9q","chain":"Kusama",
@@ -15,20 +14,19 @@
       </template>
 
       <v-list-item-title>
-        <span class="text-caption">#{{ hc.id }}.</span> {{ hc.serviceId }},  {{ hc.memberId }}
+        <span class="text-caption">#{{ hc.id }}.</span> {{ hc.serviceId }}, {{ hc.memberId }}
       </v-list-item-title>
       <v-list-item-subtitle>
-        at {{formatDateTime(hc.createdAt)}}, by: {{shortStash(hc.monitorId)}} ({{hc.source}})
+        at {{ formatDateTime(hc.createdAt) }}, by: {{ shortStash(hc.monitorId) }} ({{ hc.source }})
       </v-list-item-subtitle>
 
       <template v-slot:append>
-        {{hc.record?.performance?.toFixed(4)}}
+        {{ hc.record?.performance?.toFixed(4) }}
       </template>
     </v-list-item>
 
     <Loading :loading="loading"></Loading>
   </v-list>
-
 </template>
 
 <script lang="ts">
@@ -47,7 +45,7 @@ const levels: Record<string, string> = {
   info: 'info-dark',
   success: 'success-dark',
   warning: 'warning-dark',
-  error: 'danger'
+  error: 'danger',
 }
 const colors: Record<string, string> = {
   debug: 'grey',
@@ -55,54 +53,62 @@ const colors: Record<string, string> = {
   info: 'primary',
   success: 'success',
   warning: 'warning',
-  error: 'danger'
+  error: 'danger',
 }
 const icons: Record<string, string> = {
-  debug:   'mdi-magnify', // 'fa-solid fa-magnifying-glass',
-  log:     'mdi-information-outline', //'fa-solid fa-circle-info',
-  info:    'mdi-information-outline', // 'fa-solid fa-circle-info',
+  debug: 'mdi-magnify', // 'fa-solid fa-magnifying-glass',
+  log: 'mdi-information-outline', //'fa-solid fa-circle-info',
+  info: 'mdi-information-outline', // 'fa-solid fa-circle-info',
   success: 'mdi-check-circle-outline', // 'fa-solid fa-circle-check',
   warning: 'mdi-alert-circle-outline', // 'fa-solid fa-circle-exclamation',
-  error:   'mdi-alert-circle', // 'fa-solid fa-triangle-exclamation'
+  error: 'mdi-alert-circle', // 'fa-solid fa-triangle-exclamation'
 }
 
 export default defineComponent({
   name: 'PeerTable',
   components: {
     Loading,
-    IsLocalMonitor
+    IsLocalMonitor,
   },
   props: {
     columns: {
       type: Array,
-      default () { return ['peerId', 'createdAt', 'updatedAt'] }
+      default() {
+        return ['peerId', 'createdAt', 'updatedAt']
+      },
       // services?
     },
     healthChecks: {
       // type: Array
-      type: Object as PropType<[IHealthCheck]>, 
-   },
+      type: Object as PropType<[IHealthCheck]>,
+    },
     loading: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   computed: {
-    ...mapState(['dateTimeFormat', 'localMonitorId'])
+    ...mapState(['dateTimeFormat', 'localMonitorId']),
   },
-  data () {
+  data() {
     return {
       // columns: []
     }
   },
   methods: {
     shortStash: shortStash,
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    getLevelClass (level: string) { return levels[level] || level },
-    getLevelColor (level: string) { return colors[level] || level },
-    getLevelIcon (level: string) { return icons[level] || 'fa-circle-question' },
-    moment: moment
-  }
+    getLevelClass(level: string) {
+      return levels[level] || level
+    },
+    getLevelColor(level: string) {
+      return colors[level] || level
+    },
+    getLevelIcon(level: string) {
+      return icons[level] || 'fa-circle-question'
+    },
+    moment: moment,
+  },
 })
 </script>

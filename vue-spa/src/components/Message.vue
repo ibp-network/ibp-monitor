@@ -1,6 +1,5 @@
 <template>
   <div class="section">
-
     <p class="title h4">Signature page</p>
 
     <!-- <input v-model="injected" id="injected" label="injected" type="text" disabled> -->
@@ -9,7 +8,9 @@
       <div class="control">
         <div class="select">
           <select v-model="selPlugin">
-            <option v-for="(plugin, idx) in injected" v-bind:key="idx" :value="plugin">{{plugin.name}} ({{plugin.version}})</option>
+            <option v-for="(plugin, idx) in injected" v-bind:key="idx" :value="plugin">
+              {{ plugin.name }} ({{ plugin.version }})
+            </option>
           </select>
           <!-- {{selPlugin}} -->
         </div>
@@ -25,7 +26,7 @@
         <div class="select">
           <select v-model="selAccount">
             <option v-for="(account, idx) in filteredAccounts" v-bind:key="idx" :value="account">
-              {{account.meta.name}} ({{shortStash(account.address)}})
+              {{ account.meta.name }} ({{ shortStash(account.address) }})
             </option>
           </select>
           <!-- {{filteredAccounts.length}} {{selAccount}} -->
@@ -35,9 +36,14 @@
         </div>
       </div>
     </div>
-    <br>
+    <br />
 
-    <textarea v-model="message" id="message" class="textarea" placeholder="e.g. Enter your message here">
+    <textarea
+      v-model="message"
+      id="message"
+      class="textarea"
+      placeholder="e.g. Enter your message here"
+    >
   {
     "hello": "world"
   }
@@ -45,7 +51,12 @@
     <button class="button" @click="sign()">Sign</button>
 
     <p class="title h4">Signature</p>
-    <textarea v-model="result" id="signature" class="textarea" placeholder="Signature will display here"></textarea>
+    <textarea
+      v-model="result"
+      id="signature"
+      class="textarea"
+      placeholder="Signature will display here"
+    ></textarea>
 
     <div class="control has-icons-left">
       <label class="label">Peer</label>
@@ -53,7 +64,7 @@
         <div class="select">
           <select v-model="selPeer">
             <option v-for="(peer, idx) in peers" v-bind:key="idx" :value="peer">
-              {{peer.id}} ({{peer.remotePeer.toString()}})
+              {{ peer.id }} ({{ peer.remotePeer.toString() }})
             </option>
           </select>
           <!-- {{filteredAccounts.length}} {{selAccount}} -->
@@ -65,7 +76,6 @@
     </div>
     <button class="button" @click="submit()">Submit</button>
   </div>
-
 </template>
 
 <script lang="ts">
@@ -143,11 +153,11 @@ export default defineComponent({
   name: 'MessageC',
   computed: {
     ...mapState(['localMonitorId']),
-    filteredAccounts (): any[] {
+    filteredAccounts(): any[] {
       return this.accounts.filter((f: IAccount) => f.meta.source === this.selPlugin.name)
-    }
+    },
   },
-  data () {
+  data() {
     return {
       injected: [] as IPlugin[],
       selPlugin: {} as IPlugin,
@@ -156,35 +166,35 @@ export default defineComponent({
       accounts: [] as IAccount[],
       selAccount: {} as IAccount,
       message: '{\n    "hello": "world"\n}',
-      result: ''
+      result: '',
     }
   },
   watch: {
     selPlugin: {
       deep: true,
-      handler (newVal) {
+      handler(newVal) {
         console.debug(newVal.name, this.filteredAccounts)
         this.$nextTick().then(() => {
           console.debug('this.filteredAccounts.length', this.filteredAccounts.length)
           if (this.filteredAccounts.length > 0) this.selAccount = this.filteredAccounts[0]
         })
-      }
-    }
+      },
+    },
   },
   methods: {
     shortStash,
-    async allInjected () {
-      this.injected = await web3Enable('Dotsama IBP Monitor') as []
+    async allInjected() {
+      this.injected = (await web3Enable('Dotsama IBP Monitor')) as []
     },
-    async allAccounts () {
+    async allAccounts() {
       if (!this.injected) await this.allInjected()
       const web3accs = await web3Accounts()
       console.debug('web3accs', web3accs)
       this.accounts = web3accs as []
     },
-    submit () {
+    submit() {
       console.log('not implemented!')
-    }
+    },
     // async sign () {
     //   if (!this.injected) this.allInjected()
     //   // const accounts = await web3Accounts();
@@ -241,13 +251,15 @@ export default defineComponent({
     //   }
     // }
   },
-  async mounted () {
+  async mounted() {
     const resp = await this.allInjected()
     console.debug(resp, this.injected)
-    if (this.injected.length > 0) { this.selPlugin = this.injected[0] }
+    if (this.injected.length > 0) {
+      this.selPlugin = this.injected[0]
+    }
     this.allAccounts()
     console.debug('this.filteredAccounts.length', this.accounts, this.filteredAccounts.length)
     if (this.filteredAccounts.length > 0) this.selAccount = this.filteredAccounts[0]
-  }
+  },
 })
 </script>

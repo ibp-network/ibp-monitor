@@ -11,8 +11,10 @@
       </div>
     </nav>
 
-    <ServiceTable :services="list" :columns="['serviceUrl', 'pjs', 'name', 'memberLink', 'status', 'monitors']"></ServiceTable>
-
+    <ServiceTable
+      :services="list"
+      :columns="['serviceUrl', 'pjs', 'name', 'memberLink', 'status', 'monitors']"
+    ></ServiceTable>
   </section>
 </template>
 
@@ -38,22 +40,22 @@ import ServiceTable from './ServiceTable.vue'
 export default defineComponent({
   name: 'ServicesC',
   components: {
-    ServiceTable
+    ServiceTable,
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('service', ['list'])
+    ...mapState('service', ['list']),
   },
-  data () {
+  data() {
     return {}
   },
   methods: {
-    formatDateTime (value: any): string {
+    formatDateTime(value: any): string {
       return moment(value).format(this.dateTimeFormat)
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.$store.dispatch('service/getList')
-  }
+  },
 })
 </script>

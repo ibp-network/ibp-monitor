@@ -16,10 +16,8 @@ const serviceModel = {
     tableName: 'service',
     // timestamps: true,
     createdAt: false,
-    updatedAt: false
-  }
+    updatedAt: false,
+  },
 }
 
-export {
-  serviceModel
-}
+export { serviceModel }

@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="ma-0 pa-0">
-
     <!-- <nav class="breadcrumb" aria-label="breadcrumbs">
       <ul>
         <li><router-link to="/">Home</router-link></li>
@@ -17,19 +16,29 @@
     <table class="table">
       <tr>
         <th>Service</th>
-        <td><router-link :to="`/service/${healthCheck.serviceId}`">{{healthCheck.serviceId}}</router-link></td>
+        <td>
+          <router-link :to="`/service/${healthCheck.serviceId}`">{{
+            healthCheck.serviceId
+          }}</router-link>
+        </td>
       </tr>
       <tr>
         <th>Member2</th>
-        <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">{{healthCheck.memberId}}</td>
+        <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">
+          {{ healthCheck.memberId }}
+        </td>
       </tr>
       <tr>
         <th>Monitor</th>
-        <td><router-link :to="`/monitor/${healthCheck.monitorId}`">{{shortStash(healthCheck.monitorId)}}</router-link></td>
+        <td>
+          <router-link :to="`/monitor/${healthCheck.monitorId}`">{{
+            shortStash(healthCheck.monitorId)
+          }}</router-link>
+        </td>
       </tr>
       <tr>
         <th>Performance</th>
-        <td>{{healthCheck.record?.performance?.toFixed(2)}} ms</td>
+        <td>{{ healthCheck.record?.performance?.toFixed(2) }} ms</td>
       </tr>
     </table>
     <div class="tabs">
@@ -38,12 +47,10 @@
       </ul>
     </div>
 
-    <pre>
-{{healthCheckAsJSON()}}
+    <pre
+      >{{ healthCheckAsJSON() }}
     </pre>
-
   </v-container>
-
 </template>
 
 <script lang="ts">
@@ -56,29 +63,33 @@ export default defineComponent({
   name: 'ServiceC',
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('healthCheck', ['healthCheck'])
+    ...mapState('healthCheck', ['healthCheck']),
   },
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
   methods: {
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
     shortStash,
     moment: moment,
-    healthCheckAsJSON () {
+    healthCheckAsJSON() {
       return JSON.stringify(this.healthCheck, null, 4)
     },
     gotoMember(memberId: string) {
       // console.debug('gotoMember()', memberId)
-      this.$router.push({ path: `/member/${memberId}`, params: { memberId }, query: { tab: 'checks' } })
-    }
+      this.$router.push({
+        path: `/member/${memberId}`,
+        params: { memberId },
+        query: { tab: 'checks' },
+      })
+    },
   },
-  created () {
+  created() {
     console.debug(this.$route.params)
     this.store.dispatch('healthCheck/setHealthCheck', this.$route.params.id)
-  }
+  },
 })
 </script>

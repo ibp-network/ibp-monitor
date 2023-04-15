@@ -2,12 +2,12 @@
   <v-navigation-drawer app location="right" v-model="visible">
     <v-toolbar color="rgb(54,54,54)">
       <v-app-bar-title>
-        <v-btn color="white" to="/" style="min-height: 25px;">
+        <v-btn color="white" to="/" style="min-height: 25px">
           <v-img src="/image/IBP2.png" width="28" height="28"></v-img>
           &nbsp;Menu
         </v-btn>
       </v-app-bar-title>
-      <v-btn icon @click="visible=false">
+      <v-btn icon @click="visible = false">
         <v-icon color="white">mdi-close</v-icon>
       </v-btn>
     </v-toolbar>
@@ -23,7 +23,8 @@
         <template v-slot:prepend>
           <v-icon>mdi-server</v-icon>
         </template>
-        Services</v-list-item>
+        Services</v-list-item
+      >
       <!-- <v-list-item to="/endpoint">
         <template v-slot:prepend>
           <v-icon>mdi-connection</v-icon>
@@ -40,10 +41,10 @@
         <template v-slot:prepend>
           <v-icon>mdi-pulse</v-icon>
         </template>
-        Checks</v-list-item>
+        Checks</v-list-item
+      >
     </v-list>
-
-</v-navigation-drawer>
+  </v-navigation-drawer>
 </template>
 
 <script lang="ts">
@@ -55,14 +56,20 @@ export default defineComponent({
     const store = useStore()
     const showSideBar = computed(() => store.state.showSideBar)
     const visible = ref(false)
-    watch(() => showSideBar.value, (newVal) => {
-      visible.value = newVal
-    })
-    watch(() => visible.value, (newVal) => {
-      store.dispatch('setSideBar', newVal)
-    })
+    watch(
+      () => showSideBar.value,
+      (newVal) => {
+        visible.value = newVal
+      }
+    )
+    watch(
+      () => visible.value,
+      (newVal) => {
+        store.dispatch('setSideBar', newVal)
+      }
+    )
     return {
-      visible
+      visible,
     }
   },
 })

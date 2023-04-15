@@ -22,16 +22,16 @@ const monitor: Module<IState, IRootState> = {
   state: {
     list: [],
     monitor: {},
-    healthChecks: []
+    healthChecks: [],
   },
   mutations: {
-    SET_LIST (state: IState, list: any[]) {
+    SET_LIST(state: IState, list: any[]) {
       state.list = list
     },
-    SET_MONITOR (state: IState, value: any) {
+    SET_MONITOR(state: IState, value: any) {
       console.debug('SET_MONITOR()', value)
       state.monitor = value
-    }
+    },
   },
   // getters: {
   //   isReady () {
@@ -39,25 +39,25 @@ const monitor: Module<IState, IRootState> = {
   //   }
   // },
   actions: {
-    async getList ({ commit, dispatch }: any) {
+    async getList({ commit, dispatch }: any) {
       const res = await axios.get('/api/monitor')
       commit('SET_LIST', res.data.monitors)
       // dispatch('init')
       dispatch('setLocalMonitorId', res.data.localMonitorId, { root: true })
     },
-    async setMonitor ({ state, commit }: any, monitorId: string) {
+    async setMonitor({ state, commit }: any, monitorId: string) {
       // const service = state.list.find((f: any) => f.serviceUrl === serviceUrl)
       const res = await axios.get(`/api/monitor/${monitorId}`)
       // commit('SET_DATETIME_FORMAT', res.data.dateTimeFormat)
       commit('SET_MONITOR', { ...res.data.monitor, healthChecks: res.data.healthChecks })
       // commit('SET_MONITORS', res.data.monitors)
       // commit('SET_HEALTH_CHECKS', res.data.healthChecks)
-    }
+    },
     // setCurrency ({ commit }, c: ICurrency) {
     //   commit('SET_CURRENCY', c)
     //   commit('SET_WALLET', testWallets[c.code])
     // }
-  }
+  },
 }
 
 export default monitor

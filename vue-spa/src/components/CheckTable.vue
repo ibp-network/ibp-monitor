@@ -1,5 +1,4 @@
 <template>
-
   <table class="table is-fullwidth has-text-centered">
     <!--
       {"peerId":"12D3KooWR87dpwfWdg8nQVx243ugPM66vFCcVVQCUu7Cn733YY9q","chain":"Kusama",
@@ -26,23 +25,28 @@
         <td :class="`has-text-${getLevelClass(hc.level)} has-text-centered`">
           <i :class="getLevelIcon(hc.level)"></i>
         </td>
-        <td><router-link :to="`/healthCheck/${hc.id}`">{{hc.id}}</router-link></td>
+        <td>
+          <router-link :to="`/healthCheck/${hc.id}`">{{ hc.id }}</router-link>
+        </td>
         <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
-        <td v-if="columns.includes('serviceUrl')"><router-link :to="`/service/${encodeURIComponent(hc.serviceUrl)}`">{{hc.serviceUrl}}</router-link></td>
+        <td v-if="columns.includes('serviceUrl')">
+          <router-link :to="`/service/${encodeURIComponent(hc.serviceUrl)}`">{{
+            hc.serviceUrl
+          }}</router-link>
+        </td>
         <td v-if="columns.includes('monitorId')">
-          <router-link :to="`/monitor/${hc.monitorId}`">{{shortStash(hc.monitorId)}}</router-link>
+          <router-link :to="`/monitor/${hc.monitorId}`">{{ shortStash(hc.monitorId) }}</router-link>
           <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: hc.monitorId, localMonitorId }); -%> -->
           <sup><IsLocalMonitor :monitorId="hc.monitorId"></IsLocalMonitor></sup>
         </td>
-        <td>{{hc.source}}</td>
-        <td>{{hc.record?.version || 'unknown'}}</td>
-        <td class="has-text-right">{{hc.record?.performance?.toFixed(4)}}</td>
-        <td>{{formatDateTime(hc.createdAt)}}</td>
+        <td>{{ hc.source }}</td>
+        <td>{{ hc.record?.version || 'unknown' }}</td>
+        <td class="has-text-right">{{ hc.record?.performance?.toFixed(4) }}</td>
+        <td>{{ formatDateTime(hc.createdAt) }}</td>
       </tr>
     </tbody>
     <Loading :loading="loading"></Loading>
   </table>
-
 </template>
 
 <script lang="ts">
@@ -60,7 +64,7 @@ const levels: Record<string, string> = {
   info: 'info-dark',
   success: 'success-dark',
   warning: 'warning-dark',
-  error: 'danger'
+  error: 'danger',
 }
 const icons: Record<string, string> = {
   debug: 'fa-solid fa-magnifying-glass',
@@ -68,44 +72,50 @@ const icons: Record<string, string> = {
   info: 'fa-solid fa-circle-info',
   success: 'fa-solid fa-circle-check',
   warning: 'fa-solid fa-circle-exclamation',
-  error: 'fa-solid fa-triangle-exclamation'
+  error: 'fa-solid fa-triangle-exclamation',
 }
 
 export default defineComponent({
   name: 'PeerTable',
   components: {
     Loading,
-    IsLocalMonitor
+    IsLocalMonitor,
   },
   props: {
     columns: {
       type: Array,
-      default () { return ['peerId', 'createdAt', 'updatedAt'] }
+      default() {
+        return ['peerId', 'createdAt', 'updatedAt']
+      },
       // services?
     },
     healthChecks: {
-      type: Array
+      type: Array,
     },
     loading: {
-      type: Boolean
-    }
+      type: Boolean,
+    },
   },
   computed: {
-    ...mapState(['dateTimeFormat', 'localMonitorId'])
+    ...mapState(['dateTimeFormat', 'localMonitorId']),
   },
-  data () {
+  data() {
     return {
       // columns: []
     }
   },
   methods: {
     shortStash: shortStash,
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    getLevelClass (level: string) { return levels[level] || level },
-    getLevelIcon (level: string) { return icons[level] || 'fa-circle-question' },
-    moment: moment
-  }
+    getLevelClass(level: string) {
+      return levels[level] || level
+    },
+    getLevelIcon(level: string) {
+      return icons[level] || 'fa-circle-question'
+    },
+    moment: moment,
+  },
 })
 </script>

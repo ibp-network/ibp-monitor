@@ -18,39 +18,43 @@ const member: Module<IState, IRootState> = {
     list: [],
     model: {},
     endpoints: {},
-    healthChecks: []
+    healthChecks: [],
   },
   mutations: {
-    SET_LIST (state: IState, list: any[]) {
+    SET_LIST(state: IState, list: any[]) {
       state.list = list
     },
-    SET_MODEL (state: IState, value: any) {
+    SET_MODEL(state: IState, value: any) {
       console.debug('SET_MODEL()', value)
       state.model = value
     },
-    SET_ENDPOINTS (state: IState, value: any) {
+    SET_ENDPOINTS(state: IState, value: any) {
       console.debug('SET_ENDPOINTS()', value)
       state.endpoints = value
     },
-    SET_HEALTHCHECKS (state: IState, value: any) {
+    SET_HEALTHCHECKS(state: IState, value: any) {
       console.debug('SET_HEALTHCHECKS()', value)
       state.healthChecks = value
-    }
+    },
   },
   actions: {
-    async getList ({ commit, dispatch }: any) {
+    async getList({ commit, dispatch }: any) {
       const res = await axios.get('/api/member')
       commit('SET_LIST', res.data.members)
     },
-    async setModel ({ state, commit }: any, memberId: string) {
+    async setModel({ state, commit }: any, memberId: string) {
       const res = await axios.get(`/api/member/${memberId}`)
-      commit('SET_MODEL', { ...res.data.member, healthChecks: res.data.healthChecks, endpoints: res.data.endpoints })
+      commit('SET_MODEL', {
+        ...res.data.member,
+        healthChecks: res.data.healthChecks,
+        endpoints: res.data.endpoints,
+      })
     },
-    async getChecks ({ commit, dispatch }: any, memberId: string) {
+    async getChecks({ commit, dispatch }: any, memberId: string) {
       const res = await axios.get(`/api/member/${memberId}/healthChecks`)
       commit('SET_HEALTHCHECKS', res.data.healthChecks)
     },
-  }
+  },
 }
 
 export default member

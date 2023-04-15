@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="ma-0 pa-0">
-
     <!-- <v-breadcrumbs>
       <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
       <v-breadcrumbs-divider></v-breadcrumbs-divider>
@@ -12,7 +11,6 @@
     </v-toolbar>
 
     <MonitorTable :monitors="list" :columns="['monitorId', 'services', 'createdAt']"></MonitorTable>
-
   </v-container>
 </template>
 
@@ -24,17 +22,17 @@ import MonitorTable from './MonitorTable.vue'
 export default defineComponent({
   name: 'MonitorsC',
   components: {
-    MonitorTable
+    MonitorTable,
   },
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
   computed: {
-    ...mapState('monitor', ['list'])
+    ...mapState('monitor', ['list']),
   },
-  created () {
+  created() {
     this.store.dispatch('monitor/getList')
-  }
+  },
 })
 </script>

@@ -13,15 +13,13 @@ const healthCheckModel = {
     source: { type: DataTypes.STRING(10) }, // gossip, check
     level: { type: DataTypes.STRING(10) }, // log, error, info?
     record: { type: DataTypes.JSON },
-  }, 
+  },
   options: {
     tableName: 'health_check',
     timestamps: true,
     createdAt: true,
-    updatedAt: false
-  }
+    updatedAt: false,
+  },
 }
 
-export {
-  healthCheckModel
-}
+export { healthCheckModel }

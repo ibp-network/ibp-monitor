@@ -1,61 +1,77 @@
 'use strict'
 
-// import axios from 'axios'
-// import moment from 'moment'
-// import { createUrl, prepareDB, closeDB } from './utils.js'
-// function slog (str) { console.log('1kv-nominators:' + str) }
-// import { HealthChecker } from "./HealthChecker.js";
-// const hc = new HealthChecker()
-
+import dns from 'node:dns'
+import edns from 'evil-dns'
 import { ApiPromise, WsProvider, HttpProvider } from '@polkadot/api'
-// import { asyncForeach } from '../lib/utils.js'
+import { serializeError, deserializeError } from 'serialize-error'
 
 import { config } from '../../config/config.js'
 import { configLocal } from '../../config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
+// eDns has patched node:dns and not node:dns/promises
+async function lookupAsync(domain) {
+  return new Promise((resolve, reject) => {
+    dns.lookup(domain, (err, address, family) => {
+      if (err) reject(err)
+      resolve({ address, family })
+    })
+  })
+}
+
+const setDNS = async (domain, ip) => {
+  edns.add(domain, ip)
+  var { address } = await lookupAsync(domain)
+  console.debug(`${domain} now resolves to ${address}, and should be ${ip}`)
+}
+const clearDNS = async (domain, ip) => {
+  console.log(`removing eDns for ${domain}`)
+  edns.remove(domain, ip)
+  var { address } = await lookupAsync(domain)
+  console.log(`${domain} now resolves to ${address}\n`)
+}
+
 class TimeoutException extends Error {
-  constructor (message) {
+  constructor(message) {
     super(message)
-    this.name = 'TimeoutException';
+    this.name = 'TimeoutException'
   }
 }
 
-export async function f_health_check (job) {
+/**
+ * Similar to healthCheck-endpoint, but for IBP url at member.services_address
+ * @param {} job
+ * @returns
+ */
+export async function checkService(job) {
   // Will print { foo: 'bar'} for the first job
   // and { qux: 'baz' } for the second.
   // console.log('job.data', job.data);
 
-  const { service, monitorId } = job.data
-  console.debug('[worker] checking service', service.serviceUrl, service.status)
+  const { subdomain, member, service, monitorId } = job.data
+  console.debug('[worker] checkService', subdomain, member.id, service.id)
 
-  if (['stale', 'maintenance'].includes(service.status)) return {
-    monitorId,
-    serviceUrl: service.serviceUrl,
-    peerId: null,
-    source: 'check',
-    level: 'warning',
-    message: service.status,
-    record: {
-      monitorId,
-      serviceUrl: service.serviceUrl,
-      //chain, chainType, health, networkState, syncState, version,
-      // peerCount,
-      error: 'service stale',
-      performance: -1,
-    }
-  }
-
+  
+  // const service = services[domain]
+  const domain = `${subdomain}.dotters.network`
+  const endpoint = `wss://${domain}/${service.chainId}`
+  //const service_address = member.services_address
+  //console.debug('address', service_address)
+  
   var timeout = null
   var result
-  var peerId = ""
+  var peerId = ''
   // TODO different types of service? http / substrate / ...?
   try {
-    job.log(`f_health_check(): ${service.serviceUrl}`)
+    job.log(`checkService: ${domain}, ${member.id}, ${service.id}`)
+
+    // amend DNS
+    await setDNS(domain, member.serviceIpAddress)
 
     // catch & throw promise reject()
-    const provider = new WsProvider(service.serviceUrl, false, {}, 10 * 1000) // 10 seconds timeout
-    // any error is 'out of context' in the handler and does not stop the `await provider.isReady` 
+    // const provider = new WsProvider(service.serviceUrl, false, {}, 10 * 1000) // 10 seconds timeout
+    const provider = new WsProvider(endpoint, false, {}, 10 * 1000) // 10 seconds timeout
+    // any error is 'out of context' in the handler and does not stop the `await provider.isReady`
     // provider.on('connected | disconnected | error')
     job.log('connecting to provider...')
     // https://github.com/polkadot-js/api/issues/5249#issue-1392411072
@@ -85,7 +101,7 @@ export async function f_health_check (job) {
     job.log('connecting to api...')
     const api = await ApiPromise.create({ provider, noInitWarn: true, throwOnConnect: true })
     // api.on('error', function (err) { throw new ApiError(err.toString()) })
-    api.on('error', async (err) => { 
+    api.on('error', async (err) => {
       job.log('== got apiError for ', service.serviceUrl)
       job.log(err)
       console.log('== got apiError for ', service.serviceUrl)
@@ -110,9 +126,11 @@ export async function f_health_check (job) {
     }, 70 * 1000) // job should timeout based on jobOpts anyway
 
     job.log('getting stats from provider / api...')
+
     peerId = await api.rpc.system.localPeerId()
     const chain = await api.rpc.system.chain()
     const chainType = await api.rpc.system.chainType()
+
     // start
     var start = performance.now()
     const health = await api.rpc.system.health()
@@ -127,48 +145,66 @@ export async function f_health_check (job) {
     result = {
       // our peerId will be added by the receiver of the /ibp/healthCheck messate
       monitorId,
-      serviceUrl: service.serviceUrl,
+      serviceId: service.id,
+      memberId: member.id,
       peerId: peerId.toString(),
       source: 'check',
-      level: timing > (cfg.performance?.sla || 500) ? 'warning' : 'success',
-      record: {
+      type: 'service_check',
+      status: timing > (cfg.performance?.sla || 500) ? 'warning' : 'success',
+      responseTimeMs: timing,
+      value: {
         monitorId,
-        serviceUrl: service.serviceUrl,
-        chain, chainType, health, networkState, syncState, version,
+        memberId: member.id,
+        serviceId: service.id,
+        endpoint,
+        ipAddress: member.serviceIpAddress,
+        chain,
+        chainType,
+        health,
+        networkState,
+        syncState,
+        version,
         // peerCount,
         performance: timing,
-      }
+      },
     }
     await provider.disconnect()
     // not here, we'll do it in the app-server
     // await this.datastore.Service.update({ status: 'online' }, { where: { serviceUrl: service.serviceUrl } })
     // save healthCheck in storage
-    // console.debug('f_health_check() done 1')
+    // console.debug('checkService() done 1')
   } catch (err) {
     console.warn('[worker] WE GOT AN ERROR --------------')
     console.error(err)
     job.log('WE GOT AN ERROR --------------')
     job.log(err)
+    job.log(err.toString())
     // mark the service errorCount
     // result = await this.handleGenericError(err, service, peerId)
     result = {
-      // our peerId will be added by the receiver of the /ibp/healthCheck messate
+      // our peerId will be added by the receiver of the /ibp/healthCheck message
       monitorId,
-      serviceUrl: service.serviceUrl,
+      serviceId: service.id,
+      memberId: member.id,
       peerId: peerId?.toString() || null,
       source: 'check',
-      level: 'error',
+      type: 'service_check',
+      status: 'error',
       record: {
         monitorId,
-        serviceUrl: service.serviceUrl,
-        error: err ? err.toString() : 'unknown error',
+        memberId: member.id,
+        serviceId: service.id,
+        endpoint,
+        ip_address: member.serviceIpAddress,
+        error: serializeError(err),
         performance: -1,
-      }
+      },
     }
+  } finally {
+    if (timeout) clearTimeout(timeout)
+    await clearDNS(domain, member.serviceIpAddress)
+    console.log('[worker] checkService done...', member.id, service.id)
+    job.log('checkService done...', member.id, service.id)
+    return result
   }
-
-  if (timeout) clearTimeout(timeout)
-
-  console.log('[worker] health_check done...', service.serviceUrl)
-  return result
 }

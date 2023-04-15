@@ -1,16 +1,16 @@
 <template>
   <div>
-    <br>
+    <br />
     <!-- <div class="nav-right nav-menu is-active">this is a sidebar</div> -->
     <NavBar></NavBar>
-      <!-- <transition name="fade" mode="out-in">
+    <!-- <transition name="fade" mode="out-in">
         <router-view/>
       </transition> -->
-      <router-view v-slot="{ Component}">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+    <router-view v-slot="{ Component }">
+      <transition name="fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
     <Footer></Footer>
   </div>
 </template>
@@ -24,8 +24,8 @@ export default defineComponent({
   components: {
     NavBar,
     // eslint-disable-next-line
-    Footer
-  }
+    Footer,
+  },
 })
 </script>
 

@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier . --write"
   },
   "author": "",
   "license": "ISC",
@@ -38,10 +39,12 @@
     "mariadb": "^3.1.0",
     "moment": "^2.29.4",
     "mysql2": "^3.2.0",
+    "pg": "^8.10.0",
     "sequelize": "^6.29.3",
     "serialize-error": "^11.0.0",
     "sqlite3": "^5.1.4",
-    "uint8arrays": "^4.0.3"
+    "uint8arrays": "^4.0.3",
+    "umzug": "^3.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.21.0",
@@ -50,6 +53,8 @@
     "babel-loader": "^9.1.2",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.0",
+    "prettier": "^2.8.7",
+    "sequelize-cli": "^6.6.0",
     "webpack": "^5.76.1",
     "webpack-cli": "^5.0.1",
     "webpack-node-externals": "^3.0.0"

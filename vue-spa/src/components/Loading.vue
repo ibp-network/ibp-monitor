@@ -20,8 +20,8 @@ export default defineComponent({
   name: 'LoadingC',
   props: {
     loading: {
-      type: Boolean
-    }
-  }
+      type: Boolean,
+    },
+  },
 })
 </script>

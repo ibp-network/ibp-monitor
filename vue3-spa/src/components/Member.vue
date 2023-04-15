@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
-
     <v-toolbar>
       <v-btn icon to="/member"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ member.name || 'Member' }}</v-toolbar-title>
@@ -15,11 +14,11 @@
           <tbody>
             <tr>
               <th>Name</th>
-              <td>{{member.name}}</td>
+              <td>{{ member.name }}</td>
             </tr>
             <tr>
               <th>Membership</th>
-              <td>{{member.membership}}-{{member.current_level}}</td>
+              <td>{{ member.membership }}-{{ member.current_level }}</td>
             </tr>
             <!-- <tr>
               <th>Status</th>
@@ -27,15 +26,14 @@
             </tr> -->
             <tr>
               <th>Discovered</th>
-              <td>{{formatDateTime(member.createdAt)}}</td>
+              <td>{{ formatDateTime(member.createdAt) }}</td>
             </tr>
             <tr>
               <th>Updated</th>
-              <td>{{formatDateTime(member.updatedAt)}}</td>
+              <td>{{ formatDateTime(member.updatedAt) }}</td>
             </tr>
           </tbody>
         </table>
-
       </v-col>
       <v-col cols="4" fill-height class="text-center">
         <v-avatar size="96">
@@ -52,16 +50,28 @@
     <!-- <MemberServiceTable v-if="$vuetify.display.width > 599" :member="member" :columns="['serviceId', 'name', 'pjs']"></MemberServiceTable> -->
     <v-window v-model="activeTab">
       <v-window-item value="services">
-        <ServiceTable v-if="$vuetify.display.width > 599" :member="member" :services="servicesForMember" :columns="['logo', 'name', 'serviceId', 'pjs']"></ServiceTable>
-        <ServiceList v-if="$vuetify.display.width < 600" :member="member" :services="servicesForMember"></ServiceList>
+        <ServiceTable
+          v-if="$vuetify.display.width > 599"
+          :member="member"
+          :services="servicesForMember"
+          :columns="['logo', 'name', 'serviceId', 'pjs']"
+        ></ServiceTable>
+        <ServiceList
+          v-if="$vuetify.display.width < 600"
+          :member="member"
+          :services="servicesForMember"
+        ></ServiceList>
       </v-window-item>
       <v-window-item value="checks">
-        <CheckTable v-if="$vuetify.display.width > 599" :health-checks="healthChecks" :columns="['id', 'serviceId', 'performance']"></CheckTable>
+        <CheckTable
+          v-if="$vuetify.display.width > 599"
+          :health-checks="healthChecks"
+          :columns="['id', 'serviceId', 'performance']"
+        ></CheckTable>
         <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
       </v-window-item>
     </v-window>
   </v-container>
-
 </template>
 
 <script lang="ts">
@@ -82,15 +92,15 @@ export default defineComponent({
     ServiceTable,
     ServiceList,
     CheckTable,
-    CheckList
+    CheckList,
   },
   props: {
     tab: {
       type: String,
-      default: 'services'
-    }
+      default: 'services',
+    },
   },
-  setup (props) {
+  setup(props) {
     const store = useStore()
     const propTab = props.tab
     const activeTab = ref(propTab)
@@ -103,31 +113,31 @@ export default defineComponent({
     ...mapState('member', { member: 'model', healthChecks: 'healthChecks' }),
     servicesForMember() {
       return this.services.filter((f: IService) => f.level_required <= this.member.current_level)
-    }
+    },
   },
   methods: {
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    moment: moment
+    moment: moment,
   },
-  created () {
+  created() {
     console.debug(this.$route.params)
     if (this.member.memberId !== this.$route.params.memberId) {
       this.store.dispatch('member/setModel', this.$route.params.memberId)
     }
   },
-  mounted () {
+  mounted() {
     this.$nextTick(() => {
       window.scrollTo({
         top: 0,
         left: 0,
-        behavior: 'smooth'
+        behavior: 'smooth',
       })
     })
     var id = this.member.id || this.$route.params.memberId
     this.store.dispatch('member/getChecks', id)
     this.activeTab = this.$route.params.tab?.toString() || 'services'
-  }
+  },
 })
 </script>

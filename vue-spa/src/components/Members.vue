@@ -1,19 +1,20 @@
 <template>
   <section class="section">
-
-  <nav class="level">
-    <div class="level-left">
-      <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li class="is-active"><a href="#" aria-current="page">Members</a></li>
-        </ul>
-      </nav>
-    </div>
-  </nav>
-  <!-- <%- include(templateDir + '/monitorsTable.ejs', { monitors, columns: ['monitorId', 'services', 'createdAt'] }); -%>    -->
-  <MemberTable :members="list" :columns="['name', 'region', 'current_level', 'level_timestamp', 'services', 'createdAt']"></MemberTable>
-
+    <nav class="level">
+      <div class="level-left">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+          <ul>
+            <li><a href="/">Home</a></li>
+            <li class="is-active"><a href="#" aria-current="page">Members</a></li>
+          </ul>
+        </nav>
+      </div>
+    </nav>
+    <!-- <%- include(templateDir + '/monitorsTable.ejs', { monitors, columns: ['monitorId', 'services', 'createdAt'] }); -%>    -->
+    <MemberTable
+      :members="list"
+      :columns="['name', 'region', 'current_level', 'level_timestamp', 'services', 'createdAt']"
+    ></MemberTable>
   </section>
 </template>
 
@@ -25,13 +26,13 @@ import MemberTable from './MemberTable.vue'
 export default defineComponent({
   name: 'MonitorsC',
   components: {
-    MemberTable
+    MemberTable,
   },
   computed: {
-    ...mapState('member', ['list'])
+    ...mapState('member', ['list']),
   },
-  created () {
+  created() {
     this.$store.dispatch('member/getList')
-  }
+  },
 })
 </script>

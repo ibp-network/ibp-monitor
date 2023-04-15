@@ -1,24 +1,24 @@
 <template>
-
-<v-list>
-  <!-- <thead>
+  <v-list>
+    <!-- <thead>
     <th v-if="columns.includes('monitorId')">Monitor</th>
     <th v-if="columns.includes('services')" class="has-text-centered">Services</th>
     <th>Last Seen (UTC)</th>
     <th>Discovered</th>
   </thead> -->
     <v-list-item v-for="monitor in monitors" v-bind:key="monitor.monitorId">
-      <td v-if="columns.includes('monitorId')" style="cursor: pointer;">
-        <a @click="gotoMonitor(monitor.monitorId)">{{shortStash(monitor.monitorId)}}</a>
+      <td v-if="columns.includes('monitorId')" style="cursor: pointer">
+        <a @click="gotoMonitor(monitor.monitorId)">{{ shortStash(monitor.monitorId) }}</a>
         <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%> -->
         <sup><IsLocalMonitor :monitorId="monitor.monitorId"></IsLocalMonitor></sup>
       </td>
-      <td v-if="columns.includes('services')" class="has-text-centered">{{monitor.services?.length || 0}}</td>
-      <td>{{formatDateTime(monitor.updatedAt)}}</td>
-      <td>{{formatDateTime(monitor.createdAt)}}</td>
+      <td v-if="columns.includes('services')" class="has-text-centered">
+        {{ monitor.services?.length || 0 }}
+      </td>
+      <td>{{ formatDateTime(monitor.updatedAt) }}</td>
+      <td>{{ formatDateTime(monitor.createdAt) }}</td>
     </v-list-item>
   </v-list>
-
 </template>
 
 <script lang="ts">
@@ -32,7 +32,7 @@ import { IMonitor } from './types'
 export default defineComponent({
   name: 'MonitorTable',
   components: {
-    IsLocalMonitor
+    IsLocalMonitor,
   },
   props: {
     monitors: {
@@ -41,30 +41,32 @@ export default defineComponent({
     },
     columns: {
       type: Array,
-      default () { return ['monitorId', 'createdAt', 'updatedAt'] }
+      default() {
+        return ['monitorId', 'createdAt', 'updatedAt']
+      },
       // services?
-    }
+    },
   },
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
   computed: {
-    ...mapState(['dateTimeFormat'])
+    ...mapState(['dateTimeFormat']),
   },
   methods: {
     shortStash,
     moment,
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment.utc(value).format(this.dateTimeFormat)
     },
-    async gotoMonitor (monitorId: string) {
+    async gotoMonitor(monitorId: string) {
       await this.store.dispatch('monitor/setMonitor', monitorId)
       this.$router.push(`/monitor/${monitorId}`)
-    }
+    },
   },
-  created () {
+  created() {
     console.debug('MonitorTable', 'created')
-  }
+  },
 })
 </script>

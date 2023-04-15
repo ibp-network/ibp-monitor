@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
-
     <!-- <v-breadcrumbs>
       <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
       <v-breadcrumbs-divider></v-breadcrumbs-divider>
@@ -12,7 +11,11 @@
       <v-toolbar-title>Services</v-toolbar-title>
     </v-toolbar>
 
-    <ServiceTable  v-if="$vuetify.display.width > 599" :services="list" :columns="['logo', 'endpoint', 'pjs', 'name', 'status']"></ServiceTable>
+    <ServiceTable
+      v-if="$vuetify.display.width > 599"
+      :services="list"
+      :columns="['logo', 'endpoint', 'pjs', 'name', 'status']"
+    ></ServiceTable>
     <ServiceList v-if="$vuetify.display.width < 600" :services="list"></ServiceList>
   </v-container>
 </template>
@@ -28,26 +31,26 @@ export default defineComponent({
   name: 'ServicesC',
   components: {
     ServiceTable,
-    ServiceList
+    ServiceList,
   },
-  setup () {
+  setup() {
     const store = useStore()
     return { store }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('service', ['list'])
+    ...mapState('service', ['list']),
   },
-  data () {
+  data() {
     return {}
   },
   methods: {
-    formatDateTime (value: any): string {
+    formatDateTime(value: any): string {
       return moment(value).format(this.dateTimeFormat)
-    }
+    },
   },
-  mounted () {
+  mounted() {
     this.store.dispatch('service/getList')
-  }
+  },
 })
 </script>

@@ -33,15 +33,17 @@ export const store = createStore({
     serviceCount: 0,
     checkCount: 0,
     packageVersion: process.env.PACKAGE_VERSION || '0',
-    dateTimeFormat: 'DD/MM/YYYY HH:mm:ss'
+    dateTimeFormat: 'DD/MM/YYYY HH:mm:ss',
   },
-  getters: {
-  },
+  getters: {},
   mutations: {
-    SET_LOCAL_MONITOR_ID (state: IState, value: string) {
+    SET_LOCAL_MONITOR_ID(state: IState, value: string) {
       state.localMonitorId = value
     },
-    SET_HOME (state: IState, { version, config, localMonitorId, memberCount, monitorCount, serviceCount, checkCount }) {
+    SET_HOME(
+      state: IState,
+      { version, config, localMonitorId, memberCount, monitorCount, serviceCount, checkCount }
+    ) {
       state.apiVersion = version
       state.config = config
       state.localMonitorId = localMonitorId
@@ -50,28 +52,28 @@ export const store = createStore({
       state.serviceCount = serviceCount
       state.checkCount = checkCount
     },
-    SET_CONFIG (state: IState, config: any) {
+    SET_CONFIG(state: IState, config: any) {
       state.config = config
-    }
+    },
   },
   actions: {
-    setLocalMonitorId ({ commit }: any, value: string) {
+    setLocalMonitorId({ commit }: any, value: string) {
       commit('SET_LOCAL_MONITOR_ID', value)
     },
-    async getHome ({ commit }) {
+    async getHome({ commit }) {
       const res = await axios.get('/api/home')
       commit('SET_HOME', res.data)
     },
-    async getConfig ({ commit }) {
+    async getConfig({ commit }) {
       const res = await axios.get('/api/config')
       commit('SET_CONFIG', res.data)
-    }
+    },
   },
   modules: {
     member,
     service,
     monitor,
     healthCheck,
-    libp2p
-  }
+    libp2p,
+  },
 })

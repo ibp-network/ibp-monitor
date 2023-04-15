@@ -15,24 +15,24 @@ const service: Module<IState, IRootState> = {
     list: [],
     service: {},
     monitors: [],
-    healthChecks: []
+    healthChecks: [],
   },
   mutations: {
-    SET_LIST (state: IState, list: any[]) {
+    SET_LIST(state: IState, list: any[]) {
       state.list = list
     },
-    SET_SERVICE (state: IState, value: any) {
+    SET_SERVICE(state: IState, value: any) {
       console.debug('SET_SERVICE()', value)
       state.service = value
     },
-    SET_MONITORS (state: IState, value: any) {
+    SET_MONITORS(state: IState, value: any) {
       console.debug('SET_MONITORS()', value)
       state.monitors = value
     },
-    SET_HEALTH_CHECKS (state: IState, value: any) {
+    SET_HEALTH_CHECKS(state: IState, value: any) {
       console.debug('SET_HEALTH_CHECKS()', value)
       state.healthChecks = value
-    }
+    },
     // SET_CURRENCY (state: IState, value: ICurrency) {
     //   state.currency = value
     // },
@@ -71,25 +71,29 @@ const service: Module<IState, IRootState> = {
     //   //   await api.close()
     //   }
     // },
-    async getList ({ commit, dispatch }: any) {
+    async getList({ commit, dispatch }: any) {
       const res = await axios.get('/api/service')
       commit('SET_LIST', res.data.services)
       // dispatch('init')
       dispatch('setLocalMonitorId', res.data.localMonitorId, { root: true })
     },
-    async setService ({ state, commit }: any, serviceUrl: string) {
+    async setService({ state, commit }: any, serviceUrl: string) {
       // const service = state.list.find((f: any) => f.serviceUrl === serviceUrl)
       const res = await axios.get(`/api/service/${encodeURIComponent(serviceUrl)}`)
       // commit('SET_DATETIME_FORMAT', res.data.dateTimeFormat)
-      commit('SET_SERVICE', { ...res.data.service, monitors: res.data.monitors, healthChecks: res.data.healthChecks })
+      commit('SET_SERVICE', {
+        ...res.data.service,
+        monitors: res.data.monitors,
+        healthChecks: res.data.healthChecks,
+      })
       // commit('SET_MONITORS', res.data.monitors)
       // commit('SET_HEALTH_CHECKS', res.data.healthChecks)
-    }
+    },
     // setCurrency ({ commit }, c: ICurrency) {
     //   commit('SET_CURRENCY', c)
     //   commit('SET_WALLET', testWallets[c.code])
     // }
-  }
+  },
 }
 
 export default service

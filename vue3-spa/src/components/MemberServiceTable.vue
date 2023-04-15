@@ -2,7 +2,6 @@
   <div>
     {{ services }}
     <ServiceTable :columns="columns" :services="filteredServices"></ServiceTable>
-
   </div>
 </template>
 
@@ -19,23 +18,25 @@ export default defineComponent({
   props: {
     member: {
       type: Object as PropType<IMember>,
-      required: true
+      required: true,
     },
     columns: {
       type: Array,
-      default () { return ['memberId', 'createdAt', 'updatedAt'] }
+      default() {
+        return ['memberId', 'createdAt', 'updatedAt']
+      },
       // services?
-    }
+    },
   },
   computed: {
     ...mapState('service', { services: 'list' }),
     filteredServices() {
       console.debug(this.member, this.services)
       return this.services.filter((f: IService) => f.level_required <= this.member.current_level)
-    }
+    },
   },
-  created () {
+  created() {
     console.debug('MemberServiceTable.vue created', this.services)
-  }
+  },
 })
 </script>

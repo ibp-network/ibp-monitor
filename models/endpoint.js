@@ -17,10 +17,8 @@ const endpointModel = {
     tableName: 'endpoint',
     timestamps: true,
     createdAt: true,
-    updatedAt: true
-  }
+    updatedAt: true,
+  },
 }
 
-export {
-  endpointModel
-}
+export { endpointModel }

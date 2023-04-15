@@ -4,22 +4,22 @@
       <ul>
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/monitor">Monitors</router-link></li>
-        <li class="is-active">&nbsp;&nbsp;{{monitor.monitorId}}</li>
+        <li class="is-active">&nbsp;&nbsp;{{ monitor.monitorId }}</li>
       </ul>
     </nav>
     <table class="table is-bordered">
       <tbody>
         <tr>
           <th>Monitor ID</th>
-          <td>{{monitor.monitorId}}</td>
+          <td>{{ monitor.monitorId }}</td>
         </tr>
         <tr>
           <th>Name</th>
-          <td>{{monitor.name}}</td>
+          <td>{{ monitor.name }}</td>
         </tr>
         <tr>
           <th>Addresses</th>
-          <td>{{monitor.multiaddrs}}</td>
+          <td>{{ monitor.multiaddrs }}</td>
         </tr>
         <!-- <tr>
           <th>Polkadot.js</th>
@@ -30,11 +30,11 @@
         </tr> -->
         <tr>
           <th>Updated</th>
-          <td>{{formatDateTime(monitor.updatedAt)}}</td>
+          <td>{{ formatDateTime(monitor.updatedAt) }}</td>
         </tr>
         <tr>
           <th>Discovered</th>
-          <td>{{formatDateTime(monitor.createdAt)}}</td>
+          <td>{{ formatDateTime(monitor.createdAt) }}</td>
         </tr>
       </tbody>
     </table>
@@ -45,7 +45,7 @@
       </ul>
     </div>
     <!-- <%- include(templateDir + '/servicesTable.ejs', { services: monitor.services, columns: [] }); -%> -->
-    <ServiceTable :services="monitor.services" :columns="['id','serviceUrl']"></ServiceTable>
+    <ServiceTable :services="monitor.services" :columns="['id', 'serviceUrl']"></ServiceTable>
 
     <div class="tabs">
       <ul>
@@ -53,10 +53,11 @@
       </ul>
     </div>
     <!-- <%- include(templateDir + '/checksTable.ejs', { healthChecks }); -%> -->
-    <CheckTable :healthChecks="monitor.healthChecks" :columns="['id', 'serviceUrl', 'source', 'version', 'performance', 'updatedAt']"></CheckTable>
-
+    <CheckTable
+      :healthChecks="monitor.healthChecks"
+      :columns="['id', 'serviceUrl', 'source', 'version', 'performance', 'updatedAt']"
+    ></CheckTable>
   </section>
-
 </template>
 
 <script lang="ts">
@@ -70,21 +71,21 @@ export default defineComponent({
   name: 'ServiceC',
   components: {
     ServiceTable,
-    CheckTable
+    CheckTable,
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('monitor', ['monitor'])
+    ...mapState('monitor', ['monitor']),
   },
   methods: {
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    moment: moment
+    moment: moment,
   },
-  created () {
+  created() {
     console.debug(this.$route.params)
     this.$store.dispatch('monitor/setMonitor', this.$route.params.monitorId)
-  }
+  },
 })
 </script>

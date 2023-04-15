@@ -4,30 +4,30 @@
       <ul>
         <li><router-link to="/">Home</router-link></li>
         <li><router-link to="/member">Members</router-link></li>
-        <li class="is-active">&nbsp;&nbsp;{{member.name}}</li>
+        <li class="is-active">&nbsp;&nbsp;{{ member.name }}</li>
       </ul>
     </nav>
     <table class="table is-bordered">
       <tbody>
         <tr>
           <th>ID</th>
-          <td>{{member.memberId}}</td>
+          <td>{{ member.memberId }}</td>
         </tr>
         <tr>
           <th>Name</th>
-          <td>{{member.name}}</td>
+          <td>{{ member.name }}</td>
         </tr>
         <tr>
           <th>Status</th>
-          <td>{{member.status}}</td>
+          <td>{{ member.status }}</td>
         </tr>
         <tr>
           <th>Discovered</th>
-          <td>{{formatDateTime(member.createdAt)}}</td>
+          <td>{{ formatDateTime(member.createdAt) }}</td>
         </tr>
         <tr>
           <th>Updated</th>
-          <td>{{formatDateTime(member.updatedAt)}}</td>
+          <td>{{ formatDateTime(member.updatedAt) }}</td>
         </tr>
       </tbody>
     </table>
@@ -39,12 +39,13 @@
             <li class="is-active"><a>Services</a></li>
           </ul>
         </div>
-        <ServiceTable :services="member.services" :columns="['serviceUrl', 'name', 'pjs', 'updatedAt']"></ServiceTable>
+        <ServiceTable
+          :services="member.services"
+          :columns="['serviceUrl', 'name', 'pjs', 'updatedAt']"
+        ></ServiceTable>
       </div>
     </div>
-
   </section>
-
 </template>
 
 <script lang="ts">
@@ -59,26 +60,26 @@ import ServiceTable from './ServiceTable.vue'
 export default defineComponent({
   name: 'MemberC',
   components: {
-    ServiceTable
-  //   PeerTable,
-  //   CheckChart,
-  //   CheckTable
+    ServiceTable,
+    //   PeerTable,
+    //   CheckChart,
+    //   CheckTable
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('member', { member: 'model' })
+    ...mapState('member', { member: 'model' }),
   },
   methods: {
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    moment: moment
+    moment: moment,
   },
-  created () {
+  created() {
     console.debug(this.$route.params)
     if (this.member.memberId !== this.$route.params.memberId) {
       this.$store.dispatch('member/setModel', this.$route.params.memberId)
     }
-  }
+  },
 })
 </script>

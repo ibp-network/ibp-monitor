@@ -1,8 +1,7 @@
-
 # IBP Monitor - network of members
 
+## Architecture / Components
 
-## Architecture / Components  
 - frontend - serves the vue-spa
 - api - provides http services at `/api`
 - datastore (sequelize => mariadb, postgres, mysql etc)
@@ -13,6 +12,7 @@
 # Getting Started
 
 Clone the repo
+
 ```bash
 git clone https://github.com/dotsama-ibp/dotsama-ibp
 cd dotsama-ibp/monitor
@@ -36,22 +36,27 @@ For details of the config items, please refer [CONFIG.md](./CONFIG.md)
 # Datastore
 
 The database abstraction layer is sequelize.org. The default datastore is MariaDB, supported DBs are:
--   [MySQL](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#mysql)
--   [MariaDB](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#mariadb)
--   [PostgreSQL](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#postgresql)
--   [MSSQL](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#mssql)
--   [Oracle Database](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#oracle-database)
+
+- [MySQL](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#mysql)
+- [MariaDB](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#mariadb)
+- [PostgreSQL](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#postgresql)
+- [MSSQL](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#mssql)
+- [Oracle Database](https://sequelize.org/docs/v6/other-topics/dialect-specific-things/#oracle-database)
 
 Notes:
+
 - SQLite is not supported. We need concurrent access to the database.
 - if you chose another database you need to create your own installation / docker container, and amend the `./config/config.local.js` with appropriate DB connection details.
 
 ## Initialise the datastore
+
 The MariaDB docker container will initialise the datastore from the `./data/schema.mysql.sql` file.
 For development, you can trigger the following script:
+
 ```bash
 node createDatastore.js
 ```
+
 Or, manually, run the ./data/schema.mysql.sql script in your fav SQL client. (after editing the `config/config.local.js` file)
 
 # Manual / Development
@@ -63,39 +68,51 @@ Or, manually, run the ./data/schema.mysql.sql script in your fav SQL client. (af
 - edit the hosts file & config.local.js as needed
 
 ## Hosts file (for development)
+
 Inside Docker, the components can access each other by hostnames. When developing locally, you need to edit `config/config.local.js` file, or set /etc/hosts as follows:
+
 ```
 127.0.0.1 ibp-redis
 127.0.0.1 ibp-datastore
 127.0.0.1 ibp-monitor-api
 ```
+
 If you don't have redis or mariadb installed, you can start these individually & manually via Docker. See below for more info.
 
 ## Starting each component manually
+
 Each component requires a separate shell window.
+
 1. **redis & mariadb**
-See Docker section of you don't have these running locally
-Or, amend the config to point to your local services
+   See Docker section of you don't have these running locally
+   Or, amend the config to point to your local services
 2. **ibp-monitor-api**
+
 ```bash
 node api.js
 ```
+
 3. **ibp-monitor (p2p server)**
+
 ```bash
 node server.js
 ```
+
 4. **ibp-monitor-frontend** (static)
-see Docker, this will launch on `http://localhost:30001`
-Building the frontend for production
+   see Docker, this will launch on `http://localhost:30001`
+   Building the frontend for production
+
 ```bash
 cd vue-spa
 npm install
 npm run build # target files will populate ../static
 ```
+
 5. **ibp-monitor-frontend** (developer mode)
-See http://localhost:8080
-In developer mode the frontend will proxy `/api` to the api service. See `./vue-spa/vue.config.js` if you need to amend this.
-Note, in production mode the `/api` location is proxied by nginx to the `ibp-monitor-api` service.
+   See http://localhost:8080
+   In developer mode the frontend will proxy `/api` to the api service. See `./vue-spa/vue.config.js` if you need to amend this.
+   Note, in production mode the `/api` location is proxied by nginx to the `ibp-monitor-api` service.
+
 ```bash
 cd vue-spa
 npm install
@@ -103,13 +120,16 @@ npm run serve
 ```
 
 6. **ibp-bullmq**
-See http://localhost:3000/admin/queues
+   See http://localhost:3000/admin/queues
+
 ```bash
 node workers.js
 ```
 
 ## PM2
+
 As above, each node.js component can run separately in PM2. (Requires mariadb and redis)
+
 ```bash
 pm2 start --name ibp-monitor-api api.js
 pm2 start --name ibp-monitor-p2p server.js
@@ -117,9 +137,11 @@ pm2 start --name ibp-monitor-workders workers.js
 ```
 
 ## Serving the frontend apache/nginx
+
 The frontend is located in the ./static folder
 See development above for building the ./static folder contents
 Point apache or nginx to serve this folder, with the following config (nginx example):
+
 ```nginx
 server {
   listen 80;
@@ -139,9 +161,10 @@ server {
 }
 ```
 
-# Docker 
+# Docker
 
 Docker files and `docker-compose.yml` are in the `./docker` folder. Service names:
+
 - ibp-monitor-frontend
 - ibp-monitor-api
 - ibp-monitor
@@ -149,23 +172,22 @@ Docker files and `docker-compose.yml` are in the `./docker` folder. Service name
 - redis
 - bullmq
 
-
 ## Start all services
+
 ```bash
 cd docker # you need to be in the docker directory!
 docker compose up
 ```
+
 `ctrl-c` to stop services
 Use `-d` flag with compose for detach to let them run in background
 
 #### Start individual services
+
 ```bash
 cd docker # you need to be in the docker directory!
 docker compose up <service name> # optional `-d` flag
 ```
-
-
-  
 
 ## getting started
 
@@ -183,42 +205,30 @@ node createDatastore.js
 # run the server
 node server.js
 ```
-  
-
-
 
 ### optional
+
 ```
 pm2 save  # to persist your jobs
 pm2 list  # see the running jobs
 pm2 logs  ibp-monitor
 ```
 
-  
-
 ## Managing the datastore
 
-  
-
 ## TODO, progress
-
-  
 
 - implememt scoring
 
 - implement alerting
 
--  ~~implement status / metrics~~ - some basic metrics available at /metrics/&lt;serviceUrl&gt;
+- ~~implement status / metrics~~ - some basic metrics available at /metrics/&lt;serviceUrl&gt;
 
--  ~~implement prometheus (or similar) api~~ - done, each service has a link to the prometheus data
+- ~~implement prometheus (or similar) api~~ - done, each service has a link to the prometheus data
 
--  ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
+- ~~how to create your own peerId~~ - done, the server will create `keys/peerId.json` at 1st startup
 
--  ~~peers should sign status updates~~ - this is configured in `libp2p.pubsub.signMessages: true`
-
-
-
-  
+- ~~peers should sign status updates~~ - this is configured in `libp2p.pubsub.signMessages: true`
 
 ## Kudos
 

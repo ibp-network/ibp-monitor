@@ -1,6 +1,6 @@
-import { Worker, Job } from 'bullmq';
+import { Worker, Job } from 'bullmq'
 import { ApiPromise, WsProvider, HttpProvider } from '@polkadot/api'
-import { DataStore } from '../../lib/DataStore';
+import { DataStore } from '../../data/data_store'
 
 import { config } from '../../config/config.js'
 import { configLocal } from '../../config/config.local.js'
@@ -16,30 +16,31 @@ async function handleProviderError(args) {
 }
 
 // TODO move pruning function to worker
-const ds = new DataStore({ initialiseDb: false })
+const ds = new DataStore({})
 
 const worker = new Worker(queueName, async (job) => {
   // Will print { foo: 'bar'} for the first job
   // and { qux: 'baz' } for the second.
-  console.log(job.data);
+  console.log(job.data)
 
   var results = []
   const { service } = job.data
   console.debug('checking service', service.serviceUrl, service.status)
 
-  if (['stale', 'maintenance'].includes(service.status)) return {
-    monitorId: this.localMonitorId,
-    serviceUrl: service.serviceUrl,
-    peerId: null,
-    source: 'check',
-    level: 'warning',
-    message: service.status,
-    record: {
+  if (['stale', 'maintenance'].includes(service.status))
+    return {
       monitorId: this.localMonitorId,
       serviceUrl: service.serviceUrl,
-      performance: -1,
+      peerId: null,
+      source: 'check',
+      level: 'warning',
+      message: service.status,
+      record: {
+        monitorId: this.localMonitorId,
+        serviceUrl: service.serviceUrl,
+        performance: -1,
+      },
     }
-  }
 
   var result
   var peerId
@@ -64,13 +65,15 @@ const worker = new Worker(queueName, async (job) => {
 
     const api = await ApiPromise.create({ provider })
     // api.on('error', function (err) { throw new ApiError(err.toString()) })
-    api.on('error', (args) => { this.handleApiError(args) })
+    api.on('error', (args) => {
+      this.handleApiError(args)
+    })
     await api.isReady
 
     console.debug('getting stats from provider / api...')
     peerId = await api.rpc.system.localPeerId()
     // console.log('localPeerId', localPeerId.toString())
-    await this.datastore.Peer.upsert({ peerId: peerId.toString(), serviceUrl: service.serviceUrl})
+    await this.datastore.Peer.upsert({ peerId: peerId.toString(), serviceUrl: service.serviceUrl })
     const chain = await api.rpc.system.chain()
     const chainType = await api.rpc.system.chainType()
     // start
@@ -94,13 +97,21 @@ const worker = new Worker(queueName, async (job) => {
       record: {
         monitorId: this.localMonitorId, // .toString(),
         serviceUrl: service.serviceUrl,
-        chain, chainType, health, networkState, syncState, version,
+        chain,
+        chainType,
+        health,
+        networkState,
+        syncState,
+        version,
         // peerCount,
         performance: timing,
-      }
+      },
     }
     await provider.disconnect()
-    await this.datastore.Service.update({ status: 'online' }, { where: { serviceUrl: service.serviceUrl } })
+    await this.datastore.Service.update(
+      { status: 'online' },
+      { where: { serviceUrl: service.serviceUrl } }
+    )
     // save healthCheck in storage
     console.debug('HealthCheck.check() done')
   } catch (err) {
@@ -114,8 +125,7 @@ const worker = new Worker(queueName, async (job) => {
   // console.debug('creating healthChecK', result)
   const created = await this.datastore.HealthCheck.create(result)
   // console.debug('HealthCheck created', created)
-    
+
   console.log('health_check done...', service.serviceUrl)
   return JSON.stringify(results)
-
-});
+})
