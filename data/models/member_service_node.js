@@ -7,6 +7,14 @@ export const memberServiceNodeModel = {
       allowNull: false,
       primaryKey: true,
     },
+    serviceId: {
+      type: DataTypes.STRING(128),
+      allowNull: false,
+    },
+    memberId: {
+      type: DataTypes.STRING(128),
+      allowNull: false,
+    },
     memberServiceId: {
       type: DataTypes.INTEGER,
       allowNull: false,

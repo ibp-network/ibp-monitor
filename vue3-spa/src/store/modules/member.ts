@@ -6,6 +6,7 @@ import { IState as IRootState } from '../index'
 export interface IState {
   list: any[]
   model: any
+  nodes: any[]
   healthChecks: any[]
 }
 
@@ -16,6 +17,7 @@ const member: Module<IState, IRootState> = {
   state: {
     list: [],
     model: {},
+    nodes: [],
     healthChecks: [],
   },
   mutations: {
@@ -25,6 +27,10 @@ const member: Module<IState, IRootState> = {
     SET_MODEL(state: IState, value: any) {
       console.debug('SET_MODEL()', value)
       state.model = value
+    },
+    SET_NODES(state: IState, value: any) {
+      console.debug('SET_NODES()', value)
+      state.nodes = value
     },
     SET_HEALTHCHECKS(state: IState, value: any) {
       console.debug('SET_HEALTHCHECKS()', value)
@@ -42,6 +48,10 @@ const member: Module<IState, IRootState> = {
         ...res.data.member,
         healthChecks: res.data.healthChecks,
       })
+    },
+    async getNodes({ commit, dispatch }: any, memberId: string) {
+      const res = await axios.get(`/api/member/${memberId}/nodes`)
+      commit('SET_NODES', res.data.nodes)
     },
     async getChecks({ commit, dispatch }: any, memberId: string) {
       const res = await axios.get(`/api/member/${memberId}/healthChecks`)

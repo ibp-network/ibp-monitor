@@ -44,9 +44,10 @@
 
     <v-tabs v-model="activeTab">
       <v-tab value="services">Provides</v-tab>
+      <v-tab value="nodes">Nodes</v-tab>
       <v-tab value="checks">Healthchecks</v-tab>
-      <!-- <v-tab>{{ activeTab }}</v-tab> -->
     </v-tabs>
+
     <v-window v-model="activeTab">
       <v-window-item value="services">
         <ServiceTable
@@ -61,6 +62,12 @@
           :services="servicesForMember"
         ></ServiceList>
       </v-window-item>
+      <v-container v-show="activeTab === 'nodes'">
+        <NodeTable
+          :nodes="nodesForMember"
+          :columns="['peerId', 'serviceId', 'updatedAt', 'createdAt']"
+        ></NodeTable>
+      </v-container>
       <v-window-item value="checks">
         <CheckTable
           v-if="$vuetify.display.width > 599"
@@ -80,6 +87,7 @@ import moment from 'moment'
 // import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
+import NodeTable from './NodeTable.vue'
 import ServiceTable from './ServiceTable.vue'
 import ServiceList from './ServiceList.vue'
 import { IService } from './types'
@@ -87,10 +95,11 @@ import { IService } from './types'
 export default defineComponent({
   name: 'MemberC',
   components: {
-    ServiceTable,
-    ServiceList,
     CheckTable,
     CheckList,
+    NodeTable,
+    ServiceTable,
+    ServiceList,
   },
   props: {
     tab: {
@@ -107,10 +116,13 @@ export default defineComponent({
   computed: {
     ...mapState(['dateTimeFormat']),
     ...mapState('service', { services: 'list' }),
-    ...mapState('member', { member: 'model', healthChecks: 'healthChecks' }),
+    ...mapState('member', { member: 'model', healthChecks: 'healthChecks', nodes: 'nodes' }),
     servicesForMember() {
       return this.services.filter((service: IService) => service.membershipLevel.id <= this.member.membershipLevelId)
     },
+    nodesForMember() {
+      return this.nodes
+    }
   },
   methods: {
     formatDateTime(value: any) {
@@ -120,9 +132,11 @@ export default defineComponent({
   },
   created() {
     console.debug(this.$route.params)
-    if (this.member.memberId !== this.$route.params.memberId) {
+    if (this.member.id !== this.$route.params.memberId) {
       this.store.dispatch('member/setModel', this.$route.params.memberId)
     }
+    this.store.dispatch('member/getChecks', this.member.id)
+    this.store.dispatch('member/getNodes', this.member.id)
   },
   mounted() {
     this.$nextTick(() => {
@@ -132,8 +146,6 @@ export default defineComponent({
         behavior: 'smooth',
       })
     })
-    var id = this.member.id || this.$route.params.memberId
-    this.store.dispatch('member/getChecks', id)
     this.activeTab = this.$route.params.tab?.toString() || 'services'
   },
 })

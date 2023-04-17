@@ -49,6 +49,7 @@
     <v-tabs v-model="activeTab">
       <v-tab value="performance">Performance</v-tab>
       <v-tab value="members">Providers</v-tab>
+      <v-tab value="nodes">Nodes</v-tab>
       <v-tab value="checks">HealthChecks</v-tab>
     </v-tabs>
 
@@ -67,6 +68,12 @@
     </v-container>
     <!-- </v-window-item>
     <v-window-item value="checks"> -->
+    <v-container v-show="activeTab === 'nodes'">
+      <NodeTable
+        :nodes="service.nodes"
+        :columns="['peerId', 'memberId', 'updatedAt', 'createdAt']"
+      ></NodeTable>
+    </v-container>
     <v-container v-show="activeTab === 'checks'">
       <CheckTable
         v-if="$vuetify.display.width > 599"
@@ -92,6 +99,7 @@ import MemberTable from './MemberTable.vue'
 import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
+import NodeTable from './NodeTable.vue'
 import MonitorTable from './MonitorTable.vue'
 import MonitorList from './MonitorList.vue'
 import { IMember } from './types'
@@ -99,13 +107,14 @@ import { IMember } from './types'
 export default defineComponent({
   name: 'ServiceC',
   components: {
+    CheckChart,
+    CheckTable,
+    CheckList,
+    NodeTable,
     MemberList,
     MemberTable,
     MonitorTable,
     MonitorList,
-    CheckChart,
-    CheckTable,
-    CheckList,
   },
   setup() {
     const store = useStore()

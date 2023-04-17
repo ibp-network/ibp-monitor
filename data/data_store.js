@@ -137,6 +137,26 @@ class DataStore {
         sequelize,
       }
     )
+    Service.hasMany(MemberServiceNode, {
+      as: 'nodes',
+      foreignKey: 'serviceId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'RESTRICT',
+    })
+    MemberServiceNode.belongsTo(Service, {
+      as: 'service',
+      foreignKey: 'serviceId',
+    })
+    Member.hasMany(MemberServiceNode, {
+      as: 'nodes',
+      foreignKey: 'memberId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'RESTRICT',
+    })
+    MemberServiceNode.belongsTo(Member, {
+      as: 'member',
+      foreignKey: 'memberId',
+    })
     MemberService.hasMany(MemberServiceNode, {
       as: 'nodes',
       foreignKey: 'memberServiceId',

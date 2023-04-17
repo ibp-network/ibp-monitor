@@ -6,6 +6,32 @@ async function up({ context: queryInterface }) {
     .then(() =>
       queryInterface.addConstraint('member_service_node', {
         type: 'FOREIGN KEY',
+        name: 'fk_member_service_node_service',
+        fields: ['serviceId'],
+        references: {
+          table: 'service',
+          field: 'id',
+        },
+        onUpdate: 'RESTRICT',
+        onDelete: 'RESTRICT',
+      })
+    )
+    .then(() =>
+      queryInterface.addConstraint('member_service_node', {
+        type: 'FOREIGN KEY',
+        name: 'fk_member_service_node_member',
+        fields: ['memberId'],
+        references: {
+          table: 'member',
+          field: 'id',
+        },
+        onUpdate: 'RESTRICT',
+        onDelete: 'RESTRICT',
+      })
+    )
+    .then(() =>
+      queryInterface.addConstraint('member_service_node', {
+        type: 'FOREIGN KEY',
         name: 'fk_member_service_node_member_service',
         fields: ['memberServiceId'],
         references: {

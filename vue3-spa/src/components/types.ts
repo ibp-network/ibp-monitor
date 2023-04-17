@@ -46,6 +46,14 @@ export interface IMemberService {
   updatedAt: number,
 }
 
+export interface IMemberServiceNode {
+  peerId: string
+  serviceId: string,
+  memberId: string,
+  createdAt: number,
+  updatedAt: number,
+}
+
 export interface IMonitor {
   id: string
   addresses: string[]

@@ -212,6 +212,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       let memberService = await ds.MemberService.findOne({ where: { serviceId: service.id } })
       await ds.MemberServiceNode.upsert({
         peerId: result.peerId,
+        serviceId: service.id,
+        memberId: member.id,
         memberServiceId: memberService.id,
         name: null,
       })

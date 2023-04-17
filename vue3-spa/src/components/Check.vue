@@ -29,6 +29,14 @@
         </td>
       </tr>
       <tr>
+        <th>Node</th>
+        <td style="cursor: pointer">
+          <router-link :to="`/node/${healthCheck.peerId}`">
+            {{ shortStash(healthCheck.peerId) }}
+          </router-link>
+        </td>
+      </tr>
+      <tr>
         <th>Monitor</th>
         <td>
           <router-link :to="`/monitor/${healthCheck.monitorId}`">{{
