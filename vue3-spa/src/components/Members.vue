@@ -27,7 +27,7 @@ import MemberTable from './MemberTable.vue'
 import MemberList from './MemberList.vue'
 
 export default defineComponent({
-  name: 'MonitorsC',
+  name: 'MembersC',
   components: {
     MemberTable,
     MemberList,

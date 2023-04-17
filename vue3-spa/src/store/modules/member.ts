@@ -6,7 +6,6 @@ import { IState as IRootState } from '../index'
 export interface IState {
   list: any[]
   model: any
-  endpoints: Record<string, any>
   healthChecks: any[]
 }
 
@@ -17,7 +16,6 @@ const member: Module<IState, IRootState> = {
   state: {
     list: [],
     model: {},
-    endpoints: {},
     healthChecks: [],
   },
   mutations: {
@@ -27,10 +25,6 @@ const member: Module<IState, IRootState> = {
     SET_MODEL(state: IState, value: any) {
       console.debug('SET_MODEL()', value)
       state.model = value
-    },
-    SET_ENDPOINTS(state: IState, value: any) {
-      console.debug('SET_ENDPOINTS()', value)
-      state.endpoints = value
     },
     SET_HEALTHCHECKS(state: IState, value: any) {
       console.debug('SET_HEALTHCHECKS()', value)
@@ -47,7 +41,6 @@ const member: Module<IState, IRootState> = {
       commit('SET_MODEL', {
         ...res.data.member,
         healthChecks: res.data.healthChecks,
-        endpoints: res.data.endpoints,
       })
     },
     async getChecks({ commit, dispatch }: any, memberId: string) {

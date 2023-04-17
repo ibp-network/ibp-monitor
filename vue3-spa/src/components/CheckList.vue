@@ -10,7 +10,7 @@
     -->
     <v-list-item v-for="hc in healthChecks" v-bind:key="hc.id" :to="`/healthCheck/${hc.id}`">
       <template v-slot:prepend>
-        <v-icon :color="getLevelColor(hc.level)" :icon="getLevelIcon(hc.level)"></v-icon>
+        <v-icon :color="getStatusColor(hc.status)" :icon="getStatusIcon(hc.status)"></v-icon>
       </template>
 
       <v-list-item-title>
@@ -39,7 +39,7 @@ import Loading from './Loading.vue'
 import IsLocalMonitor from './IsLocalMonitor.vue'
 import { IHealthCheck } from './types'
 
-const levels: Record<string, string> = {
+const statusClasses: Record<string, string> = {
   debug: 'grey',
   log: 'info-dark',
   info: 'info-dark',
@@ -47,7 +47,7 @@ const levels: Record<string, string> = {
   warning: 'warning-dark',
   error: 'danger',
 }
-const colors: Record<string, string> = {
+const statusColors: Record<string, string> = {
   debug: 'grey',
   log: 'primary',
   info: 'primary',
@@ -55,7 +55,7 @@ const colors: Record<string, string> = {
   warning: 'warning',
   error: 'danger',
 }
-const icons: Record<string, string> = {
+const statusIcons: Record<string, string> = {
   debug: 'mdi-magnify', // 'fa-solid fa-magnifying-glass',
   log: 'mdi-information-outline', //'fa-solid fa-circle-info',
   info: 'mdi-information-outline', // 'fa-solid fa-circle-info',
@@ -65,7 +65,7 @@ const icons: Record<string, string> = {
 }
 
 export default defineComponent({
-  name: 'PeerTable',
+  name: 'CheckList',
   components: {
     Loading,
     IsLocalMonitor,
@@ -99,14 +99,14 @@ export default defineComponent({
     formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
-    getLevelClass(level: string) {
-      return levels[level] || level
+    getStatusClass(status: string) {
+      return statusClasses[status] || status
     },
-    getLevelColor(level: string) {
-      return colors[level] || level
+    getStatusColor(status: string) {
+      return statusColors[status] || status
     },
-    getLevelIcon(level: string) {
-      return icons[level] || 'fa-circle-question'
+    getStatusIcon(status: string) {
+      return statusIcons[status] || 'fa-circle-question'
     },
     moment: moment,
   },

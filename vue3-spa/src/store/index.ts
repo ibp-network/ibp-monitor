@@ -2,14 +2,12 @@ import { InjectionKey } from 'vue'
 import { createStore, Store } from 'vuex'
 import axios from 'axios'
 
-import domain from './modules/domain'
+import geoDnsPool from './modules/geo_dns_pool'
 import member from './modules/member'
 import service from './modules/service'
 import monitor from './modules/monitor'
-import healthCheck from './modules/healthCheck'
+import healthCheck from './modules/health_check'
 import libp2p from './modules/libp2p'
-
-// Vue.use(Vuex)
 
 export interface IState {
   apiVersion: string
@@ -75,7 +73,6 @@ export const store = createStore({
   },
   actions: {
     async init({ dispatch, commit }) {
-      dispatch('domain/getList', {}, { root: true })
       dispatch('member/getList', {}, { root: true })
       dispatch('service/getList', {}, { root: true })
       const res = await axios.get('/api/home')
@@ -100,7 +97,7 @@ export const store = createStore({
     },
   },
   modules: {
-    domain,
+    geoDnsPool,
     member,
     service,
     monitor,

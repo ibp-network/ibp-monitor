@@ -10,7 +10,7 @@
       <v-toolbar-title>Monitors</v-toolbar-title>
     </v-toolbar>
 
-    <MonitorTable :monitors="list" :columns="['monitorId', 'services', 'createdAt']"></MonitorTable>
+    <MonitorTable :monitors="list" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
   </v-container>
 </template>
 

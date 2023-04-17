@@ -8,18 +8,17 @@
     >
       <template v-slot:prepend>
         <v-avatar size="small">
-          <v-img :src="service.logo"></v-img>
+          <v-img :src="service.chain.logoUrl"></v-img>
         </v-avatar>
       </template>
       <v-list-item-title>
-        {{ service.name }}
+        {{ service.chain.name }}
         <v-icon color="success" v-if="service.status === 'active'">mdi-check-circle-outline</v-icon>
       </v-list-item-title>
       <v-list-item-subtitle>
-        <v-icon v-if="service.parachain">mdi-link</v-icon>
-        {{ service.parachain ? 'on' : '' }} {{ service.parentId }}
+        <v-icon v-if="service.chain.relayChainId != null">mdi-link</v-icon>
+        {{ service.chain.relayChainId ? 'on' : '' }} {{ service.chain.relayChainId }}
       </v-list-item-subtitle>
-      <!-- <td>{{service.status}}</td> -->
 
       <template v-slot:append>
         <v-menu v-if="service.status === 'active'">
@@ -29,31 +28,16 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item>
+            <v-list-item
+              v-for="geoDnsPool in geoDnsPools"
+              v-bind:key="geoDnsPool.id"
+            >
               <a
                 @click.stop
-                :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.dotters.network/${service.endpoint}`"
+                :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
                 target="_blank"
               >
-                IBP 1 <sup><v-icon size="x-small">mdi-open-in-new</v-icon></sup>
-              </a>
-            </v-list-item>
-            <v-list-item>
-              <a
-                @click.stop
-                :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.ibp.network/${service.endpoint}`"
-                target="_blank"
-              >
-                IBP 2 <sup><v-icon size="x-small">mdi-open-in-new</v-icon></sup>
-              </a>
-            </v-list-item>
-            <v-list-item v-show="memberServiceUrl(service.id)">
-              <a
-                @click.stop
-                :href="`https://polkadot.js.org/apps/?rpc=${memberServiceUrl(service.id)}`"
-                target="_blank"
-              >
-                Direct<sup><v-icon size="x-small">mdi-open-in-new</v-icon></sup>
+                IBP.{{ geoDnsPool.id }} <sup><v-icon size="x-small">mdi-open-in-new</v-icon></sup>
               </a>
             </v-list-item>
           </v-list>
@@ -64,12 +48,12 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent, PropType } from 'vue'
-import { mapState } from 'vuex'
-import { IMember, IService, IEndpoint } from './types'
+import { defineComponent, PropType } from 'vue'
+import { IMember, IService } from './types'
+import { mapState, useStore } from 'vuex'
 
 export default defineComponent({
-  name: 'ServiceTable',
+  name: 'ServiceList',
   props: {
     services: {
       // type: Array
@@ -86,14 +70,14 @@ export default defineComponent({
       // services?
     },
   },
+  setup(props) {
+    const store = useStore()
+    return { store }
+  },
+  computed: {
+    ...mapState('geoDnsPool', { geoDnsPools: 'list' }),
+  },
   methods: {
-    memberServiceUrl(serviceId: string): string | undefined {
-      console.debug('memberServiceUrl', serviceId, this.member)
-
-      return this.member?.id
-        ? this.member.endpoints.find((f: IEndpoint) => f.serviceId === serviceId)?.serviceUrl
-        : undefined
-    },
     gotoService(serviceUrl: string) {
       console.debug('gotoService', serviceUrl)
       this.$router.push(`/service/${encodeURIComponent(serviceUrl)}`)
@@ -101,6 +85,7 @@ export default defineComponent({
   },
   created() {
     console.debug('ServiceTable.vue created', this.services)
+    this.store.dispatch('geoDnsPool/getList')
   },
 })
 </script>

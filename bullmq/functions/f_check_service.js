@@ -51,13 +51,12 @@ export async function checkService(job) {
   const { subdomain, member, service, monitorId } = job.data
   console.debug('[worker] checkService', subdomain, member.id, service.id)
 
-  
   // const service = services[domain]
   const domain = `${subdomain}.dotters.network`
   const endpoint = `wss://${domain}/${service.chainId}`
   //const service_address = member.services_address
   //console.debug('address', service_address)
-  
+
   var timeout = null
   var result
   var peerId = ''
@@ -152,7 +151,7 @@ export async function checkService(job) {
       type: 'service_check',
       status: timing > (cfg.performance?.sla || 500) ? 'warning' : 'success',
       responseTimeMs: timing,
-      value: {
+      record: {
         monitorId,
         memberId: member.id,
         serviceId: service.id,

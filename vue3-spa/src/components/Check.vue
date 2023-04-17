@@ -23,7 +23,7 @@
         </td>
       </tr>
       <tr>
-        <th>Member2</th>
+        <th>Member</th>
         <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">
           {{ healthCheck.memberId }}
         </td>
@@ -60,7 +60,7 @@ import moment from 'moment'
 import { shortStash } from './utils'
 
 export default defineComponent({
-  name: 'ServiceC',
+  name: 'CheckC',
   computed: {
     ...mapState(['dateTimeFormat']),
     ...mapState('healthCheck', ['healthCheck']),

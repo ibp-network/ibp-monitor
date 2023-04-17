@@ -41,7 +41,7 @@ export const healthCheckModel = {
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    value: {
+    record: {
       type: DataTypes.JSON,
       allowNull: true,
     },

@@ -77,9 +77,9 @@ const service: Module<IState, IRootState> = {
       // dispatch('init')
       dispatch('setLocalMonitorId', res.data.localMonitorId, { root: true })
     },
-    async setService({ state, commit }: any, serviceUrl: string) {
+    async setService({ state, commit }: any, serviceId: string) {
       // const service = state.list.find((f: any) => f.serviceUrl === serviceUrl)
-      const res = await axios.get(`/api/service/${encodeURIComponent(serviceUrl)}`)
+      const res = await axios.get(`/api/service/${encodeURIComponent(serviceId)}`)
       // commit('SET_DATETIME_FORMAT', res.data.dateTimeFormat)
       commit('SET_SERVICE', {
         ...res.data.service,

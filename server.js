@@ -202,12 +202,14 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   const handleCheckServiceResult = async ({ jobId }) => {
     const job = await Job.fromId(checkServiceQueue, jobId)
     console.log('handleCheckServiceResult', jobId, job.returnvalue)
-    if (!job.returnvalue) { return }
+    if (!job.returnvalue) {
+      return
+    }
     const { member, service } = job.data
     const result = job.returnvalue
     // upsert member service node
     if (result.peerId) {
-      let memberService = await ds.MemberService.findOne({ where: {serviceId: service.id}})
+      let memberService = await ds.MemberService.findOne({ where: { serviceId: service.id } })
       await ds.MemberServiceNode.upsert({
         peerId: result.peerId,
         memberServiceId: memberService.id,

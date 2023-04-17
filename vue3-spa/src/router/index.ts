@@ -4,8 +4,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '@/components/Home.vue'
 import Config from '@/components/Config.vue'
 import Services from '@/components/Services.vue'
-import Endpoints from '@/components/Endpoints.vue'
-import Endpoint from '@/components/Endpoint.vue'
 import Members from '@/components/Members.vue'
 import Member from '@/components/Member.vue'
 import Service from '@/components/Service.vue'
@@ -56,13 +54,11 @@ const routes = [
     component: Services,
   },
   {
-    path: '/service/:serviceUrl',
+    path: '/service/:serviceId',
     name: 'Service',
     component: Service,
     props: true,
   },
-  { path: '/endpoint', name: 'Endpoints', component: Endpoints },
-  { path: '/endpoint/:endpointUrl', name: 'Endpoint', component: Endpoint, props: true },
   { path: '/monitor', name: 'Monitors', component: Monitors },
   { path: '/monitor/:monitorId', name: 'Monitor', component: Monitor, props: true },
   {

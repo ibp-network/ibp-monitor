@@ -41,7 +41,7 @@ export const serviceModel = {
     updatedAt: true,
     defaultScope: {
       attributes: {
-        exclude: ['createdAt', 'updatedAt'],
+        exclude: [],
       },
       order: [['id', 'ASC']],
     },

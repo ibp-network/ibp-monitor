@@ -9,19 +9,23 @@
       <!-- Logo -->
       <template v-slot:prepend>
         <v-avatar>
-          <v-img v-show="member.logo !== ''" :src="member.logo"></v-img>
+          <v-img v-show="member.logoUrl !== ''" :src="member.logoUrl"></v-img>
           <!-- <v-icon v-show="member.logo === ''" size="large" color="grey">mdi-circle-outline</v-icon> -->
-          <span v-show="member.logo === ''" size="x-large" color="grey">{{ member.name[0] }}</span>
+          <span v-show="member.logoUrl === ''" size="x-large" color="grey">{{
+            member.name[0]
+          }}</span>
         </v-avatar>
       </template>
 
       <!-- memberID -->
       <v-list-item-title> {{ member.name }} ({{ member.id }}) </v-list-item-title>
 
-      <v-list-item-subtitle> {{ member.region }} / {{ member.membership }} </v-list-item-subtitle>
+      <v-list-item-subtitle>
+        {{ member.region }} / {{ member.membershipType }}
+      </v-list-item-subtitle>
       <!-- Region -->
       <td v-if="columns.includes('level_timestamp')" class="text-center">
-        {{ formatDateTime(member.level_timestamp) }}
+        {{ formatDateTime(member.membershipLevelTimestamp) }}
       </td>
       <td v-if="columns.includes('updatedAt')">{{ formatDateTime(member.updatedAt) }}</td>
       <td v-if="columns.includes('createdAt')">{{ formatDateTime(member.createdAt) }}</td>
@@ -32,8 +36,8 @@
           <!-- <v-col align="center"> -->
           <!-- <v-btn variant="text" elevation="0" stacked> -->
           <v-badge
-            :content="member.current_level"
-            :color="member.current_level > 0 ? 'green-lighten-4' : 'grey-lighten-2'"
+            :content="member.membershipLevelId"
+            :color="member.membershipLevelId > 0 ? 'green-lighten-4' : 'grey-lighten-2'"
           >
             <v-icon size="large">mdi-seal-variant</v-icon>
           </v-badge>

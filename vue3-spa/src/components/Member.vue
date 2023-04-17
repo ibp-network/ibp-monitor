@@ -18,7 +18,7 @@
             </tr>
             <tr>
               <th>Membership</th>
-              <td>{{ member.membership }}-{{ member.current_level }}</td>
+              <td>{{ member.membershipLevel.name }}</td>
             </tr>
             <!-- <tr>
               <th>Status</th>
@@ -47,7 +47,6 @@
       <v-tab value="checks">Healthchecks</v-tab>
       <!-- <v-tab>{{ activeTab }}</v-tab> -->
     </v-tabs>
-    <!-- <MemberServiceTable v-if="$vuetify.display.width > 599" :member="member" :columns="['serviceId', 'name', 'pjs']"></MemberServiceTable> -->
     <v-window v-model="activeTab">
       <v-window-item value="services">
         <ServiceTable
@@ -78,7 +77,6 @@
 import { defineComponent, ref } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
-// import PeerTable from './PeerTable.vue'
 // import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
@@ -108,11 +106,10 @@ export default defineComponent({
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('domain', { domains: 'list' }),
     ...mapState('service', { services: 'list' }),
     ...mapState('member', { member: 'model', healthChecks: 'healthChecks' }),
     servicesForMember() {
-      return this.services.filter((f: IService) => f.level_required <= this.member.current_level)
+      return this.services.filter((service: IService) => service.membershipLevel.id <= this.member.membershipLevelId)
     },
   },
   methods: {

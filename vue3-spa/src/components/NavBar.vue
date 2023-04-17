@@ -21,12 +21,6 @@
         </template>
         Services
       </v-btn>
-      <!-- <v-btn color="white" variant="plain" to="/endpoint">
-        <template v-slot:prepend>
-          <v-icon v-if="$vuetify.display.width > 900">mdi-connection</v-icon>
-        </template>
-        Endpoints
-      </v-btn> -->
       <v-btn color="white" variant="plain" to="/monitor">
         <template v-slot:prepend>
           <v-icon v-if="$vuetify.display.width > 900">mdi-monitor-eye</v-icon>

@@ -27,7 +27,7 @@
         <td v-if="columns.includes('logo')">
           <!-- <a @click="gotoMember(member.memberId)"> -->
           <v-avatar size="x-small">
-            <v-img :src="member.logo"></v-img>
+            <v-img :src="member.logoUrl"></v-img>
           </v-avatar>
           <!-- </a> -->
         </td>
@@ -48,12 +48,12 @@
         <td v-if="columns.includes('services')" class="text-center">
           {{ member.services?.length || 0 }}
         </td>
-        <td v-if="columns.includes('membership')">{{ member.membership }}</td>
+        <td v-if="columns.includes('membership')">{{ member.membershipType }}</td>
         <td v-if="columns.includes('current_level')" class="text-center">
-          {{ member.current_level }}
+          {{ member.membershipLevelId }}
         </td>
         <td v-if="columns.includes('level_timestamp')" class="text-center">
-          {{ formatDateTime(member.level_timestamp) }}
+          {{ formatDateTime(member.membershipLevelTimestamp) }}
         </td>
         <td v-if="columns.includes('updatedAt')">{{ formatDateTime(member.updatedAt) }}</td>
         <td v-if="columns.includes('createdAt')">{{ formatDateTime(member.createdAt) }}</td>
@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, PropType } from 'vue'
+import { defineComponent, PropType } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'

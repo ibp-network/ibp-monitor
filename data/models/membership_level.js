@@ -27,7 +27,7 @@ export const membershipLevelModel = {
     updatedAt: false,
     defaultScope: {
       attributes: {
-        exclude: ['createdAt'],
+        exclude: [],
       },
       order: [['id', 'ASC']],
     },

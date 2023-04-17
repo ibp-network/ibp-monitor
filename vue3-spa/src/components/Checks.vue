@@ -11,13 +11,13 @@
       :loading="loading"
       :columns="[
         'id',
+        'monitorId',
         'serviceId',
         'memberId',
-        'monitorId',
         'source',
         'version',
         'performance',
-        'updatedAt',
+        'createdAt',
       ]"
     ></CheckTable>
     <CheckList v-if="$vuetify.display.width < 600" :healthChecks="list"></CheckList>
@@ -59,12 +59,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
-import moment from 'moment'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
 
 export default defineComponent({
-  name: 'ServicesC',
+  name: 'ChecksC',
   components: {
     CheckTable,
     CheckList,
@@ -118,8 +117,8 @@ export default defineComponent({
     handleSelect(evt: any) {
       console.debug('handleSelect()', evt)
       //   var x = document.getElementById('itemsPerPage')
-      //   console.debug('handleSelect', x.value)
-      //   window.location.href = `/healthCheck?offset=0&limit=${x.value}`
+      //   console.debug('handleSelect', x.record)
+      //   window.location.href = `/healthCheck?offset=0&limit=${x.record}`
     },
   },
   mounted() {

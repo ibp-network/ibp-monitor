@@ -5,54 +5,42 @@
       <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
     </v-toolbar>
 
-    <table class="table is-fullwidth">
+    <table class="table is-fullwidth" v-if="(service.chain)">
       <tbody>
         <tr>
           <th>Name</th>
-          <td>{{ service.name }}</td>
+          <td>{{ service.chain.name }}</td>
         </tr>
         <tr>
           <th>Level Required</th>
-          <td>{{ service.level_required }}</td>
+          <td>{{ service.membershipLevelId }}</td>
         </tr>
         <tr>
           <th>Status</th>
           <td>{{ service.status }}</td>
         </tr>
-        <tr v-if="service.parachain">
+        <tr v-if="(service.chain.relayChainId)">
           <th>Parachain</th>
           <td>
-            Yes (on: <a @click="gotoService(service.parentId)">{{ service.parentId }}</a
+            Yes (on: <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
             >)
           </td>
         </tr>
-        <!-- <tr>
-          <th>Error count</th>
-          <td>{{service.errorCount}}</td>
-        </tr> -->
         <tr v-if="service.status === 'active'">
           <th>Polkadot.js</th>
           <td>
             <div
-              v-for="domain in domains"
-              v-bind:key="domain.id"
-              v-show="domain.level_required >= service.level_required"
+              v-for="geoDnsPool in geoDnsPools"
+              v-bind:key="geoDnsPool.id"
             >
               <a
-                :href="`https://polkadot.js.org/apps/?rpc=wss://${domain.id}/${service.endpoint}`"
+                :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
                 target="_blank"
               >
-                wss://{{ domain.id }}/{{ service.endpoint }}
+                wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{ service.chain.id }}
               </a>
-              (level: {{ domain.level_required }})
+              (level: {{ service.membershipLevelId }})
             </div>
-            <!-- <a v-show="service.status==='active'" :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.dotters.network/${service.endpoint}`" target="_blank">
-              IBP.1: wss://rpc.dotters.network/{{ service.endpoint }}
-            </a>
-            <br>
-            <a v-show="service.status==='active'" :href="`https://polkadot.js.org/apps/?rpc=wss://rpc.ibp.network/${service.endpoint}`" target="_blank">
-              IBP.2:  wss://rpc.ibp.network/{{ service.endpoint }}
-            </a> -->
           </td>
         </tr>
       </tbody>
@@ -83,7 +71,7 @@
       <CheckTable
         v-if="$vuetify.display.width > 599"
         :healthChecks="service.healthChecks"
-        :columns="['id', 'memberId', 'source', 'version', 'performance', 'updatedAt']"
+        :columns="['id', 'monitorId', 'memberId', 'source', 'version', 'performance', 'createdAt']"
       ></CheckTable>
       <CheckList
         v-if="$vuetify.display.width < 600"
@@ -101,7 +89,6 @@ import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import MemberList from './MemberList.vue'
 import MemberTable from './MemberTable.vue'
-import PeerTable from './PeerTable.vue'
 import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
@@ -116,7 +103,6 @@ export default defineComponent({
     MemberTable,
     MonitorTable,
     MonitorList,
-    PeerTable,
     CheckChart,
     CheckTable,
     CheckList,
@@ -129,9 +115,9 @@ export default defineComponent({
     ...mapState(['dateTimeFormat']),
     ...mapState('service', ['service']),
     ...mapState('member', { members: 'list' }),
-    ...mapState('domain', { domains: 'list' }),
+    ...mapState('geoDnsPool', { geoDnsPools: 'list' }),
     membersForService(): IMember[] {
-      return this.members.filter((m: IMember) => m.current_level >= this.service.level_required)
+      return this.members.filter((m: IMember) => m.membershipLevelId >= this.service.membershipLevelId)
     },
   },
   watch: {
@@ -156,7 +142,8 @@ export default defineComponent({
   },
   created() {
     console.debug(this.$route.params)
-    this.store.dispatch('service/setService', this.$route.params.serviceUrl)
+    this.store.dispatch('service/setService', this.$route.params.serviceId)
+    this.store.dispatch('geoDnsPool/getList')
   },
   mounted() {
     this.$nextTick(() => {

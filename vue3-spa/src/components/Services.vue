@@ -1,11 +1,5 @@
 <template>
   <v-container fluid class="pa-0 ma-0">
-    <!-- <v-breadcrumbs>
-      <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item><b>Services</b></v-breadcrumbs-item>
-    </v-breadcrumbs> -->
-
     <v-toolbar>
       <v-btn icon><v-icon size="small">mdi-server</v-icon></v-btn>
       <v-toolbar-title>Services</v-toolbar-title>
@@ -14,7 +8,7 @@
     <ServiceTable
       v-if="$vuetify.display.width > 599"
       :services="list"
-      :columns="['logo', 'endpoint', 'pjs', 'name', 'status']"
+      :columns="['logo', 'name', 'endpoint', 'status', 'pjs']"
     ></ServiceTable>
     <ServiceList v-if="$vuetify.display.width < 600" :services="list"></ServiceList>
   </v-container>

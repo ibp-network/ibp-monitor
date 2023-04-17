@@ -10,12 +10,9 @@ import { memberServiceNodeModel } from '../data/models/member_service_node.js'
 import { monitorModel } from '../data/models/monitor.js'
 import { healthCheckModel } from '../data/models/health_check.js'
 import { logModel } from '../data/models/log.js'
+import { geoDnsPoolModel } from '../data/models/geo_dns_pool.js'
 
-import { domainModel } from '../models/domain.js'
-import { endpointModel } from '../models/endpoint.js'
-import { peerModel } from '../models/peer.js'
-
-import { Umzug, SequelizeStorage } from 'umzug'
+// import { Umzug, SequelizeStorage } from 'umzug'
 
 import { config } from '../config/config.js'
 import { configLocal } from '../config/config.local.js'
@@ -30,6 +27,7 @@ const sequelize = new Sequelize(
 
 class DataStore {
   Chain = undefined
+  GeoDnsPool = undefined
   HealthCheck = undefined
   Log = undefined
   Member = undefined
@@ -38,10 +36,6 @@ class DataStore {
   MemberServiceNode = undefined
   Service = undefined
   Monitor = undefined
-
-  Domain = undefined
-  Endpoint = undefined
-  Peer = undefined
 
   pruning = {
     age: 90 * (24 * 60 * 60), // days as seconds
@@ -229,20 +223,13 @@ class DataStore {
       foreignKey: 'memberServiceId',
     })
 
-    const Domain = sequelize.define('domain', domainModel.definition, {
-      ...domainModel.options,
-      sequelize,
-    })
-    const Peer = sequelize.define('peer', peerModel.definition, {
-      ...peerModel.options,
-      sequelize,
-    })
-    const Endpoint = sequelize.define('endpoint', endpointModel.definition, {
-      ...endpointModel.options,
+    const GeoDnsPool = sequelize.define('geo_dns_pool', geoDnsPoolModel.definition, {
+      ...geoDnsPoolModel.options,
       sequelize,
     })
 
     this.Chain = Chain
+    this.GeoDnsPool = GeoDnsPool
     this.HealthCheck = HealthCheck
     this.Log = Log
     this.Member = Member
@@ -251,10 +238,6 @@ class DataStore {
     this.MemberServiceNode = MemberServiceNode
     this.Monitor = Monitor
     this.Service = Service
-
-    this.Domain = Domain
-    this.Peer = Peer
-    this.Endpoint = Endpoint
   }
 
   /*

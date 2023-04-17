@@ -1,62 +1,74 @@
-export interface IEndpoint {
-  memberId: string
-  serviceId: string
-  serviceUrl: string
+export interface IChain {
+  id: string
+  genesisHash: string
   name: string
-  chain: string
-  errorCount: number
-  status: string
-  createdAt: any
-  updatedAt: any
+  relayChainId: string
+  logoUrl: string
+}
+
+export interface IMembershipLevel {
+  id: number
+  name: string
+  subdomain: string
 }
 
 export interface IService {
   id: string
-  name: string
-  endpoint: string
-  level_required: number
-  parachain: boolean
-  parentId: string
+  chain: IChain
+  type: string
+  membershipLevel: IMembershipLevel
   status: string
-  logo: string
-}
-
-export interface IMonitor {
-  monitorId: string
-  services: [IService]
-  addresses: any[]
-  createdAt: any
-  updatedAt: any
-}
-
-export interface IHealthCheck {
-  id: number
-  level: string
-  serviceId: string
-  memberId: string
-  monitorId: string
-  source: string
-  record: any
-  createdAt: any
-  updatedAt: any
 }
 
 export interface IMember {
   id: string
   name: string
-  logo: string
-  membership: string
+  websiteUrl: string
+  logoUrl: string
+  serviceIpAddress: string
+  membershipType: string
+  membershipLevelId: number
+  membershipLevelTimestamp: number
+  status: string
   region: string
-  current_level: any
-  level_timestamp: any
-  services: [IService]
-  endpoints: [IEndpoint]
-  createdAt: any
-  updatedAt: any
+  services: [IMemberService]
+  createdAt: number
+  updatedAt: number
 }
 
-export interface IPeer {
+export interface IMemberService {
+  id: string
+  memberId: string,
+  serviceId: string,
+  serviceUrl: string,
+  status: string,
+  createdAt: number,
+  updatedAt: number,
+}
+
+export interface IMonitor {
+  id: string
+  addresses: string[]
+  status: string
+  createdAt: number
+  updatedAt: number
+}
+
+export interface IHealthCheck {
+  id: number
+  monitorId: string
+  serviceId: string
+  memberId: string
   peerId: string
-  createdAt: any
-  updatedAt: any
+  source: string
+  status: string
+  record: any
+  createdAt: number
+}
+
+export interface IGeoDnsPool {
+  id: string
+  name: string
+  host: string
+  createdAt: number
 }

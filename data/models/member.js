@@ -77,7 +77,7 @@ export const memberModel = {
     updatedAt: true,
     defaultScope: {
       attributes: {
-        exclude: ['createdAt', 'updatedAt'],
+        exclude: [],
       },
       order: [['id', 'ASC']],
     },

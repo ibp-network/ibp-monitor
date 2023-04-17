@@ -16,7 +16,7 @@
       <tbody>
         <tr>
           <th>Monitor ID</th>
-          <td>{{ monitor.monitorId }}</td>
+          <td>{{ monitor.id }}</td>
         </tr>
         <tr>
           <th>Name</th>
@@ -24,7 +24,7 @@
         </tr>
         <tr>
           <th>Addresses</th>
-          <td>{{ monitor.multiaddrs }}</td>
+          <td>{{ monitor.multiaddress }}</td>
         </tr>
         <!-- <tr>
           <th>Polkadot.js</th>
