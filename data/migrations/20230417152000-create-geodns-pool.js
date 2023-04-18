@@ -1,8 +1,7 @@
-import { geoDnsPoolModel } from '../models/geo_dns_pool.js'
+import { geoDnsPoolModel } from '../models/geo-dns-pool.js'
 
 async function up({ context: queryInterface }) {
-  await queryInterface
-    .createTable('geo_dns_pool', geoDnsPoolModel.definition)
+  await queryInterface.createTable('geo_dns_pool', geoDnsPoolModel.definition)
 }
 
 async function down({ context: queryInterface }) {

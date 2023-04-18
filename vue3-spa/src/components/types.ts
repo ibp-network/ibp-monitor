@@ -38,20 +38,20 @@ export interface IMember {
 
 export interface IMemberService {
   id: string
-  memberId: string,
-  serviceId: string,
-  serviceUrl: string,
-  status: string,
-  createdAt: number,
-  updatedAt: number,
+  memberId: string
+  serviceId: string
+  serviceUrl: string
+  status: string
+  createdAt: number
+  updatedAt: number
 }
 
 export interface IMemberServiceNode {
   peerId: string
-  serviceId: string,
-  memberId: string,
-  createdAt: number,
-  updatedAt: number,
+  serviceId: string
+  memberId: string
+  createdAt: number
+  updatedAt: number
 }
 
 export interface IMonitor {

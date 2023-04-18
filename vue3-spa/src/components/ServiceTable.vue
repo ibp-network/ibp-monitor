@@ -23,7 +23,8 @@
               v-for="geoDnsPool in geoDnsPools"
               v-bind:key="geoDnsPool.id"
               :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
-              target="_blank">
+              target="_blank"
+            >
               IBP.{{ geoDnsPool.id }}
             </a>
           </div>

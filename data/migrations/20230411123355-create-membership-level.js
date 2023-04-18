@@ -1,4 +1,4 @@
-import { membershipLevelModel } from '../models/membership_level.js'
+import { membershipLevelModel } from '../models/membership-level.js'
 
 async function up({ context: queryInterface }) {
   await queryInterface.createTable('membership_level', membershipLevelModel.definition).then(() =>

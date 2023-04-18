@@ -1,8 +1,8 @@
 import fs from 'fs'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
 
-import { DataStore } from './data/data_store.js'
-import { HttpHandler } from './lib/http_handler.js'
+import { DataStore } from './data/data-store.js'
+import { HttpHandler } from './lib/http-handler.js'
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
 console.log('VERSION', pkg.version)

@@ -1,5 +1,4 @@
 import fs from 'fs'
-import moment from 'moment'
 import { createLibp2p } from 'libp2p'
 import { bootstrap } from '@libp2p/bootstrap'
 import { mdns } from '@libp2p/mdns'
@@ -19,12 +18,10 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
 
-import { DataStore } from './data/data_store.js'
-import { Op, Sequelize } from 'sequelize'
+import { DataStore } from './data/data-store.js'
 // import { DataStoreLoki } from './lib/DataStoreLoki.js'
-import { MessageHandler } from './lib/message_handler.js'
-import { HealthChecker } from './lib/health_checker.js'
-import { asyncForeach, streamToString, stringToStream } from './lib/utils.js'
+import { MessageHandler } from './lib/message-handler.js'
+import { HealthChecker } from './lib/health-checker.js'
 
 // const star = webRTCStar()
 // const direct = webRTCDirect()

@@ -43,40 +43,42 @@
     </v-row>
 
     <v-tabs v-model="activeTab">
+      <v-tab value="performance">Performance</v-tab>
       <v-tab value="services">Provides</v-tab>
       <v-tab value="nodes">Nodes</v-tab>
       <v-tab value="checks">Healthchecks</v-tab>
     </v-tabs>
 
-    <v-window v-model="activeTab">
-      <v-window-item value="services">
-        <ServiceTable
-          v-if="$vuetify.display.width > 599"
-          :member="member"
-          :services="servicesForMember"
-          :columns="['logo', 'name', 'serviceId', 'pjs']"
-        ></ServiceTable>
-        <ServiceList
-          v-if="$vuetify.display.width < 600"
-          :member="member"
-          :services="servicesForMember"
-        ></ServiceList>
-      </v-window-item>
-      <v-container v-show="activeTab === 'nodes'">
-        <NodeTable
-          :nodes="nodesForMember"
-          :columns="['peerId', 'serviceId', 'updatedAt', 'createdAt']"
-        ></NodeTable>
-      </v-container>
-      <v-window-item value="checks">
-        <CheckTable
-          v-if="$vuetify.display.width > 599"
-          :health-checks="healthChecks"
-          :columns="['id', 'serviceId', 'performance']"
-        ></CheckTable>
-        <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
-      </v-window-item>
-    </v-window>
+    <v-container v-show="activeTab === 'performance'">
+      <CheckChart :health-checks="healthChecks" :group-by="'serviceId'"></CheckChart>
+    </v-container>
+    <v-container v-show="activeTab === 'services'">
+      <ServiceTable
+        v-if="$vuetify.display.width > 599"
+        :member="member"
+        :services="servicesForMember"
+        :columns="['logo', 'name', 'serviceId', 'pjs']"
+      ></ServiceTable>
+      <ServiceList
+        v-if="$vuetify.display.width < 600"
+        :member="member"
+        :services="servicesForMember"
+      ></ServiceList>
+    </v-container>
+    <v-container v-show="activeTab === 'nodes'">
+      <NodeTable
+        :nodes="nodesForMember"
+        :columns="['peerId', 'serviceId', 'updatedAt', 'createdAt']"
+      ></NodeTable>
+    </v-container>
+    <v-container v-show="activeTab === 'checks'">
+      <CheckTable
+        v-if="$vuetify.display.width > 599"
+        :health-checks="healthChecks"
+        :columns="['id', 'serviceId', 'performance']"
+      ></CheckTable>
+      <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
+    </v-container>
   </v-container>
 </template>
 
@@ -84,7 +86,7 @@
 import { defineComponent, ref } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
-// import CheckChart from './CheckChart.vue'
+import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
 import NodeTable from './NodeTable.vue'
@@ -95,6 +97,7 @@ import { IService } from './types'
 export default defineComponent({
   name: 'MemberC',
   components: {
+    CheckChart,
     CheckTable,
     CheckList,
     NodeTable,
@@ -104,7 +107,7 @@ export default defineComponent({
   props: {
     tab: {
       type: String,
-      default: 'services',
+      default: 'performance',
     },
   },
   setup(props) {
@@ -118,11 +121,13 @@ export default defineComponent({
     ...mapState('service', { services: 'list' }),
     ...mapState('member', { member: 'model', healthChecks: 'healthChecks', nodes: 'nodes' }),
     servicesForMember() {
-      return this.services.filter((service: IService) => service.membershipLevel.id <= this.member.membershipLevelId)
+      return this.services.filter(
+        (service: IService) => service.membershipLevel.id <= this.member.membershipLevelId
+      )
     },
     nodesForMember() {
       return this.nodes
-    }
+    },
   },
   methods: {
     formatDateTime(value: any) {
@@ -132,11 +137,6 @@ export default defineComponent({
   },
   created() {
     console.debug(this.$route.params)
-    if (this.member.id !== this.$route.params.memberId) {
-      this.store.dispatch('member/setModel', this.$route.params.memberId)
-    }
-    this.store.dispatch('member/getChecks', this.member.id)
-    this.store.dispatch('member/getNodes', this.member.id)
   },
   mounted() {
     this.$nextTick(() => {
@@ -146,7 +146,12 @@ export default defineComponent({
         behavior: 'smooth',
       })
     })
-    this.activeTab = this.$route.params.tab?.toString() || 'services'
+    if (this.member.id !== this.$route.params.memberId) {
+      this.store.dispatch('member/setModel', this.$route.params.memberId)
+    }
+    this.store.dispatch('member/getChecks', this.member.id)
+    this.store.dispatch('member/getNodes', this.member.id)
+    this.activeTab = this.$route.params.tab?.toString() || 'performance'
   },
 })
 </script>

@@ -1,4 +1,4 @@
-import { healthCheckModel } from '../models/health_check.js'
+import { healthCheckModel } from '../models/health-check.js'
 
 async function up({ context: queryInterface }) {
   await queryInterface

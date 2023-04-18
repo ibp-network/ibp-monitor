@@ -2,11 +2,11 @@ import { InjectionKey } from 'vue'
 import { createStore, Store } from 'vuex'
 import axios from 'axios'
 
-import geoDnsPool from './modules/geo_dns_pool'
+import geoDnsPool from './modules/geo-dns-pool'
 import member from './modules/member'
 import service from './modules/service'
 import monitor from './modules/monitor'
-import healthCheck from './modules/health_check'
+import healthCheck from './modules/health-check'
 import libp2p from './modules/libp2p'
 
 export interface IState {

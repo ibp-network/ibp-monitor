@@ -5,7 +5,7 @@
       <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
     </v-toolbar>
 
-    <table class="table is-fullwidth" v-if="(service.chain)">
+    <table class="table is-fullwidth" v-if="service.chain">
       <tbody>
         <tr>
           <th>Name</th>
@@ -19,25 +19,25 @@
           <th>Status</th>
           <td>{{ service.status }}</td>
         </tr>
-        <tr v-if="(service.chain.relayChainId)">
+        <tr v-if="service.chain.relayChainId">
           <th>Parachain</th>
           <td>
-            Yes (on: <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
+            Yes (on:
+            <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
             >)
           </td>
         </tr>
         <tr v-if="service.status === 'active'">
           <th>Polkadot.js</th>
           <td>
-            <div
-              v-for="geoDnsPool in geoDnsPools"
-              v-bind:key="geoDnsPool.id"
-            >
+            <div v-for="geoDnsPool in geoDnsPools" v-bind:key="geoDnsPool.id">
               <a
                 :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
                 target="_blank"
               >
-                wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{ service.chain.id }}
+                wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{
+                  service.chain.id
+                }}
               </a>
               (level: {{ service.membershipLevelId }})
             </div>
@@ -57,9 +57,9 @@
     <v-window-item value="performance"> -->
     <v-container v-show="activeTab === 'performance'">
       <a :href="`/api/metrics/${service.id}`" target="_blank">
-        Prometheus &nbsp;<img src="/image/prometheus_logo_orange.svg" alt="" width="18px" />
+        Prometheus &nbsp;<img src="/image/prometheus-logo-orange.svg" alt="" width="18px" />
       </a>
-      <CheckChart :healthChecks="service.healthChecks"></CheckChart>
+      <CheckChart :healthChecks="service.healthChecks" :group-by="'memberId'"></CheckChart>
     </v-container>
     <!-- </v-window-item>
     <v-window-item value="members"> -->
@@ -126,7 +126,9 @@ export default defineComponent({
     ...mapState('member', { members: 'list' }),
     ...mapState('geoDnsPool', { geoDnsPools: 'list' }),
     membersForService(): IMember[] {
-      return this.members.filter((m: IMember) => m.membershipLevelId >= this.service.membershipLevelId)
+      return this.members.filter(
+        (m: IMember) => m.membershipLevelId >= this.service.membershipLevelId
+      )
     },
   },
   watch: {

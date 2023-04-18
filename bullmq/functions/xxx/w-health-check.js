@@ -1,6 +1,6 @@
 import { Worker, Job } from 'bullmq'
 import { ApiPromise, WsProvider, HttpProvider } from '@polkadot/api'
-import { DataStore } from '../../data/data_store'
+import { DataStore } from '../../data/data-store'
 
 import { config } from '../../config/config.js'
 import { configLocal } from '../../config/config.local.js'

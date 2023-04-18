@@ -1,4 +1,4 @@
-import { memberServiceNodeModel } from '../models/member_service_node.js'
+import { memberServiceNodeModel } from '../models/member-service-node.js'
 
 async function up({ context: queryInterface }) {
   await queryInterface

@@ -28,10 +28,7 @@
             </v-btn>
           </template>
           <v-list>
-            <v-list-item
-              v-for="geoDnsPool in geoDnsPools"
-              v-bind:key="geoDnsPool.id"
-            >
+            <v-list-item v-for="geoDnsPool in geoDnsPools" v-bind:key="geoDnsPool.id">
               <a
                 @click.stop
                 :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"

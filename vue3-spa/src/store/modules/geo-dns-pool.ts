@@ -3,7 +3,7 @@ import { Module } from 'vuex'
 import { IState as IRootState } from '../index'
 
 export interface IState {
-  list: any[],
+  list: any[]
 }
 
 const geoDnsPool: Module<IState, IRootState> = {

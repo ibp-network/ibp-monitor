@@ -15,7 +15,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 // import axios from 'axios'
 
 import { asyncForeach } from './lib/utils.js'
-import { checkService } from './bullmq/functions/f_check_service.js'
+import { checkService } from './bullmq/functions/f-check-service.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'
 // import { f_w3f_exposures_update } from './workers/w3f-exposures-update.js'
