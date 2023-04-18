@@ -13,9 +13,3 @@ RUN rm -rf node_modules
 RUN rm -rf vue-spa
 RUN cp config/config.js config/config.local.js
 RUN npm install
-
-# WORKDIR /home/ibp/vue-spa
-# RUN rm -rf node_modules
-# RUN npm install
-# RUN npm run build
-# WORKDIR /home/ibp

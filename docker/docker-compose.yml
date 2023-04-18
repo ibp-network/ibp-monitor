@@ -110,8 +110,6 @@ services:
     restart: on-failure
     ports:
       - '30001:80'
-    volumes:
-      - ../vue-spa/static:/usr/share/nginx/html
     depends_on:
       wait-for-ibp-api-ready:
         condition: service_completed_successfully
