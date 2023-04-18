@@ -15,7 +15,7 @@ import { geoDnsPoolModel } from '../data/models/geo-dns-pool.js'
 // import { Umzug, SequelizeStorage } from 'umzug'
 
 import { config } from '../config/config.js'
-import { configLocal } from '../config/config.local.js'
+import { config as configLocal } from '../config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 const sequelize = new Sequelize(

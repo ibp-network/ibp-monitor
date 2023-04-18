@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 import { config } from '../config/config.js'
-import { configLocal } from '../config/config.local.js'
+import { config as configLocal } from '../config/config.local.js'
 import { DataStore } from '../data/data-store.js'
 import axios from 'axios'
 

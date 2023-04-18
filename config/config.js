@@ -16,6 +16,7 @@ const config = {
       // hostname = docker service name
       host: 'ibp-datastore',
       port: 3306,
+      logging: false,
     },
   },
   redis: {

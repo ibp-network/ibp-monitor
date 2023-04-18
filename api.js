@@ -1,14 +1,14 @@
 import fs from 'fs'
-import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
-
+import { createEd25519PeerId, createFromJSON } from '@libp2p/peer-id-factory'
 import { DataStore } from './data/data-store.js'
 import { HttpHandler } from './lib/http-handler.js'
+import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
+import { config } from './config/config.js'
+import { config as configLocal } from './config/config.local.js'
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
 console.log('VERSION', pkg.version)
 
-import { config } from './config/config.js'
-import { configLocal } from './config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 // set this in docker-compose.yml?

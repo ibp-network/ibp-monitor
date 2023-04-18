@@ -2,7 +2,7 @@
 // dotenv.config()
 
 import { config } from './config/config.js'
-import { configLocal } from './config/config.local.js'
+import { config as configLocal } from './config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 import express from 'express'

@@ -1,0 +1,5 @@
+FROM nginx
+
+WORKDIR /etc/nginx/conf.d
+
+COPY etc/nginx/ibp-monitor.conf default.conf

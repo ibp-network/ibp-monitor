@@ -32,7 +32,7 @@ const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
 console.log('VERSION', pkg.version)
 
 import { config } from './config/config.js'
-import { configLocal } from './config/config.local.js'
+import { config as configLocal } from './config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 const queueOpts = {

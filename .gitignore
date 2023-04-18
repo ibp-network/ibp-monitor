@@ -3,6 +3,6 @@ config/config.local.js
 data/mariadb/**
 prototype/**
 _archive/**
-node_modules/
+**/node_modules
 .DS_Store
-static
+**/static
