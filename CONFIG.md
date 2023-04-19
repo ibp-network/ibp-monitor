@@ -1,14 +1,12 @@
 # How to configure the monitor
 
-1. copy `config/config.js` to `config/config.local.js`
-   Do not modify config.js, this could prevent you from pulling updates from github
-2. edit the config.local.js as needed
+1. Copy `config/config.js` to `config/config.local.js`
+   Do not modify `config.js`, this could prevent you from pulling updates from github
+2. Edit `config.local.js` as needed
 
 ## A note on `peerId`
 
-The `monitor` uses libp2p to connect with other monitor peers.
-At 1st startup, each monitor will generate a peerId (saved here: `keys/peerId.json`)
-The local monitorId (peerId) is printed to console at startup:
+The `monitor` uses `libp2p` to connect with other monitor peers. At 1st startup, each monitor will generate a peerId (saved as `keys/peerId.json`) The local monitor id (`peerId`) is printed to console at startup:
 
 ```bash
 Our monitorId  12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh
@@ -33,12 +31,12 @@ WARNING: `config/config.local.js` potentially contains password and other sensit
 
 ```js
 // TODO: check if this is useful? process.env.GOSSIP_PORT could be set in the Dockerfile?
-const  GOSSIP_PORT = 30000`
+const GOSSIP_PORT = 30000`
 ```
 
 ```js
 // TODO: check if this is useful? process.env.HTTP_PORT could be set in the Dockerfile?
-const  HTTP_PORT = process.env.HTTP_PORT || 30001`
+const HTTP_PORT = process.env.HTTP_PORT || 30001`
 ```
 
 ```js
@@ -49,14 +47,16 @@ dateTimeFormat: 'DD/MM/YYYY HH:mm',`
 ```js
 // Connection to the datastore
 sequelize: {
-  databasename: 'ibp_monitor',
+  database: 'ibp_monitor',
   username: 'ibp_monitor',
   password: 'ibp_monitor',
   options: {
     dialect: 'mariadb',
     // hostname = docker service name
     host: 'ibp-datastore',
-    port: 3306
+    port: 3306,
+    // optionally turn on Sequelize logs 
+    logging: false,
   }
 }
 ```
@@ -64,24 +64,24 @@ sequelize: {
 ```js
 // Connection to Redis
 redis: {
-// hostname = docker service name
-host: 'ibp-redis',
-port: 6379
+  // hostname = docker service name
+  host: 'ibp-redis',
+  port: 6379
 },
 ```
 
 ```js
 // @deprecated: the peerId is calculated at 1st run
 peerId: {
-// each member should register a known peerId
+  // each member should register a known peerId
 },
 ```
 
 ```js
 // List of other monitors (peerId is printed on startup)
 knownPeers: [
-// TODO: list all peers/members public keys...?
-// Not currently used.
+  // TODO: list all peers/members public keys...?
+  // Not currently used.
 ],
 // TODO: amend lib/MessageHandler to check `cfg.knownPeersOnly` when gossip messages.
 knownPeersOnly: false,
@@ -100,14 +100,14 @@ listenPort: GOSSIP_PORT,
 ```js
 // config for libp2p
 addresses: {
-listen: [
-  '/ip4/0.0.0.0/tcp/${GOSSIP_PORT}',
-  // `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct` // not used!
-],
-announce: [
-  // your monitor's external ip address, p2p port and peerId
-  `/ip4/31.22.13.147/tcp/${GOSSIP_PORT}/p2p/12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh`,
-]
+  listen: [
+    '/ip4/0.0.0.0/tcp/${GOSSIP_PORT}',
+    // `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct` // not used!
+  ],
+  announce: [
+    // your monitor's external ip address, p2p port and peerId
+    `/ip4/31.22.13.147/tcp/${GOSSIP_PORT}/p2p/12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh`,
+  ]
 },
 ```
 
@@ -153,9 +153,7 @@ gossipResults: true,
 
 ```js
 // libp2p: allow our node to relay messages to other nodes
-relay: {
-  enabled: false
-},
+relay: null,
 ```
 
 ```js
@@ -163,11 +161,11 @@ relay: {
 // these services will be advertised to other nodes
 services: [
 // put these in your config.local.js
-{
-  serviceUrl: "wss://ibp-rpc.metaspan.io/westend",
-  name: "Metaspan Westend RPC",
-  chain: "westend",
-}
+  {
+    serviceUrl: "wss://ibp-rpc.metaspan.io/westend",
+    name: "Metaspan Westend RPC",
+    chain: "westend",
+  }
 ],
 ```
 

@@ -1,6 +1,6 @@
 keys/peerId.json
 config/config.local.js
-data/mariadb/**
+**/mariadb
 prototype/**
 _archive/**
 **/node_modules
