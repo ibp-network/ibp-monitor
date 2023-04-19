@@ -34,9 +34,7 @@ const config = {
   // TODO: how to do this through NAT?
   // 0.0.0.0 will bind all interfaces
   addresses: {
-    listen: [
-      `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`,
-    ],
+    listen: [`/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`],
     // announce: []
   },
   allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck'],
