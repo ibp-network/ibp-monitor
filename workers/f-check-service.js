@@ -2,11 +2,11 @@
 
 import dns from 'node:dns'
 import edns from 'evil-dns'
-import { ApiPromise, WsProvider, HttpProvider } from '@polkadot/api'
-import { serializeError, deserializeError } from 'serialize-error'
+import { ApiPromise, WsProvider } from '@polkadot/api'
+import { serializeError } from 'serialize-error'
 
-import { config } from '../../config/config.js'
-import { config as configLocal } from '../../config/config.local.js'
+import { config } from '../config/config.js'
+import { config as configLocal } from '../config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 // eDns has patched node:dns and not node:dns/promises
