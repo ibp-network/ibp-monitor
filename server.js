@@ -93,9 +93,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   const libp2p = await createLibp2p({
     peerId,
     addresses: cfg.addresses,
-    transports: [
-      new tcp(),
-    ],
+    transports: [new tcp()],
     streamMuxers: [mplex()],
     connectionEncryption: [new noise()],
     connectionManager: {
@@ -226,7 +224,10 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
 
   async function checkServiceJobs() {
     // from now on all monitors check all services
-    const services = await ds.Service.findAll({ where: { type: 'rpc', status: 'active' } })
+    const services = await ds.Service.findAll({
+      where: { type: 'rpc', status: 'active' },
+      include: ['membershipLevel'],
+    })
     const members = await ds.Member.findAll({
       where: { status: 'active' },
       include: ['membershipLevel'],
@@ -253,7 +254,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
           checkServiceQueue.add(
             'checkService',
             {
-              subdomain: member.membershipLevel.subdomain,
+              subdomain: service.membershipLevel.subdomain,
               member,
               service,
               monitorId: peerId.toString(),
