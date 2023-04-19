@@ -1,28 +1,20 @@
-// import Vue from 'vue'
-import { createApp } from 'vue'
+/**
+ * main.ts
+ *
+ * Bootstraps Vuetify and other plugins then mounts the App`
+ */
+
+// Components
 import App from './App.vue'
-import router from './router'
-import { store, key } from './store'
 
-import '@/assets/main.scss'
+// Composables
+import { createApp } from 'vue'
 
-// import { Libp2pPlugin } from './plugins/libp2p'
-// Vue.use(Libp2pPlugin, {})
+// Plugins
+import { registerPlugins } from '@/plugins'
 
-import vuetify from './plugins/vuetify'
-console.debug('vuetify', vuetify)
-// Vue.config.productionTip = false
-
-// const app = createApp({
-//   router,
-//   store,
-//   render: (h: any) => h(App)
-// })
 const app = createApp(App)
-app.provide('$store', store)
-app.use(store)
-app.use(router)
-app.use(vuetify)
-// app.use(store, key)
+
+registerPlugins(app)
 
 app.mount('#app')

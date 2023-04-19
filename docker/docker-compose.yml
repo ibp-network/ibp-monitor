@@ -10,104 +10,109 @@ name: ibp-stack
 # - 30002 - api, http
 
 services:
-  ibp-monitor-frontend:
-    container_name: ibp-monitor-frontend
-    # image: nginx
-    build:
-      context: ../.
-      dockerfile: docker/Dockerfile.frontend
-      args:
-        RELEASE: "latest"
-    ports:
-      - "30001:80"
-    volumes:
-      - ../static:/usr/share/nginx/html
-    depends_on:
-      - ibp-monitor-api
-
-  ibp-monitor-api:
-    container_name: ibp-monitor-api
-    # image: nginx
-    build:
-      context: ../.
-      dockerfile: docker/Dockerfile.api
-      args:
-        RELEASE: "latest"
-        HTTP_PORT: 30002
-    # no ports, we'll proxy from frontend
-    ports:
-      - "30002:30002"
-    environment:
-      - HTTP_PORT=30002
-    volumes:
-      - ../config/config.local.js:/home/ibp/config/config.local.js
-      - ../keys:/home/ibp/keys
-    depends_on:
-      - ibp-datastore
-
-  ibp-monitor:
-    container_name: ibp-monitor
-    image: metaspan/ibp-monitor
-    build:
-      context: ../.
-      dockerfile: docker/Dockerfile.server
-      args:
-        RELEASE: "latest"
-    restart: on-failure
-    depends_on:
-      - ibp-datastore
-    ports:
-      - "30000:30000"  # p2p port
-    volumes:
-      - ../config:/home/ibp/config
-      - ../keys:/home/ibp/keys
-    command: []
-
-  ibp-datastore:
-    container_name: ibp-datastore
-    image: mariadb:10.11.2
-    # no build required
-    # build:
-    #   context: ../.
-    #   dockerfile: docker/Dockerfile.mariadb
-    #   args:
-    #     RELEASE: "latest"
-    restart: unless-stopped
-    environment:
-      MARIADB_ROOT_PASSWORD: thisIsASecret
-    ports:
-      - "3306:3306"
-    volumes:
-      - ../data/mariadb:/var/lib/mysql
-      - ../data/schema.mysql.sql:/docker-entrypoint-initdb.d/schema.sql:ro
-
-  # MariaDB Admin utils
-  # adminer:
-  #   image: adminer
-  #   restart: always
-  #   ports:
-  #     - 8080:8080
-
   ibp-redis:
     container_name: ibp-redis
     image: redis
+    restart: unless-stopped
     ports:
-      - "6379:6379"
-
-  ibp-bullmq:
-    container_name: ibp-bullmq
-    build:
-      context: ../.
-      dockerfile: docker/Dockerfile.bullmq
-      args:
-        RELEASE: "latest"
-    restart: on-failure
+      - '6379:6379'
+  ibp-datastore:
+    container_name: ibp-datastore
+    image: mariadb:10.11.2
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=thisIsASecret
+      - MARIADB_USER=ibp_monitor
+      - MARIADB_PASSWORD=ibp_monitor
+      - MARIADB_DATABASE=ibp_monitor
+    ports:
+      - '3306:3306'
+    volumes:
+      - ../data/mariadb:/var/lib/mysql
+  wait-for-datastore-ready:
+    container_name: wait-for-datastore-ready
+    image: jwilder/dockerize:0.6.1
     depends_on:
       - ibp-datastore
-      - ibp-redis
+    command: 'dockerize -wait=tcp://ibp-datastore:3306 -timeout 60s'
+  ibp-datastore-init:
+    &ibp-services
+    container_name: ibp-datastore-init
+    image: ibp-services
+    pull_policy: never
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.ibp.services
+    restart: "no"
+    depends_on:
+      wait-for-datastore-ready:
+        condition: service_completed_successfully
+    command: >
+      bash -c "cd data
+      && node migrate.js"
+  ibp-monitor-api:
+    <<: *ibp-services
+    container_name: ibp-monitor-api
+    restart: on-failure
+    depends_on:
+      ibp-datastore-init:
+        condition: service_completed_successfully
     ports:
-      - "3000:3000"  # http port
+      - '30002:30002'
+    command: >
+      bash -c "node api.js"
     volumes:
-      # - ../config/config.local.js:/config/config.local.js
-      - ../config:/home/app/config
-    command: ["node", "workers.js"]
+      - ibp-keys:/home/ibp/keys
+  ibp-monitor-server:
+    <<: *ibp-services
+    container_name: ibp-monitor-server
+    restart: on-failure
+    depends_on:
+      ibp-datastore-init:
+        condition: service_completed_successfully
+    ports:
+      - '30000:30000' # p2p port
+    command: >
+      bash -c "node server.js"
+    volumes:
+      - ibp-keys:/home/ibp/keys
+  wait-for-ibp-server-ready:
+    container_name: wait-for-ibp-server-ready
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - ibp-monitor-server
+    command: 'dockerize -wait=tcp://ibp-monitor-server:30000 -timeout 60s'
+  ibp-monitor-workers:
+    <<: *ibp-services
+    container_name: ibp-monitor-workers
+    restart: on-failure
+    depends_on:
+      wait-for-ibp-server-ready:
+        condition: service_completed_successfully
+    ports:
+      - '3000:3000'
+    command: >
+      bash -c "node workers.js"
+  wait-for-ibp-api-ready:
+    container_name: wait-for-ibp-api-ready
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - ibp-monitor-api
+    command: 'dockerize -wait=tcp://ibp-monitor-api:30002 -timeout 60s'
+  ibp-monitor-frontend:
+    &ibp-monitor-frontend
+    container_name: ibp-monitor-frontend
+    image: ibp-monitor-frontend
+    pull_policy: never
+    build:
+      context: ../.
+      dockerfile: docker/Dockerfile.ibp.frontend
+    restart: on-failure
+    ports:
+      - '30001:80'
+    depends_on:
+      wait-for-ibp-api-ready:
+        condition: service_completed_successfully
+volumes:
+  ibp-keys:
+    name: ibp-keys

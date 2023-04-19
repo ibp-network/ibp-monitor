@@ -1,11 +1,11 @@
-<script>
+<script lang="ts">
 import mixins, { Line } from 'vue-chartjs'
 
 export default Line.extend({
-  mixins: [mixins?.reactiveProp],
+  // mixins: [mixins?.reactiveProp],
   props: ['options'],
-  mounted () {
+  mounted() {
     this.renderChart(this.chartData, { responsive: true, maintainAspectRatio: false })
-  }
+  },
 })
 </script>

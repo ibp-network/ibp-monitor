@@ -1,28 +1,48 @@
 <template>
-  <footer class="footer">
+  <v-footer app color="rgb(54,54,54)">
+    <v-toolbar density="compact" color="rgb(54,54,54)">
+      <span style="color: white">
+        <sup
+          ><small><i class="fa-regular fa-circle-check"></i></small
+        ></sup>
+        Local MonitorId:
+        <router-link :to="`/monitor/${localMonitorId}`">{{ localMonitorId }}</router-link>
+      </span>
 
-    <!-- Main container -->
-    <nav class="level is-fixed-bottom">
-      <!-- Left side -->
-      <div class="level-left">
-        <p>
-          <sup><small><i class="fa-regular fa-circle-check"></i></small></sup> Local MonitorId:
-          <router-link :to="`/monitor/${localMonitorId}`">{{ localMonitorId }}</router-link>
-        </p>
-      </div>
+      <v-spacer></v-spacer>
 
-      <!-- Right side -->
-      <div class="level-right">
-        <p class="level-item">
-          <a class="nodecoration" href="https://github.com/dotsama-ibp/dotsama-ibp/tree/main/monitor" target="_blank">
-            <!-- <i class="fa-solid fa-code"></i> -->
-            <img src="/image/github-logo.png" width="24" height="24">&nbsp;github
-          </a>
-        </p>
-      </div>
-    </nav>
+      <v-btn color="white" text>
+        <small>
+          <!-- <small> -->
+          ui: {{ packageVersion }} <br />
+          api: {{ apiVersion }}
+          <!-- </small> -->
+        </small>
+      </v-btn>
 
-  </footer>
+      <!-- <v-avatar sizze="x-small"> -->
+      <v-btn icon color="white" href="https://github.com/ibp-network/ibp-monitor" target="_blank">
+        <!-- <img src="/image/github-logo.png" width="24" height="24">&nbsp;github -->
+        <v-icon>mdi-github</v-icon>
+      </v-btn>
+      <!-- </v-avatar> -->
+
+      <!--
+    <div class="d-flex w-100 align-center px-4">
+      <v-btn class="text-none" :to="`/monitor/${localMonitorId}`" >
+        Local MonitorId:{{ localMonitorId }}
+        <template v-slot:append>
+          <v-icon>mdi-check-circle-outline"</v-icon>
+        </template>
+      </v-btn>
+      <v-divider></v-divider>
+      <a class="nodecoration" href="https://github.com/dotsama-ibp/dotsama-ibp/tree/main/monitor" target="_blank">
+        <img src="/image/github-logo.png" width="24" height="24">&nbsp;github
+      </a>
+    </div>
+    -->
+    </v-toolbar>
+  </v-footer>
 </template>
 
 <script lang="ts">
@@ -32,7 +52,7 @@ import { mapState } from 'vuex'
 export default defineComponent({
   name: 'FooterC',
   computed: {
-    ...mapState(['localMonitorId'])
-  }
+    ...mapState(['packageVersion', 'apiVersion', 'localMonitorId']),
+  },
 })
 </script>

@@ -1,6 +1,4 @@
-
 const GOSSIP_PORT = 30000 // 0 for development/debugging, 30000 for deployment
-//const RTC_PORT = 30002 // TODO remove this
 // set HTTP_PORT in docker-compose.yml
 const HTTP_PORT = process.env.HTTP_PORT || 30001
 
@@ -16,13 +14,14 @@ const config = {
       dialect: 'mariadb',
       // hostname = docker service name
       host: 'ibp-datastore',
-      port: 3306
-    }
+      port: 3306,
+      logging: false,
+    },
   },
   redis: {
     // hostname = docker service name
     host: 'ibp-redis',
-    port: 6379
+    port: 6379,
   },
   peerId: {
     // TODO: each member should register a known peerId
@@ -37,15 +36,10 @@ const config = {
   addresses: {
     listen: [
       `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`,
-      // `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct`
     ],
     // announce: []
   },
-  allowedTopics: [
-    '/ibp',
-    '/ibp/services',
-    '/ibp/healthCheck'
-  ],
+  allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck'],
   updateInterval: 30 * 1000, // 30 seconds
   bootstrapPeers: [
     '/ip4/31.22.13.147/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
@@ -54,19 +48,17 @@ const config = {
   checkOwnServices: false,
   checkOtherServices: true,
   gossipResults: true,
-  relay: {
-    enabled: false
-  },
+  relay: null,
   services: [
     // put these in your config.local.js
   ],
   pruning: {
     age: 90 * 24 * 60 * 60, // 90 days as seconds
-    interval: 1 * 60 * 60 // 1 hour as seconds
+    interval: 1 * 60 * 60, // 1 hour as seconds
   },
   performance: {
-    sla: 500 // ms - used for performance graph, and later for alerts
-  }
+    sla: 500, // ms - used for performance graph, and later for alerts
+  },
 }
 
 export { config }

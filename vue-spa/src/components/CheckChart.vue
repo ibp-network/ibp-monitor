@@ -1,29 +1,45 @@
 <template>
-
-<div class="columns">
-  <div class="column is-1 is-narrow-mobile"></div>
-  <div class="column">
-    <div class="chart-container" style="position: relative; height:40vh;">
-      <!-- <canvas id="myChart"></canvas> -->
-      <LineChart
-        id="myChart"
-        :options="chartOptions"
-        :data="chartData"
-      ></LineChart>
+  <div class="columns">
+    <div class="column is-1 is-narrow-mobile"></div>
+    <div class="column">
+      <div class="chart-container" style="position: relative; height: 40vh">
+        <!-- <canvas id="myChart"></canvas> -->
+        <LineChart id="myChart" :options="chartOptions" :data="chartData"></LineChart>
+      </div>
     </div>
+    <div class="column is-1 is-narrow-mobile"></div>
   </div>
-  <div class="column is-1 is-narrow-mobile"></div>
-</div>
-
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import moment from 'moment'
-
+import 'chartjs-adapter-date-fns'
 import { Line as LineChart } from 'vue-chartjs'
-import { Chart as ChartJS, Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale, LineController } from 'chart.js'
-ChartJS.register(Title, Tooltip, Legend, PointElement, LineElement, CategoryScale, LinearScale, LineController)
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  LineController,
+  TimeScale,
+} from 'chart.js'
+import { shortStash } from './utils'
+
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  LineController,
+  TimeScale
+)
 
 // interface IData {
 //   chartOptions: Record<string, any>
@@ -41,61 +57,128 @@ ChartJS.register(Title, Tooltip, Legend, PointElement, LineElement, CategoryScal
 //   healthChecks: any[]
 // }
 
+const colors = ['red', 'pink', 'green', 'blue', 'purple', 'black', 'brown', 'darkblue', 'darkgreen']
+
+interface IChartData {
+  labels: string[]
+  datasets: any[]
+}
+
 export default defineComponent({
   name: 'CheckChart',
   components: { LineChart },
   props: {
     healthChecks: {
       type: Array,
-      default: () => { return [] }
-    }
+      default: () => {
+        return []
+      },
+    },
+    groupBy: {
+      type: String,
+      default: 'memberId',
+    },
   },
   computed: {
-    chartData (): Record<string, any> {
+    chartData(): IChartData {
       return {
         // labels: ['January', 'February', 'March'],
         // datasets: [{ data: [40, 20, 12] }]
-        labels: this.labels, // <%-JSON.stringify(labels) %>,
-        datasets: [{
+        //labels: this.labels, // <%-JSON.stringify(labels) %>,
+        /*
+        datasets: [...this.datasets, {
           label: 'Service performance (ms)',
           // data: [12, 19, 3, 5, 2, 3],
           data: this.data,
           borderColor: 'darkblue',
           backgroundColor: 'blue',
           borderWidth: 2,
-          lineTension: 0.2
-        }, {
-          label: 'Moving Average',
-          data: this.moveMean,
-          borderColor: 'darkgreen',
-          backgroundColor: 'green',
-          borderWidth: 1,
-          lineTension: 0.2
-        }]
-      } as any
-    }
+          lineTension: 0.2,
+        }],
+        */
+
+        datasets: this.datasets,
+      } as IChartData
+    },
   },
   watch: {
-    healthChecks () {
+    healthChecks() {
       this.makeChartData()
-    }
+    },
   },
-  data () {
+  data() {
     return {
       chartOptions: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'time',
+            display: true,
+            /*
+            scaleLabel: {
+              display: true,
+              labelString: 'x',
+            },*/
+            time: {
+              displayFormats: {
+                hour: 'HH:mm',
+              },
+            },
+          },
+          y: {
+            ticks: {
+              beginAtZero: true,
+              stepSize: 10,
+              suggestedMax: 1000,
+            },
+            /*
+            scaleLabel: {
+              display: true,
+              labelString: 'y',
+            },
+            */
+          },
+        },
       },
-      data: [] as any[],
-      labels: [] as string[],
-      moveMean: [] as number[]
+      datasets: [] as any[],
     }
   },
   methods: {
-    makeChartData () {
+    makeChartData() {
       console.debug('makeChartData()')
       const reversed = [...this.healthChecks].reverse() || []
-      this.data = reversed.map((hc: any) => hc.record?.performance || 0)
+      const groupedData = {}
+      this.datasets = []
+      for (let check of reversed) {
+        // @ts-ignore
+        if (groupedData[check[this.groupBy]]) {
+          // @ts-ignore
+          groupedData[check[this.groupBy]].push(check)
+        } else {
+          // @ts-ignore
+          groupedData[check[this.groupBy]] = [check]
+        }
+      }
+      let index = 0
+      for (let key of Object.keys(groupedData)) {
+        this.datasets.push({
+          label: key,
+          // @ts-ignore
+          data: groupedData[key].map((hc: any) => {
+            return {
+              x: new Date(hc.createdAt),
+              y: hc.record?.performance || 0,
+            }
+          }),
+          borderColor: colors[index % colors.length],
+          backgroundColor: colors[index % colors.length],
+          borderWidth: 1,
+          blineTension: 0.2,
+        })
+        index++
+      }
+      /*
       console.log('length', this.data.length)
       this.labels = reversed.map((hc: any) => moment.utc(hc.createdAt).format('HH:mm') || '0')
       const period = 3.0
@@ -113,41 +196,14 @@ export default defineComponent({
         }
       }
       this.moveMean = moveMean
-      // this.chartData = {
-      //   // labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-      //   labels: this.labels, // <%-JSON.stringify(labels) %>,
-      //   datasets: [{
-      //     label: 'Service performance (ms)',
-      //     // data: [12, 19, 3, 5, 2, 3],
-      //     data: this.data, // <%- JSON.stringify(data) %>,
-      //     borderColor: 'darkblue',
-      //     backgroundColor: 'blue',
-      //     borderWidth: 2
-      //     // lineTension: 0.2,
-      //     // options: {
-      //     //   elements: {
-      //     //     line: {
-      //     //       tension : 0.4  // smooth lines
-      //     //     },
-      //     //   }
-      //     // },
-      //   }, {
-      //     label: 'Moving Average',
-      //     data: this.moveMean, // <%- JSON.stringify(moveMean) %>,
-      //     borderColor: 'darkgreen',
-      //     backgroundColor: 'green',
-      //     borderWidth: 1
-      //     // lineTension: 0.4,
-      //   }]
-      // } as any
-      console.debug(this.chartData)
-    }
+      */
+    },
   },
-  mounted () {
+  mounted() {
     console.debug('CheckChart.vue: mounted()', this.healthChecks)
     // eslint-disable-next-line
     this.makeChartData()
     // this.healthChecks.reverse() // put it back!
-  }
+  },
 })
 </script>

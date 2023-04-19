@@ -1,77 +1,118 @@
 <template>
-
-<table class="table is-fullwidth">
-  <thead>
-    <th v-if="columns.includes('memberId')">ID</th>
-    <th v-if="columns.includes('name')">Member</th>
-    <th v-if="columns.includes('region')" class="has-text-left">Region</th>
-    <th v-if="columns.includes('current_level')" class="has-text-left">Level</th>
-    <th v-if="columns.includes('level_timestamp')" class="has-text-left">Level Date</th>
-    <th v-if="columns.includes('services')" class="has-text-centered">Services</th>
-    <th v-if="columns.includes('updatedAt')">Last Seen (UTC)</th>
-    <th v-if="columns.includes('createdAt')">Discovered</th>
-  </thead>
-  <tbody>
-    <tr v-for="member in members" v-bind:key="member.memberId">
-      <td v-if="columns.includes('memberId')">
-        <a @click="gotoMember(member.memberId)">{{member.memberId}}</a>
-      </td>
-      <td v-if="columns.includes('name')">
-        <a @click="gotoMember(member.memberId)">{{member.name}}</a>
-        <v-avatar>
-          <v-img :src="member.logo"></v-img>
-        </v-avatar>
-      </td>
-      <td v-if="columns.includes('region')" class="has-text-left">{{member.region}}</td>
-      <td v-if="columns.includes('current_level')" class="has-text-centered">{{member.current_level}}</td>
-      <td v-if="columns.includes('level_timestamp')">{{formatDateTime(member.level_timestamp)}}</td>
-      <td v-if="columns.includes('services')" class="has-text-centered">{{member.services?.length || 0}}</td>
-      <td v-if="columns.includes('updatedAt')">{{formatDateTime(member.updatedAt)}}</td>
-      <td v-if="columns.includes('createdAt')">{{formatDateTime(member.createdAt)}}</td>
-    </tr>
-  </tbody>
-</table>
-
+  <table class="table is-fullwidth">
+    <thead>
+      <th v-if="columns.includes('logo')"></th>
+      <th v-if="columns.includes('memberId')">ID</th>
+      <th v-if="columns.includes('name')"><v-icon size="small">mdi-account</v-icon>Member</th>
+      <th v-if="columns.includes('region')"><v-icon size="small">mdi-map</v-icon> Region</th>
+      <th v-if="columns.includes('services')" class="text-centered">
+        <v-icon size="small">mdi-server</v-icon>Services
+      </th>
+      <th v-if="columns.includes('membership')">Membership</th>
+      <th v-if="columns.includes('current_level')">
+        <v-icon size="small">mdi-seal-variant</v-icon>Level
+      </th>
+      <th v-if="columns.includes('level_timestamp')" class="text-center">Level Date</th>
+      <th v-if="columns.includes('updatedAt')">Last Seen (UTC)</th>
+      <th v-if="columns.includes('createdAt')">Discovered</th>
+    </thead>
+    <tbody>
+      <tr
+        v-for="member in list"
+        v-bind:key="member.id"
+        style="cursor: pointer"
+        @click="gotoMember(member.id)"
+      >
+        <!-- Logo -->
+        <td v-if="columns.includes('logo')">
+          <!-- <a @click="gotoMember(member.memberId)"> -->
+          <v-avatar size="x-small">
+            <v-img :src="member.logoUrl"></v-img>
+          </v-avatar>
+          <!-- </a> -->
+        </td>
+        <!-- memberID -->
+        <td v-if="columns.includes('memberId')">
+          <!-- <a @click="gotoMember(member.memberId)"> -->
+          {{ member.id }}
+          <!-- </a> -->
+        </td>
+        <!-- Name -->
+        <td v-if="columns.includes('name')" style="cursor: pointer">
+          <!-- <a @click="gotoMember(member.memberId)"> -->
+          {{ member.name }}
+          <!-- </a> -->
+        </td>
+        <!-- Region -->
+        <td v-if="columns.includes('region')">{{ regions[member.region]?.name }}</td>
+        <td v-if="columns.includes('services')" class="text-center">
+          {{ member.services?.length || 0 }}
+        </td>
+        <td v-if="columns.includes('membership')">{{ member.membershipType }}</td>
+        <td v-if="columns.includes('current_level')" class="text-center">
+          {{ member.membershipLevelId }}
+        </td>
+        <td v-if="columns.includes('level_timestamp')" class="text-center">
+          {{ formatDateTime(member.membershipLevelTimestamp) }}
+        </td>
+        <td v-if="columns.includes('updatedAt')">{{ formatDateTime(member.updatedAt) }}</td>
+        <td v-if="columns.includes('createdAt')">{{ formatDateTime(member.createdAt) }}</td>
+      </tr>
+    </tbody>
+  </table>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
+import { defineComponent, PropType } from 'vue'
+import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
+import { IMember } from './types'
 
 export default defineComponent({
   name: 'MemberTable',
   props: {
-    members: {
-      type: Array
+    list: {
+      type: Object as PropType<[IMember]>,
     },
     columns: {
       type: Array,
-      default () { return ['memberId', 'createdAt', 'updatedAt'] }
+      default() {
+        return ['memberId', 'createdAt', 'updatedAt']
+      },
       // services?
-    }
+    },
+  },
+  setup() {
+    const store = useStore()
+    return { store }
   },
   computed: {
-    ...mapState(['dateTimeFormat'])
+    ...mapState(['regions']),
+    // ...mapState('member', ['list'])
+  },
+  data() {
+    return {
+      dateTimeFormat: 'YYYY/MM/DD',
+    }
   },
   methods: {
     shortStash,
     moment,
-    formatDateTime (value: any) {
+    formatDateTime(value: any) {
       console.debug('formatDateTime', value, typeof value)
       const isnum = /^\d+$/.test(value)
       return isnum
         ? moment.unix(value).format(this.dateTimeFormat)
         : moment.utc(value).format(this.dateTimeFormat)
     },
-    async gotoMember (memberId: string) {
-      await this.$store.dispatch('member/setModel', memberId)
+    async gotoMember(memberId: string) {
+      await this.store.dispatch('member/setModel', memberId)
       this.$router.push(`/member/${memberId}`)
-    }
+    },
   },
-  created () {
+  created() {
     console.debug('MemberTable', 'created')
-  }
+  },
 })
 </script>

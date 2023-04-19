@@ -1,59 +1,50 @@
 <template>
-  <section class="section">
-    <nav class="level">
-      <div class="level-left">
-        <nav class="breadcrumb" aria-label="breadcrumbs">
-          <ul>
-            <li><router-link to="/">Home</router-link></li>
-            <li class="is-active">&nbsp;&nbsp;Services</li>
-          </ul>
-        </nav>
-      </div>
-    </nav>
+  <v-container fluid class="pa-0 ma-0">
+    <v-toolbar>
+      <v-btn icon><v-icon size="small">mdi-server</v-icon></v-btn>
+      <v-toolbar-title>Services</v-toolbar-title>
+    </v-toolbar>
 
-    <ServiceTable :services="list" :columns="['serviceUrl', 'pjs', 'name', 'memberLink', 'status', 'monitors']"></ServiceTable>
-
-  </section>
+    <ServiceTable
+      v-if="$vuetify.display.width > 599"
+      :services="list"
+      :columns="['logo', 'name', 'endpoint', 'status', 'pjs']"
+    ></ServiceTable>
+    <ServiceList v-if="$vuetify.display.width < 600" :services="list"></ServiceList>
+  </v-container>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
+import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import ServiceTable from './ServiceTable.vue'
+import ServiceList from './ServiceList.vue'
 
-// // eslint-disable-next-line
-// interface IData {}
-// interface IMethods {
-//   formatDateTime(value: any): string
-// }
-// interface IComputed {
-//   dateTimeFormat: string
-//   list: any[]
-// }
-// // eslint-disable-next-line
-// interface IProps {}
-
-// export default defineComponent<{}, {}, IMethods, IData, IComputed>({
 export default defineComponent({
   name: 'ServicesC',
   components: {
-    ServiceTable
+    ServiceTable,
+    ServiceList,
+  },
+  setup() {
+    const store = useStore()
+    return { store }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('service', ['list'])
+    ...mapState('service', ['list']),
   },
-  data () {
+  data() {
     return {}
   },
   methods: {
-    formatDateTime (value: any): string {
+    formatDateTime(value: any): string {
       return moment(value).format(this.dateTimeFormat)
-    }
+    },
   },
-  mounted () {
-    this.$store.dispatch('service/getList')
-  }
+  mounted() {
+    this.store.dispatch('service/getList')
+  },
 })
 </script>

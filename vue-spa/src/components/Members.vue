@@ -1,37 +1,50 @@
 <template>
-  <section class="section">
+  <v-container fluid class="ma-0 pa-0">
+    <!-- <v-breadcrumbs class="d-none d-sm-flex">
+      <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
+      <v-breadcrumbs-divider></v-breadcrumbs-divider>
+      <v-breadcrumbs-item><b>Members</b></v-breadcrumbs-item>
+    </v-breadcrumbs> -->
 
-  <nav class="level">
-    <div class="level-left">
-      <nav class="breadcrumb" aria-label="breadcrumbs">
-        <ul>
-          <li><a href="/">Home</a></li>
-          <li class="is-active"><a href="#" aria-current="page">Members</a></li>
-        </ul>
-      </nav>
-    </div>
-  </nav>
-  <!-- <%- include(templateDir + '/monitorsTable.ejs', { monitors, columns: ['monitorId', 'services', 'createdAt'] }); -%>    -->
-  <MemberTable :members="list" :columns="['name', 'region', 'current_level', 'level_timestamp', 'services', 'createdAt']"></MemberTable>
+    <v-toolbar>
+      <v-btn icon><v-icon size="small">mdi-account-multiple</v-icon></v-btn>
+      <v-toolbar-title>Members</v-toolbar-title>
+    </v-toolbar>
 
-  </section>
+    <MemberList v-if="showList" :list="list" class="d-inline s-sm-none"></MemberList>
+    <MemberTable
+      v-if="!showList"
+      :list="list"
+      :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp']"
+    ></MemberTable>
+  </v-container>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
+import { mapState, useStore } from 'vuex'
 import MemberTable from './MemberTable.vue'
+import MemberList from './MemberList.vue'
 
 export default defineComponent({
-  name: 'MonitorsC',
+  name: 'MembersC',
   components: {
-    MemberTable
+    MemberTable,
+    MemberList,
+  },
+  setup() {
+    const store = useStore()
+    return { store }
   },
   computed: {
-    ...mapState('member', ['list'])
+    ...mapState('member', ['list']),
+    showList() {
+      // console.debug('width', this.$vuetify.display.width)
+      return this.$vuetify.display.width < 600
+    },
   },
-  created () {
-    this.$store.dispatch('member/getList')
-  }
+  created() {
+    this.store.dispatch('member/getList')
+  },
 })
 </script>
