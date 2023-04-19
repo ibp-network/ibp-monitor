@@ -7,3 +7,4 @@ static/assets
 static/css
 static/js
 static/favicon*.*
+**/docker-compose.yml
