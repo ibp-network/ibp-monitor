@@ -1,5 +1,4 @@
 const GOSSIP_PORT = 30000 // 0 for development/debugging, 30000 for deployment
-//const RTC_PORT = 30002 // TODO remove this
 // set HTTP_PORT in docker-compose.yml
 const HTTP_PORT = process.env.HTTP_PORT || 30001
 
@@ -37,7 +36,6 @@ const config = {
   addresses: {
     listen: [
       `/ip4/0.0.0.0/tcp/${GOSSIP_PORT}`,
-      // `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct`
     ],
     // announce: []
   },

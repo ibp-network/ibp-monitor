@@ -102,7 +102,6 @@ listenPort: GOSSIP_PORT,
 addresses: {
   listen: [
     '/ip4/0.0.0.0/tcp/${GOSSIP_PORT}',
-    // `/ip4/0.0.0.0/tcp/${RTC_PORT}/http/p2p-webrtc-direct` // not used!
   ],
   announce: [
     // your monitor's external ip address, p2p port and peerId

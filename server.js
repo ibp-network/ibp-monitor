@@ -5,9 +5,6 @@ import { mdns } from '@libp2p/mdns'
 import { tcp } from '@libp2p/tcp'
 // import { webSockets } from '@libp2p/websockets'
 // import { all as filters_all } from '@libp2p/websockets/filters'
-// import { webRTCDirect } from '@libp2p/webrtc-direct'
-// import wrtc from 'wrtc'
-// import { webRTCStar } from '@libp2p/webrtc-star'
 // import { Noise } from '@libp2p/noise' // @deprecated
 import { noise } from '@chainsafe/libp2p-noise'
 import { mplex } from '@libp2p/mplex'
@@ -22,9 +19,6 @@ import { DataStore } from './data/data-store.js'
 // import { DataStoreLoki } from './lib/DataStoreLoki.js'
 import { MessageHandler } from './lib/message-handler.js'
 import { HealthChecker } from './lib/health-checker.js'
-
-// const star = webRTCStar()
-// const direct = webRTCDirect()
 
 import { Job, QueueEvents, Queue } from 'bullmq'
 
@@ -101,12 +95,6 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     addresses: cfg.addresses,
     transports: [
       new tcp(),
-      // webRTCDirect({ wrtc }),
-      // webSockets({
-      //   // connect to all sockets, even insecure ones
-      //   filters: filters_all
-      // }),
-      // star.transport
     ],
     streamMuxers: [mplex()],
     connectionEncryption: [new noise()],
