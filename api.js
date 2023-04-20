@@ -20,14 +20,14 @@ const hh = new HttpHandler({ datastore: ds, version: pkg.version })
 ;(async () => {
   // get PeerId
   var peerId
-  if (fs.existsSync('./keys/peerId.json')) {
-    const pidJson = JSON.parse(fs.readFileSync('./keys/peerId.json', 'utf-8'))
+  if (fs.existsSync('./keys/peer-id.json')) {
+    const pidJson = JSON.parse(fs.readFileSync('./keys/peer-id.json', 'utf-8'))
     // console.debug(pidJson)
     peerId = await createFromJSON(pidJson)
   } else {
     peerId = await createEd25519PeerId()
     fs.writeFileSync(
-      './keys/peerId.json',
+      './keys/peer-id.json',
       JSON.stringify({
         id: peerId.toString(),
         privKey: uint8ArrayToString(peerId.privateKey, 'base64'), // .toString(),

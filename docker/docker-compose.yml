@@ -72,6 +72,9 @@ services:
         condition: service_completed_successfully
     ports:
       - '30000:30000' # p2p port
+    environment:
+      - P2P_PUBLIC_IP=${P2P_PUBLIC_IP}
+      - P2P_PUBLIC_HOST=${P2P_PUBLIC_HOST}
     command: >
       bash -c "node server.js"
     volumes:
