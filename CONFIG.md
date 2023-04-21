@@ -1,29 +1,16 @@
 # How to configure the monitor
 
 1. Copy `config/config.js` to `config/config.local.js`
-   Do not modify `config.js`, this could prevent you from pulling updates from github
-2. Edit `config.local.js` as needed
+  Do not modify `config.js`, this could prevent you from pulling updates from GitHub.
+2. Edit `config.local.js` as needed.
 
 ## A note on `peerId`
 
-The `monitor` uses `libp2p` to connect with other monitor peers. At 1st startup, each monitor will generate a peerId (saved as `keys/peerId.json`) The local monitor id (`peerId`) is printed to console at startup:
+The `monitor` uses `libp2p` to connect with other monitor peers. At 1st startup, each monitor will generate a peerId (saved as `keys/peer-id.json`) The local monitor id (`peerId`) is printed to console at startup:
 
 ```bash
 Our monitorId  12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh
 ```
-
-**!!! use this monitorId (peerId) in the `listen.announce` section below.**
-Example `keys/peerId.json`:
-
-```json
-{
-  "id": "12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh",
-  "privKey": " !!! this is secret !!! ",
-  "pubKey": "CAESIGreOOZaUhD6MAOysTOZsk4FyAZQVKFCIXkKUnkm8Q2W"
-}
-```
-
-This peerId is used to sign `gossip` messages. On receipt of a `gossip` message, we validate the signature of the sender.
 
 # Example config.local.js file
 
@@ -95,19 +82,6 @@ httpPort: HTTP_PORT,
 ```js
 // tcp port for gossip
 listenPort: GOSSIP_PORT,
-```
-
-```js
-// config for libp2p
-addresses: {
-  listen: [
-    '/ip4/0.0.0.0/tcp/${GOSSIP_PORT}',
-  ],
-  announce: [
-    // your monitor's external ip address, p2p port and peerId
-    `/ip4/31.22.13.147/tcp/${GOSSIP_PORT}/p2p/12D3KooWH1XvGgPjRoMLi4tykATZ8UUcKng8sRU8WcmftoW1ZvJh`,
-  ]
-},
 ```
 
 ```js
