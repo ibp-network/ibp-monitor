@@ -127,7 +127,7 @@ Each component requires a separate shell window.
    See Docker, this will launch on `http://localhost:30001`.
 
 	```bash
-	cd vue-spa
+	cd frontend
 	npm install
 	npm run build # target files will populate ./static
 	```
@@ -138,7 +138,7 @@ Each component requires a separate shell window.
    Note, in production mode the `/api` location is proxied by nginx to the `ibp-monitor-api` service.
 
 	```bash
-	cd vue-spa
+	cd frontend
 	npm install
 	npm run serve
 	```
@@ -162,7 +162,7 @@ pm2 start --name ibp-monitor-workders workers.js
 
 ## Serving the frontend apache/nginx
 
-The frontend is located in the `./vue-spa/static` folder. See development above for building the folder contents.
+The frontend is located in the `./frontend/static` folder. See development above for building the folder contents.
 
 Point Apache or nginx to serve this folder, with the following config (nginx example):
 
@@ -249,7 +249,7 @@ node workers.js
 # run the API
 node api.js
 # run the frontend
-cd vue-spa
+cd frontend
 npm install
 npm run dev
 ```

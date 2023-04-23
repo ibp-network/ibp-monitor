@@ -37,6 +37,12 @@
         </template>
         Checks</v-list-item
       >
+      <v-list-item to="/status">
+        <template v-slot:prepend>
+          <v-icon>mdi-radar</v-icon>
+        </template>
+        Status</v-list-item
+      >
     </v-list>
   </v-navigation-drawer>
 </template>
