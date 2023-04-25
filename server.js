@@ -3,9 +3,6 @@ import { createLibp2p } from 'libp2p'
 import { bootstrap } from '@libp2p/bootstrap'
 import { mdns } from '@libp2p/mdns'
 import { tcp } from '@libp2p/tcp'
-// import { webSockets } from '@libp2p/websockets'
-// import { all as filters_all } from '@libp2p/websockets/filters'
-// import { Noise } from '@libp2p/noise' // @deprecated
 import { noise } from '@chainsafe/libp2p-noise'
 import { mplex } from '@libp2p/mplex'
 import { kadDHT } from '@libp2p/kad-dht'
@@ -13,21 +10,26 @@ import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-import { createEd25519PeerId, createFromJSON, createFromPrivKey } from '@libp2p/peer-id-factory'
+import { createEd25519PeerId, createFromJSON } from '@libp2p/peer-id-factory'
 
 import { DataStore } from './data/data-store.js'
-// import { DataStoreLoki } from './lib/DataStoreLoki.js'
 import { MessageHandler } from './lib/message-handler.js'
 import { HealthChecker } from './lib/health-checker.js'
 import { AlertsEngine } from './lib/alerts-engine.js'
 
 import { Job, QueueEvents, Queue } from 'bullmq'
+import { isIPv4, isIPv6 } from 'is-ip'
+import isValidHostname from 'is-valid-hostname'
+
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'))
 console.log('VERSION', pkg.version)
 
 import { config } from './config/config.js'
 import { config as configLocal } from './config/config.local.js'
+
 const cfg = Object.assign(config, configLocal)
 
 const queueOpts = {
@@ -59,14 +61,14 @@ const ae = new AlertsEngine({ queue: alertsQueue, datastore: ds})
 ;(async () => {
   // get PeerId
   var peerId
-  if (fs.existsSync('./keys/peerId.json')) {
-    const pidJson = JSON.parse(fs.readFileSync('./keys/peerId.json', 'utf-8'))
+  if (fs.existsSync('./keys/peer-id.json')) {
+    const pidJson = JSON.parse(fs.readFileSync('./keys/peer-id.json', 'utf-8'))
     // console.debug(pidJson)
     peerId = await createFromJSON(pidJson)
   } else {
     peerId = await createEd25519PeerId()
     fs.writeFileSync(
-      './keys/peerId.json',
+      './keys/peer-id.json',
       JSON.stringify({
         id: peerId.toString(),
         privKey: uint8ArrayToString(peerId.privateKey, 'base64'), // .toString(),
@@ -93,9 +95,42 @@ const ae = new AlertsEngine({ queue: alertsQueue, datastore: ds})
     allowedTopics: cfg.allowedTopics,
   })
 
+  const announce = []
+  // check if P2P public IP environment variable is set and not empty
+  if (process.env.P2P_PUBLIC_IP && process.env.P2P_PUBLIC_IP.length > 0) {
+    if (isIPv4(process.env.P2P_PUBLIC_IP)) {
+      const multiaddress = `/ip4/${process.env.P2P_PUBLIC_IP}/tcp/${config.listenPort}/p2p/${peerId.toString()}`
+      console.log(`Announcing P2P IPv4 multiaddress: ${multiaddress}`)
+      announce.push(multiaddress)
+    } else if (isIPv6(process.env.P2P_PUBLIC_IP)) {
+      const multiaddress = `/ip6/${process.env.P2P_PUBLIC_IP}/tcp/${config.listenPort}/p2p/${peerId.toString()}`
+      console.log(`Announcing P2P IPv6 multiaddress: ${multiaddress}`)
+      announce.push(multiaddress)
+    } else {
+      console.error(
+        `Invalid P2P_PUBLIC_IP environment variable: ${process.env.P2P_PUBLIC_IP}. P2P IP address will NOT be announced.`
+      )
+    }
+  }
+  // check if P2P public host environment variable is set and not empty
+  if (process.env.P2P_PUBLIC_HOST && process.env.P2P_PUBLIC_HOST.length > 0) {
+    if (isValidHostname(process.env.P2P_PUBLIC_HOST)) {
+      const multiaddress = `/dnsaddr/${process.env.P2P_PUBLIC_HOST}/tcp/${config.listenPort}/p2p/${peerId.toString()}`
+      console.log(`Announcing P2P DNS multiaddress: ${multiaddress}`)
+      announce.push(multiaddress)
+    } else {
+      console.error(
+        `Invalid P2P_PUBLIC_HOST environment variable: ${process.env.P2P_PUBLIC_HOST}. P2P DNS address will NOT be announced.`
+      )
+    }
+  }
+
   const libp2p = await createLibp2p({
     peerId,
-    addresses: cfg.addresses,
+    addresses: {
+      listen: [`/ip4/0.0.0.0/tcp/${cfg.listenPort}`],
+      announce,
+    },
     transports: [new tcp()],
     streamMuxers: [mplex()],
     connectionEncryption: [new noise()],

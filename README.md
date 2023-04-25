@@ -20,15 +20,22 @@ cd ibp-monitor
 
 ## Configuration
 
-Default configuration is provided in `config/config.js`. You can either:
+Under the `docker ` folder, Rename `.env.sample` file to `.env`, and edit `P2P_PUBLIC_HOST` and/or `P2P_PUBLIC_IP` variables.
+These are going to be used to announce your monitor node's public address, so that it can connect with the other monitor nodes on the network.
+You may leave both commented out, or include any or both.
 
-- Edit the values in the default configuration file `config/config.js`.
-- Make a copy of the file, and edit the necessary items:
-  ```
-  cp config.js config.local.js
-  ```
-- Any item changed in `config/config.local.js` will override the default value
-in `config/config.js`
+```bash
+mv .env.sample .env
+nano .env
+# edit values as necessary
+```
+
+Rest of the default configuration is in `config/config.js`. Make a copy of the file, and edit the necessary items:
+```
+cp config.js config.local.js
+```
+
+Any item changed in `config/config.local.js` will override the default value in `config/config.js`
 
 For details of the config items, please refer [CONFIG.md](./CONFIG.md)
 
@@ -120,7 +127,7 @@ Each component requires a separate shell window.
    See Docker, this will launch on `http://localhost:30001`.
 
 	```bash
-	cd vue-spa
+	cd frontend
 	npm install
 	npm run build # target files will populate ./static
 	```
@@ -131,7 +138,7 @@ Each component requires a separate shell window.
    Note, in production mode the `/api` location is proxied by nginx to the `ibp-monitor-api` service.
 
 	```bash
-	cd vue-spa
+	cd frontend
 	npm install
 	npm run serve
 	```
@@ -155,7 +162,7 @@ pm2 start --name ibp-monitor-workders workers.js
 
 ## Serving the frontend apache/nginx
 
-The frontend is located in the `./vue-spa/static` folder. See development above for building the folder contents.
+The frontend is located in the `./frontend/static` folder. See development above for building the folder contents.
 
 Point Apache or nginx to serve this folder, with the following config (nginx example):
 
@@ -190,7 +197,19 @@ Docker files and `docker-compose.yml` are in the `./docker` folder. Service name
 - ibp-monitor-workers
 - ibp-monitor-frontend
 
-## Start all services
+### Edit the .env file
+
+Under the `docker ` folder, Rename `.env.sample` file to `.env`, and edit `P2P_PUBLIC_HOST` and/or `P2P_PUBLIC_IP` variables.
+These are going to be used to announce your monitor node's public address, so that it can connect with the other monitor nodes on the network.
+You may leave both commented out, or include any or both.
+
+```bash
+mv .env.sample .env
+nano .env
+# edit values as necessary
+```
+
+### Start all services
 
 ```bash
 cd docker # you need to be in the docker directory!
@@ -230,7 +249,7 @@ node workers.js
 # run the API
 node api.js
 # run the frontend
-cd vue-spa
+cd frontend
 npm install
 npm run dev
 ```
@@ -253,7 +272,7 @@ pm2 logs  ibp-monitor
 
 - ~~implement prometheus (or similar) api~~ - Done, each service has a link to the Prometheus data.
 
-- ~~how to create your own peerId~~ - Done, the server will create `keys/peerId.json` at 1st startup.
+- ~~how to create your own peerId~~ - Done, the server will create `keys/peer-id.json` at 1st startup.
 
 - ~~Peers should sign status updates~~ - This is configured in `libp2p.pubsub.signMessages: true`.
 

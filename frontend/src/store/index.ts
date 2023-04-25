@@ -7,6 +7,7 @@ import member from './modules/member'
 import service from './modules/service'
 import monitor from './modules/monitor'
 import healthCheck from './modules/health-check'
+import status from './modules/status'
 import libp2p from './modules/libp2p'
 
 export interface IState {
@@ -103,5 +104,6 @@ export const store = createStore({
     monitor,
     healthCheck,
     libp2p,
+    status,
   },
 })

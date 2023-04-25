@@ -1,6 +1,6 @@
 ## peerId
 
-- after 1st run, this folder will contain peerId.json
+- after 1st run, this folder will contain peer-id.json
 - the peerId is particular to you and is secret! do not share your private key
 
 - the peerId.toString() is printed when the server starts
