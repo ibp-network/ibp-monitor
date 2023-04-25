@@ -32,7 +32,7 @@ const config = {
   httpPort: HTTP_PORT,
   listenPort: GOSSIP_PORT,
   allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck'],
-  updateInterval: 30 * 1000, // 30 seconds
+  updateInterval: 5 * 60 * 1000, // 5 mins, as milliseconds
   bootstrapPeers: [
     '/ip4/31.22.13.147/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
     '/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',

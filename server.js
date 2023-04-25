@@ -96,11 +96,11 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   // check if P2P public IP environment variable is set and not empty
   if (process.env.P2P_PUBLIC_IP && process.env.P2P_PUBLIC_IP.length > 0) {
     if (isIPv4(process.env.P2P_PUBLIC_IP)) {
-      const multiaddress = `/ip4/${process.env.P2P_PUBLIC_IP}/tcp/${config.listenPort}/p2p/${peerId}`
+      const multiaddress = `/ip4/${process.env.P2P_PUBLIC_IP}/tcp/${config.listenPort}/p2p/${peerId.toString()}`
       console.log(`Announcing P2P IPv4 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else if (isIPv6(process.env.P2P_PUBLIC_IP)) {
-      const multiaddress = `/ip6/${process.env.P2P_PUBLIC_IP}/tcp/${config.listenPort}/p2p/${peerId}`
+      const multiaddress = `/ip6/${process.env.P2P_PUBLIC_IP}/tcp/${config.listenPort}/p2p/${peerId.toString()}`
       console.log(`Announcing P2P IPv6 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else {
@@ -112,7 +112,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   // check if P2P public host environment variable is set and not empty
   if (process.env.P2P_PUBLIC_HOST && process.env.P2P_PUBLIC_HOST.length > 0) {
     if (isValidHostname(process.env.P2P_PUBLIC_HOST)) {
-      const multiaddress = `/dnsaddr/${process.env.P2P_PUBLIC_HOST}/tcp/${config.listenPort}/p2p/${peerId}`
+      const multiaddress = `/dnsaddr/${process.env.P2P_PUBLIC_HOST}/tcp/${config.listenPort}/p2p/${peerId.toString()}`
       console.log(`Announcing P2P DNS multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else {
