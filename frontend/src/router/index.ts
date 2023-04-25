@@ -12,6 +12,7 @@ import Monitor from '@/components/Monitor.vue'
 import Checks from '@/components/Checks.vue'
 import Check from '@/components/Check.vue'
 import Message from '@/components/Message.vue'
+import Status from '@/components/Status.vue'
 
 const routes = [
   // {
@@ -76,6 +77,11 @@ const routes = [
     path: '/sign',
     name: 'Sign',
     component: Message,
+  },
+  {
+    path: '/status',
+    name: 'Status',
+    component: Status,
   },
   // {
   //   path: '/about',

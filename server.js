@@ -10,7 +10,7 @@ import { gossipsub } from '@chainsafe/libp2p-gossipsub'
 import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
-import { createEd25519PeerId, createFromJSON,  } from '@libp2p/peer-id-factory'
+import { createEd25519PeerId, createFromJSON } from '@libp2p/peer-id-factory'
 
 import { DataStore } from './data/data-store.js'
 import { MessageHandler } from './lib/message-handler.js'
@@ -92,7 +92,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     allowedTopics: cfg.allowedTopics,
   })
 
-  const announce = [];
+  const announce = []
   // check if P2P public IP environment variable is set and not empty
   if (process.env.P2P_PUBLIC_IP && process.env.P2P_PUBLIC_IP.length > 0) {
     if (isIPv4(process.env.P2P_PUBLIC_IP)) {
@@ -104,7 +104,9 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       console.log(`Announcing P2P IPv6 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else {
-      console.error(`Invalid P2P_PUBLIC_IP environment variable: ${process.env.P2P_PUBLIC_IP}. P2P IP address will NOT be announced.`)
+      console.error(
+        `Invalid P2P_PUBLIC_IP environment variable: ${process.env.P2P_PUBLIC_IP}. P2P IP address will NOT be announced.`
+      )
     }
   }
   // check if P2P public host environment variable is set and not empty
@@ -114,16 +116,16 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       console.log(`Announcing P2P DNS multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else {
-      console.error(`Invalid P2P_PUBLIC_HOST environment variable: ${process.env.P2P_PUBLIC_HOST}. P2P DNS address will NOT be announced.`)
+      console.error(
+        `Invalid P2P_PUBLIC_HOST environment variable: ${process.env.P2P_PUBLIC_HOST}. P2P DNS address will NOT be announced.`
+      )
     }
   }
 
   const libp2p = await createLibp2p({
     peerId,
     addresses: {
-      listen: [
-        `/ip4/0.0.0.0/tcp/${cfg.listenPort}`,
-      ],
+      listen: [`/ip4/0.0.0.0/tcp/${cfg.listenPort}`],
       announce,
     },
     transports: [new tcp()],

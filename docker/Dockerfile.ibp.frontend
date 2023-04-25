@@ -18,14 +18,14 @@ RUN rm -rf node_modules
 RUN cp config/config.js config/config.local.js
 RUN npm install
 
-WORKDIR /home/ibp/vue-spa
+WORKDIR /home/ibp/frontend
 
 RUN npm install
 RUN npm run build
 
 FROM --platform=$TARGETPLATFORM nginx as deploy-stage
 
-COPY --from=build-stage /home/ibp/vue-spa/static/. /usr/share/nginx/html/
+COPY --from=build-stage /home/ibp/frontend/static/. /usr/share/nginx/html/
 COPY --from=build-stage /home/ibp/etc/nginx/ibp-monitor.conf /etc/nginx/conf.d/default.conf
 
 CMD ["nginx", "-g", "daemon off;"]
