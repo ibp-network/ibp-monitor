@@ -56,8 +56,13 @@ const config = {
   },
   performance: {
     sla: 500, // ms - used for performance graph, and later for alerts
-    blockDriftThreshold: 20 // 20 blocks out of sync
   },
+  alertsEngine: {
+    queueName: 'alertsBot',
+    thresholds: {
+      blockDrift: 20 // 20 blocks out of sync
+    }
+  }
 }
 
 export { config }

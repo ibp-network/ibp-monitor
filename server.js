@@ -19,6 +19,7 @@ import { DataStore } from './data/data-store.js'
 // import { DataStoreLoki } from './lib/DataStoreLoki.js'
 import { MessageHandler } from './lib/message-handler.js'
 import { HealthChecker } from './lib/health-checker.js'
+import { AlertsEngine } from './lib/alerts-engine.js'
 
 import { Job, QueueEvents, Queue } from 'bullmq'
 
@@ -51,6 +52,8 @@ const UPDATE_INTERVAL = cfg.updateInterval || 5 * 60 * 1000 // 5 mins, in millis
 const ds = new DataStore({ pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
+const alertsQueue = new QueueEvents(cfg.alertsEngine.queueName, queueOpts)
+const ae = new AlertsEngine({ queue: alertsQueue, datastore: ds})
 // const hh = new HttpHandler({ datastore: ds, version: pkg.version })
 
 ;(async () => {
@@ -202,11 +205,6 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       })
     }
     
-    // query previous healthCheck from member and service
-    const previousHealthCheck = await ds.HealthCheck.findOne({
-      where: { memberId: member.id, serviceId: service.id },
-      order: [['createdAt', 'DESC']],})
-
     // insert health check
     await ds.HealthCheck.create(result)
     if (cfg.gossipResults) {
@@ -219,43 +217,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       )
     }
 
-    // evaluate alert rules and publish alerts into specific queue to be processed later
-    const alertsQueue = new Queue('alerts', queueOpts)
-    // alert_1: verify if chain hasn't stalled by checking previous blockHeader with the latest received
-    if (previousHealthCheck !== null) {
-      if (previousHealthCheck.record.syncState.currentBlock === result.record.syncState.currentBlock) {
-        console.debug('Creating new [alert] job for', member.id, service.id)
-        alertsQueue.add(
-          'alert',
-          {
-            subdomain: service.membershipLevel.subdomain,
-            member,
-            service,
-            monitorId: peerId.toString(),
-            severity: 'high', // low | medium | high
-            message: `block header ${result.record.syncState.currentBlock} hasn't changed since last health check`
-          },
-          { repeat: false, ...jobRetention }
-        )
-      }
-    }
-    // alert_2: verify if blockDrift is higher than the threshold defined in config
-    const blockDrift = result.record.syncState.currentBlock - result.record.syncState.finalizedBlock
-    if (blockDrift > cfg.performance.blockDriftThreshold) {
-      console.debug('Creating new [alert] job for', member.id, service.id)
-      alertsQueue.add(
-        'alert',
-        {
-          subdomain: service.membershipLevel.subdomain,
-          member,
-          service,
-          monitorId: peerId.toString(),
-          severity: 'medium', // low | medium | high
-          message: `finalized block drifted by ${blockDrift}`
-        },
-        { repeat: false, ...jobRetention }
-      )
-    }
+    // run alert engine
+    await ae.run(result)
   }
   checkServiceQueue.on('completed', handleCheckServiceResult)
   checkServiceQueue.on('error', (args) => {
@@ -276,8 +239,13 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       where: { status: 'active' },
       include: ['membershipLevel'],
     })
+
+    const a = members.filter(o => o.id === "turboflakes")
+
+    console.log("__members",members)
+
     for (let service of services) {
-      for (let member of members) {
+      for (let member of a) {
         if (member.membershipLevelId < service.membershipLevelId) {
           continue
         }

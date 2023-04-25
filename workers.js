@@ -76,8 +76,11 @@ const q_alerts = new Queue('alerts', qOpts)
 // const q_w3f_nominations_update = new Queue('w3f_nominations_update', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
-const w_checkService = new Worker('checkService', checkService, qOpts)
-const w_alerts = new Worker('alerts', (job) => console.log("__alertJob", job), qOpts)
+const workers = [
+  new Worker('checkService', checkService, qOpts)
+]
+// const w_checkService = new Worker('checkService', checkService, qOpts)
+// const w_alerts = new Worker('alerts', (job) => console.log("__alertJob", job), qOpts)
 // const w_health_check = new Worker('health_check', f_health_check, qOpts)
 // const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
 // const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
@@ -89,10 +92,11 @@ const w_alerts = new Worker('alerts', (job) => console.log("__alertJob", job), q
 // const w_dock_auto_payout = new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
 
 // handle all error/failed
-jobs.forEach((job) => {
-  const worker = eval(`w_${job}`)
-  worker.on('error', (err) => onError(job, err))
-  worker.on('failed', (event) => onFailed(job, event))
+workers.forEach((worker) => {
+  if (worker !== undefined) {
+    worker.on('error', (err) => onError(worker, err))
+    worker.on('failed', (event) => onFailed(worker, event))
+  }
 })
 
 // const jobRetention = {
