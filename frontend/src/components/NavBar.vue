@@ -33,6 +33,12 @@
         </template>
         Checks
       </v-btn>
+      <v-btn color="white" variant="plain" to="/status">
+        <template v-slot:prepend>
+          <v-icon v-if="$vuetify.display.width > 900">mdi-radar</v-icon>
+        </template>
+        Status
+      </v-btn>
     </v-toolbar-items>
     <v-spacer></v-spacer>
 

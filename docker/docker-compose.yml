@@ -36,11 +36,10 @@ services:
       - ibp-datastore
     command: 'dockerize -wait=tcp://ibp-datastore:3306 -timeout 60s'
   ibp-datastore-init:
-    &ibp-services
     container_name: ibp-datastore-init
-    image: ibp-services
+    image: ibp-monitor-services
     pull_policy: never
-    build:
+    build: &ibp-monitor-services
       context: ../.
       dockerfile: docker/Dockerfile.ibp.services
     restart: "no"
@@ -51,8 +50,8 @@ services:
       bash -c "cd data
       && node migrate.js"
   ibp-monitor-api:
-    <<: *ibp-services
     container_name: ibp-monitor-api
+    build: *ibp-monitor-services
     restart: on-failure
     depends_on:
       ibp-datastore-init:
@@ -62,20 +61,26 @@ services:
     command: >
       bash -c "node api.js"
     volumes:
-      - ibp-keys:/home/ibp/keys
+      # - ibp-keys:/home/ibp/keys
+      - ../keys:/home/ibp/keys
+      - ../config:/home/ibp/config
   ibp-monitor-server:
-    <<: *ibp-services
     container_name: ibp-monitor-server
     restart: on-failure
+    build: *ibp-monitor-services
     depends_on:
       ibp-datastore-init:
         condition: service_completed_successfully
     ports:
       - '30000:30000' # p2p port
+    environment:
+      - P2P_PUBLIC_IP=${P2P_PUBLIC_IP}
+      - P2P_PUBLIC_HOST=${P2P_PUBLIC_HOST}
     command: >
       bash -c "node server.js"
     volumes:
-      - ibp-keys:/home/ibp/keys
+      # - ibp-keys:/home/ibp/keys
+      - ../keys:/home/ibp/keys
   wait-for-ibp-server-ready:
     container_name: wait-for-ibp-server-ready
     image: jwilder/dockerize:0.6.1
@@ -83,9 +88,9 @@ services:
       - ibp-monitor-server
     command: 'dockerize -wait=tcp://ibp-monitor-server:30000 -timeout 60s'
   ibp-monitor-workers:
-    <<: *ibp-services
     container_name: ibp-monitor-workers
     restart: on-failure
+    build: *ibp-monitor-services
     depends_on:
       wait-for-ibp-server-ready:
         condition: service_completed_successfully
@@ -100,11 +105,10 @@ services:
       - ibp-monitor-api
     command: 'dockerize -wait=tcp://ibp-monitor-api:30002 -timeout 60s'
   ibp-monitor-frontend:
-    &ibp-monitor-frontend
     container_name: ibp-monitor-frontend
     image: ibp-monitor-frontend
     pull_policy: never
-    build:
+    build: &ibp-monitor-frontend
       context: ../.
       dockerfile: docker/Dockerfile.ibp.frontend
     restart: on-failure
@@ -113,6 +117,6 @@ services:
     depends_on:
       wait-for-ibp-api-ready:
         condition: service_completed_successfully
-volumes:
-  ibp-keys:
-    name: ibp-keys
+# volumes:
+#   ibp-keys:
+#     name: ibp-keys

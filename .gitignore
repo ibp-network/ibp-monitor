@@ -1,4 +1,4 @@
-keys/peerId.json
+keys/peer-id.json
 config/config.local.js
 **/mariadb
 prototype/**
@@ -6,3 +6,4 @@ _archive/**
 **/node_modules
 .DS_Store
 **/static
+.env
