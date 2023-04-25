@@ -201,6 +201,12 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
         name: null,
       })
     }
+    
+    // query previous healthCheck from member and service
+    const previousHealthCheck = await ds.HealthCheck.findOne({
+      where: { memberId: member.id, serviceId: service.id },
+      order: [['createdAt', 'DESC']],})
+
     // insert health check
     await ds.HealthCheck.create(result)
     if (cfg.gossipResults) {
@@ -210,6 +216,44 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       const res = await libp2p.pubsub.publish(
         '/ibp/healthCheck',
         uint8ArrayFromString(JSON.stringify(result))
+      )
+    }
+
+    // evaluate alert rules and publish alerts into specific queue to be processed later
+    const alertsQueue = new Queue('alerts', queueOpts)
+    // alert_1: verify if chain hasn't stalled by checking previous blockHeader with the latest received
+    if (previousHealthCheck !== null) {
+      if (previousHealthCheck.record.syncState.currentBlock === result.record.syncState.currentBlock) {
+        console.debug('Creating new [alert] job for', member.id, service.id)
+        alertsQueue.add(
+          'alert',
+          {
+            subdomain: service.membershipLevel.subdomain,
+            member,
+            service,
+            monitorId: peerId.toString(),
+            severity: 'high', // low | medium | high
+            message: `block header ${result.record.syncState.currentBlock} hasn't changed since last health check`
+          },
+          { repeat: false, ...jobRetention }
+        )
+      }
+    }
+    // alert_2: verify if blockDrift is higher than the threshold defined in config
+    const blockDrift = result.record.syncState.currentBlock - result.record.syncState.finalizedBlock
+    if (blockDrift > cfg.performance.blockDriftThreshold) {
+      console.debug('Creating new [alert] job for', member.id, service.id)
+      alertsQueue.add(
+        'alert',
+        {
+          subdomain: service.membershipLevel.subdomain,
+          member,
+          service,
+          monitorId: peerId.toString(),
+          severity: 'medium', // low | medium | high
+          message: `finalized block drifted by ${blockDrift}`
+        },
+        { repeat: false, ...jobRetention }
       )
     }
   }

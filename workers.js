@@ -40,6 +40,7 @@ const qOpts = {
 const jobs = [
   // 'health_check',
   'checkService',
+  'alerts',
   // '1kv_nominations_update',
   // '1kv_nominators_update',
   // 'w3f_exposures_update',
@@ -64,6 +65,7 @@ async function onFailed(job, event) {
 }
 
 const q_checkService = new Queue('checkService', qOpts)
+const q_alerts = new Queue('alerts', qOpts)
 // const q_health_check = new Queue('health_check', qOpts)
 // const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
 // const q_w3f_exposures_update = new Queue('w3f_exposures_update', qOpts)
@@ -75,6 +77,7 @@ const q_checkService = new Queue('checkService', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
 const w_checkService = new Worker('checkService', checkService, qOpts)
+const w_alerts = new Worker('alerts', (job) => console.log("__alertJob", job), qOpts)
 // const w_health_check = new Worker('health_check', f_health_check, qOpts)
 // const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
 // const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
@@ -153,6 +156,7 @@ async function clearQueue(jobname) {
     queues: [
       // new BullMQAdapter(q_health_check, { readOnlyMode: false }),
       new BullMQAdapter(q_checkService, { readOnlyMode: false }),
+      new BullMQAdapter(q_alerts, { readOnlyMode: false }),
       // new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_nominators_update, { readOnlyMode: false }),
