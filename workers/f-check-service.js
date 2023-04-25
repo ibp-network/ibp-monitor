@@ -138,6 +138,9 @@ export async function checkService(job) {
 
     const networkState = api.rpc.system.networkState // () // not a function?
     const syncState = await api.rpc.system.syncState()
+    const finalizedBlockHash = await api.rpc.chain.getFinalizedHead()
+    const { number: finalizedBlock } = await api.rpc.chain.getHeader(finalizedBlockHash)
+    // const blockDrift = syncState.currentBlock.toNumber() - finalizedBlock
     const version = await api.rpc.system.version()
     const timing = end - start
     // console.debug(health.toString())
@@ -161,7 +164,10 @@ export async function checkService(job) {
         chainType,
         health,
         networkState,
-        syncState,
+        syncState: {
+          ...syncState.toJSON(),
+          finalizedBlock
+        },
         version,
         // peerCount,
         performance: timing,
