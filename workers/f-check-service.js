@@ -164,10 +164,8 @@ export async function checkService(job) {
         chainType,
         health,
         networkState,
-        syncState: {
-          ...syncState.toJSON(),
-          finalizedBlock
-        },
+        syncState,
+        finalizedBlock,
         version,
         // peerCount,
         performance: timing,
