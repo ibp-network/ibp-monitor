@@ -54,8 +54,7 @@ const UPDATE_INTERVAL = cfg.updateInterval || 5 * 60 * 1000 // 5 mins, in millis
 const ds = new DataStore({ pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
 const mh = new MessageHandler({ datastore: ds, api: hc })
-const alertsQueue = new QueueEvents(cfg.alertsEngine.queueName, queueOpts)
-const ae = new AlertsEngine({ queue: alertsQueue, datastore: ds})
+const ae = new AlertsEngine({ datastore: ds})
 // const hh = new HttpHandler({ datastore: ds, version: pkg.version })
 
 ;(async () => {
@@ -252,7 +251,7 @@ const ae = new AlertsEngine({ queue: alertsQueue, datastore: ds})
       )
     }
 
-    // run alert engine
+    // run alert engine rules
     await ae.run(result)
   }
   checkServiceQueue.on('completed', handleCheckServiceResult)
@@ -275,12 +274,8 @@ const ae = new AlertsEngine({ queue: alertsQueue, datastore: ds})
       include: ['membershipLevel'],
     })
 
-    const a = members.filter(o => o.id === "turboflakes")
-
-    console.log("__members",members)
-
     for (let service of services) {
-      for (let member of a) {
+      for (let member of members) {
         if (member.membershipLevelId < service.membershipLevelId) {
           continue
         }

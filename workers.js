@@ -37,20 +37,20 @@ const qOpts = {
   connection: cfg.redis,
 }
 
-const jobs = [
-  // 'health_check',
-  'checkService',
-  'alerts',
-  // '1kv_nominations_update',
-  // '1kv_nominators_update',
-  // 'w3f_exposures_update',
-  // 'w3f_nominators_update',
-  // 'w3f_pools_update',
-  // 'w3f_validator_location_stats_update',
-  // 'w3f_validators_update',
-  // 'w3f_nominations_update',
-  // 'dock_auto_payout'
-]
+// const jobs = [
+//   // 'health_check',
+//   'checkService',
+//   cfg.alertsEngine.queueName,
+//   // '1kv_nominations_update',
+//   // '1kv_nominators_update',
+//   // 'w3f_exposures_update',
+//   // 'w3f_nominators_update',
+//   // 'w3f_pools_update',
+//   // 'w3f_validator_location_stats_update',
+//   // 'w3f_validators_update',
+//   // 'w3f_nominations_update',
+//   // 'dock_auto_payout'
+// ]
 
 async function onError(job, err) {
   const errStr = `ERROR: ${job}: ` + typeof err === 'string' ? err : JSON.stringify(err)
@@ -64,8 +64,11 @@ async function onFailed(job, event) {
   console.log(errStr)
 }
 
-const q_checkService = new Queue('checkService', qOpts)
-const q_alerts = new Queue('alerts', qOpts)
+const queues = [
+  new Queue('checkService', qOpts),
+  new Queue(cfg.alertsEngine.queueName, qOpts)
+]
+// const q_checkService = new Queue('checkService', qOpts)
 // const q_health_check = new Queue('health_check', qOpts)
 // const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
 // const q_w3f_exposures_update = new Queue('w3f_exposures_update', qOpts)
@@ -109,19 +112,18 @@ workers.forEach((worker) => {
 //   }
 // }
 
-async function clearQueue(jobname) {
-  let qname = eval(`q_${jobname}`)
-  await qname.pause()
+async function clearQueue(queue) {
+  await queue.pause()
   // // Removes all jobs that are waiting or delayed, but not active, completed or failed
   // await qname.drain()
   // Completely obliterates a queue and all of its contents.
-  await qname.resume()
+  await queue.resume()
 }
 
 ;(async () => {
   // on startup, drain the queues and start again
   async function clearQueues() {
-    await asyncForeach(jobs, clearQueue)
+    await asyncForeach(queues, clearQueue)
   }
 
   // jobs will be added by server.js
@@ -157,19 +159,20 @@ async function clearQueue(jobname) {
   serverAdapter.setBasePath('/admin/queues')
   // const queueMQ = new QueueMQ()
   const { setQueues, replaceQueues } = createBullBoard({
-    queues: [
-      // new BullMQAdapter(q_health_check, { readOnlyMode: false }),
-      new BullMQAdapter(q_checkService, { readOnlyMode: false }),
-      new BullMQAdapter(q_alerts, { readOnlyMode: false }),
-      // new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_w3f_nominators_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_w3f_pools_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_w3f_validator_location_stats_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_w3f_validators_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_w3f_nominations_update, { readOnlyMode: false }),
-      // new BullMQAdapter(q_dock_auto_payout, { readOnlyMode: false }),
-    ],
+    queues: queues.map(queue => new BullMQAdapter(queue, { readOnlyMode: false })),
+    // queues: [
+    //   // new BullMQAdapter(q_health_check, { readOnlyMode: false }),
+    //   new BullMQAdapter(q_checkService, { readOnlyMode: false }),
+    //   new BullMQAdapter(q_alerts, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_w3f_nominators_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_w3f_pools_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_w3f_validator_location_stats_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_w3f_validators_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_w3f_nominations_update, { readOnlyMode: false }),
+    //   // new BullMQAdapter(q_dock_auto_payout, { readOnlyMode: false }),
+    // ],
     serverAdapter: serverAdapter,
   })
   const app = express()

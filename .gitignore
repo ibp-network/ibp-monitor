@@ -1,4 +1,4 @@
-keys/peer-id.json
+keys/peer*
 config/config.local.js
 **/mariadb
 prototype/**
