@@ -55,7 +55,8 @@ const config = {
   },
   alertsEngine: {
     enabled: false,
-    queueName: 'alertsBot',
+    queueName: 'alerts',
+    webhook: 'http://localhost:5011/api/v1/alerts',
     thresholds: {
       blockDrift: 20 // 20 blocks out of sync
     }

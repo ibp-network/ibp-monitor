@@ -16,6 +16,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 
 import { asyncForeach } from './lib/utils.js'
 import { checkService } from './workers/f-check-service.js'
+import { processAlert } from './workers/process-alerts.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'
 // import { f_w3f_exposures_update } from './workers/w3f-exposures-update.js'
@@ -80,7 +81,8 @@ const queues = [
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
 const workers = [
-  new Worker('checkService', checkService, qOpts)
+  new Worker('checkService', checkService, qOpts),
+  new Worker(cfg.alertsEngine.queueName, processAlert, qOpts)
 ]
 // const w_checkService = new Worker('checkService', checkService, qOpts)
 // const w_alerts = new Worker('alerts', (job) => console.log("__alertJob", job), qOpts)
