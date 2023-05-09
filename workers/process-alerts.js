@@ -18,7 +18,7 @@ export async function processAlert(job) {
       }
     })
     console.log('[worker] processAlert done...', code, memberId, serviceId)
-    job.log(`Alert code: ${code} processed`)
+    job.log(`Alert code: ${code} processed`, data)
     return data
 
   } catch (err) {
