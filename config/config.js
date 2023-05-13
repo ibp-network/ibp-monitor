@@ -38,6 +38,8 @@ const config = {
     '/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
     '/ip4/78.181.100.160/tcp/30000/p2p/12D3KooWFZzcMsKumdpNyTKtivcGPukPfQAtCaW5o8qinFzSzHuf',
     '/dnsaddr/ibp-monitor.helikon.io/tcp/30000/p2p/12D3KooWFZzcMsKumdpNyTKtivcGPukPfQAtCaW5o8qinFzSzHuf',
+    '/ip4/172.104.248.97/tcp/30000/p2p/12D3KooWQv2KCogXS3qmJL1ND1gPMzmRwiGAtEAEsMSMmW4G9L4c',
+    '/dnsaddr/ibp-monitor.turboflakes.io/tcp/30000/p2p/12D3KooWQv2KCogXS3qmJL1ND1gPMzmRwiGAtEAEsMSMmW4G9L4c',
   ],
   checkOwnServices: false,
   checkOtherServices: true,
@@ -56,7 +58,8 @@ const config = {
   alertsEngine: {
     enabled: false,
     queueName: 'alerts',
-    webhook: 'http://localhost:5011/api/v1/alerts',
+    webhook: 'http://localhost:5001/api/v1/alerts',
+    apiKey: 'alerts-bot-api-key',
     thresholds: {
       blockDrift: 20 // 20 blocks out of sync
     }

@@ -240,7 +240,7 @@ const ae = new AlertsEngine({ datastore: ds})
     }
     
     // insert health check
-    await ds.HealthCheck.create(result)
+    const hc = await ds.HealthCheck.create(result)
     if (cfg.gossipResults) {
       console.debug(
         `[gossip] publishing healthCheck: ${member.id} ${service.id} to /ibp/healthCheck`
@@ -252,7 +252,7 @@ const ae = new AlertsEngine({ datastore: ds})
     }
 
     // run alert engine rules
-    await ae.run(result)
+    await ae.run(hc)
   }
   checkServiceQueue.on('completed', handleCheckServiceResult)
   checkServiceQueue.on('error', (args) => {

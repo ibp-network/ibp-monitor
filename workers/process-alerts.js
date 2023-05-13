@@ -14,7 +14,8 @@ export async function processAlert(job) {
   try {
     const {data} = await axios.post(cfg.alertsEngine.webhook, job.data, {
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-API-KEY': cfg.alertsEngine.apiKey
       }
     })
     console.log('[worker] processAlert done...', code, memberId, serviceId)
