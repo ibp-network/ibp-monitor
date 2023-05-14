@@ -226,6 +226,24 @@ Use `-d` flag with compose (`docker compose up -d`) for detach to let the servic
 cd docker # you need to be in the docker directory!
 docker compose up <service name> # optional `-d` flag
 ```
+#### Clean all/individual services
+
+```bash
+cd docker # you need to be in the docker directory!
+# Stop the container(s) using the following command:
+docker compose down
+# Delete all containers using the following command:
+docker rm -f $(docker ps -a -q)
+# Delete all volumes using the following command:
+docker volume rm $(docker volume ls -q)
+# Delete all images using the following command:
+docker image rm $(docker image ls -q)
+# Restart the containers using the following command:
+docker compose up -d
+# Delete individual images using the following command:
+docker image rm ibp-stack-ibp-monitor-workers
+docker image rm ibp-stack-ibp-monitor-server 
+```
 
 ## Getting started
 
