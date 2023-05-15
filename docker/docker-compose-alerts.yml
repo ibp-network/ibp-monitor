@@ -131,13 +131,13 @@ services:
       dockerfile: docker/Dockerfile.ibp.abot
     restart: unless-stopped
     environment:
-      - ABOT_API_KEYS=justsomecoolapikey
-      - ABOT_IBP_MONITOR_URL=http://ibp-monitor.turboflakes.io
+      - ABOT_API_KEYS=${ABOT_API_KEYS}
+      - ABOT_IBP_MONITOR_URL=${ABOT_IBP_MONITOR_URL}
       - ABOT_MEMBERS_JSON_URL=https://raw.githubusercontent.com/ibp-network/config/main/members.json
       - ABOT_DATA_PATH=/data/
-      - ABOT_MATRIX_PUBLIC_ROOM=ibp-alerts:matrix.org
-      - ABOT_MATRIX_BOT_USER=@ibp-alerts-bot-account:matrix.org
-      - ABOT_MATRIX_BOT_PASSWORD=anotthateasypassword
+      - ABOT_MATRIX_PUBLIC_ROOM=${ABOT_MATRIX_PUBLIC_ROOM}
+      - ABOT_MATRIX_BOT_USER=${ABOT_MATRIX_BOT_USER}
+      - ABOT_MATRIX_BOT_PASSWORD=${ABOT_MATRIX_BOT_PASSWORD}
       - ABOT_API_HOST=ibp-abot
       - ABOT_API_PORT=5001
       - ABOT_REDIS_HOSTNAME=ibp-redis:6379
