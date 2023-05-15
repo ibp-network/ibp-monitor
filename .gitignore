@@ -1,6 +1,8 @@
 keys/peer*
 config/config.local.js
 **/mariadb
+**/abot
+**/redis
 prototype/**
 _archive/**
 **/node_modules

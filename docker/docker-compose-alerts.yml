@@ -1,0 +1,152 @@
+version: '3'
+name: ibp-stack
+
+# PORTS
+# - 3000 - bullmq admin, http
+# - 3306 - mariadb, tcp
+# - 6379 - redis, tcp
+# - 30000 - libp2p, gossip, tcp
+# - 30001 - frontend, http
+# - 30002 - api, http
+# - 5001 - alerts webhook, http
+
+services:
+  ibp-redis:
+    container_name: ibp-redis
+    image: redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - ../data/redis:/data
+  ibp-datastore:
+    container_name: ibp-datastore
+    image: mariadb:10.11.2
+    restart: unless-stopped
+    environment:
+      - MARIADB_ROOT_PASSWORD=thisIsASecret
+      - MARIADB_USER=ibp_monitor
+      - MARIADB_PASSWORD=ibp_monitor
+      - MARIADB_DATABASE=ibp_monitor
+    ports:
+      - '3306:3306'
+    volumes:
+      - ../data/mariadb:/var/lib/mysql
+  wait-for-datastore-ready:
+    container_name: wait-for-datastore-ready
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - ibp-datastore
+    command: 'dockerize -wait=tcp://ibp-datastore:3306 -timeout 60s'
+  ibp-datastore-init:
+    container_name: ibp-datastore-init
+    image: ibp-monitor-services
+    pull_policy: never
+    build: &ibp-monitor-services
+      context: ../.
+      dockerfile: docker/Dockerfile.ibp.services
+    restart: "no"
+    depends_on:
+      wait-for-datastore-ready:
+        condition: service_completed_successfully
+    command: >
+      bash -c "cd data
+      && node migrate.js"
+  ibp-monitor-api:
+    container_name: ibp-monitor-api
+    build: *ibp-monitor-services
+    restart: on-failure
+    depends_on:
+      ibp-datastore-init:
+        condition: service_completed_successfully
+    ports:
+      - '30002:30002'
+    command: >
+      bash -c "node api.js"
+    volumes:
+      # - ibp-keys:/home/ibp/keys
+      - ../keys:/home/ibp/keys
+      - ../config:/home/ibp/config
+  ibp-monitor-server:
+    container_name: ibp-monitor-server
+    restart: on-failure
+    build: *ibp-monitor-services
+    depends_on:
+      ibp-datastore-init:
+        condition: service_completed_successfully
+    ports:
+      - '30000:30000' # p2p port
+    environment:
+      - P2P_PUBLIC_IP=${P2P_PUBLIC_IP}
+      - P2P_PUBLIC_HOST=${P2P_PUBLIC_HOST}
+    command: >
+      bash -c "node server.js"
+    volumes:
+      # - ibp-keys:/home/ibp/keys
+      - ../keys:/home/ibp/keys
+  wait-for-ibp-server-ready:
+    container_name: wait-for-ibp-server-ready
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - ibp-monitor-server
+    command: 'dockerize -wait=tcp://ibp-monitor-server:30000 -timeout 60s'
+  ibp-monitor-workers:
+    container_name: ibp-monitor-workers
+    restart: on-failure
+    build: *ibp-monitor-services
+    depends_on:
+      wait-for-ibp-server-ready:
+        condition: service_completed_successfully
+    ports:
+      - '3000:3000'
+    extra_hosts:
+      - "host.docker.internal:192.168.0.10"
+    command: >
+      bash -c "node workers.js"
+  wait-for-ibp-api-ready:
+    container_name: wait-for-ibp-api-ready
+    image: jwilder/dockerize:0.6.1
+    depends_on:
+      - ibp-monitor-api
+    command: 'dockerize -wait=tcp://ibp-monitor-api:30002 -timeout 60s'
+  ibp-monitor-frontend:
+    container_name: ibp-monitor-frontend
+    image: ibp-monitor-frontend
+    pull_policy: never
+    build: &ibp-monitor-frontend
+      context: ../.
+      dockerfile: docker/Dockerfile.ibp.frontend
+    restart: on-failure
+    ports:
+      - '30001:80'
+    depends_on:
+      wait-for-ibp-api-ready:
+        condition: service_completed_successfully
+  ibp-abot:
+    container_name: ibp-abot-cli
+    image: ibp-abot-cli
+    pull_policy: never
+    build: &abot-dockerfile
+      context: ../.
+      dockerfile: docker/Dockerfile.ibp.abot
+    restart: unless-stopped
+    environment:
+      - ABOT_API_KEYS=justsomecoolapikey
+      - ABOT_IBP_MONITOR_URL=http://ibp-monitor.turboflakes.io
+      - ABOT_MEMBERS_JSON_URL=https://raw.githubusercontent.com/ibp-network/config/main/members.json
+      - ABOT_DATA_PATH=/data/
+      - ABOT_MATRIX_PUBLIC_ROOM=ibp-alerts:matrix.org
+      - ABOT_MATRIX_BOT_USER=@ibp-alerts-bot-account:matrix.org
+      - ABOT_MATRIX_BOT_PASSWORD=anotthateasypassword
+      - ABOT_API_HOST=ibp-abot
+      - ABOT_API_PORT=5001
+      - ABOT_REDIS_HOSTNAME=ibp-redis:6379
+
+    volumes:
+      - ../data/abot:/data
+    ports:
+      - '5001:5001'
+      
+# volumes:
+#   ibp-keys:
+#     name: ibp-keys

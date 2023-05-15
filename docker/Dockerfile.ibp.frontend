@@ -13,9 +13,9 @@ COPY . /home/ibp
 
 WORKDIR /home/ibp
 
-RUN rm -rf config/config.local.js
+#RUN rm -rf config/config.local.js
 RUN rm -rf node_modules
-RUN cp config/config.js config/config.local.js
+#RUN cp config/config.js config/config.local.js
 RUN npm install
 
 WORKDIR /home/ibp/frontend

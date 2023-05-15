@@ -58,7 +58,7 @@ const config = {
   alertsEngine: {
     enabled: false,
     queueName: 'alerts',
-    webhook: 'http://localhost:5001/api/v1/alerts',
+    webhook: 'http://ibp-abot:5001/api/v1/alerts',
     apiKey: 'alerts-bot-api-key',
     thresholds: {
       blockDrift: 20 // 20 blocks out of sync

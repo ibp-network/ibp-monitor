@@ -1,0 +1,20 @@
+# This is the 2nd stage: a very small image where we copy the Polkadot binary."
+FROM --platform=linux/amd64 ubuntu:20.04
+
+WORKDIR /abot-cli
+
+RUN  apt-get update \
+  && apt-get install -y acl wget
+
+RUN wget https://github.com/ibp-network/ibp-matrix-alerts-bot/releases/download/v0.1.3/abot
+
+RUN useradd --no-create-home --shell /usr/sbin/nologin abot && \
+    setfacl -R -m u:abot:rwx /abot-cli
+
+RUN ls /abot-cli && /abot-cli/abot --version
+
+USER abot
+
+EXPOSE 5001
+
+ENTRYPOINT ["/abot-cli/abot"]
