@@ -33,7 +33,7 @@ export default defineConfig({
     port: Number(process.env.HTTP_PORT || 30001),
     // https://vitejs.dev/config/server-options.html#server-proxy
     proxy: {
-      '/api': `http://localhost:${ process.env.API_PORT || 30002}`,
+      '/api': `http://localhost:${process.env.API_PORT || 30002}`,
       // '/api': {
       //   target: 'http://localhost/30002',
       //   changeOrigin: true
