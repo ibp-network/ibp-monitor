@@ -7,6 +7,8 @@
       </v-toolbar>
     </v-container>
 
+    <div class="tooltip" id="tooltip" v-html="tooltipHTML" v-if="tooltipIsVisible"></div>
+
     <div class="status-container">
       <div class="status-inner">
         <div v-for="(service, key) in services" :key="key">
@@ -25,7 +27,8 @@
                       hourTimestamp,
                       member.id
                     )}`"
-                    v-tooltip="getTooltipMarkup(service.id, hourTimestamp, member.id)"
+                    v-on:mouseenter="onMouseEnter($event, service.id, hourTimestamp, member.id)"
+                    v-on:mouseleave="onMouseLeave()"
                   ></div>
                 </template>
               </div>
@@ -41,8 +44,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
-import moment from 'moment'
-import 'floating-vue/dist/style.css'
+import { ref } from 'vue'
+
+const left = ref(120)
 
 export default defineComponent({
   name: 'StatusC',
@@ -52,7 +56,13 @@ export default defineComponent({
     return { store }
   },
   data() {
-    return {}
+    return {
+      tooltipHTML: '',
+      tooltipIsVisible: false,
+      tooltipTop: '0px',
+      tooltipLeft: '0px',
+      color: 'red',
+    }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
@@ -90,7 +100,7 @@ export default defineComponent({
       let startDate = new Date(hourTimestamp)
       let endDate = new Date(hourTimestamp + 60 * 60 * 1000)
       let serviceStatus = this.status[serviceId]
-      let text = '<div class="tooltip">'
+      let html = ''
       let dateText = ''
       if (startDate.getDay() != new Date().getDay()) {
         dateText += this.formatDateHour(startDate)
@@ -102,24 +112,23 @@ export default defineComponent({
       } else {
         dateText += ` - ${this.formatHour(endDate)}`
       }
-      text += `<div>${dateText}</div>`
-      text += `<div>${member.name}</div>`
+      html += `<div>${dateText}</div>`
+      html += `<div>${member.name}</div>`
       if (serviceStatus) {
         let hourStatus = serviceStatus[hourTimestamp]
         if (hourStatus) {
           let memberStatus = hourStatus[memberId]
           if (memberStatus) {
-            text += `<div class="tooltip-row"><div class="status-indicator success"></div><div>${memberStatus.success}</div></div>`
-            text += `<div class="tooltip-row"><div class="status-indicator warning"></div><div>${memberStatus.warning}</div></div>`
-            text += `<div class="tooltip-row"><div class="status-indicator error"></div><div>${memberStatus.error}</div></div>`
-            text += '</div>'
-            return text
+            html += `<div class="tooltip-row"><div class="status-indicator success"></div><div>${memberStatus.success}</div></div>`
+            html += `<div class="tooltip-row"><div class="status-indicator warning"></div><div>${memberStatus.warning}</div></div>`
+            html += `<div class="tooltip-row"><div class="status-indicator error"></div><div>${memberStatus.error}</div></div>`
+            html += '</div>'
+            return html
           }
         }
       }
-      text += `<div>No data</div>`
-      text += `</div>`
-      return text
+      html += `<div>No data</div>`
+      return html
     },
     formatDateHour(date: Date): string {
       return new Intl.DateTimeFormat('en-uk', {
@@ -136,6 +145,19 @@ export default defineComponent({
         minute: 'numeric',
         hour12: false,
       }).format(date)
+    },
+    onMouseEnter(event: MouseEvent, serviceId: string, hourTimestamp: number, memberId: string) {
+      if (!event.target) {
+        return
+      }
+      this.tooltipHTML = this.getTooltipMarkup(serviceId, hourTimestamp, memberId)
+      let rect = (event.target as HTMLElement).getBoundingClientRect()
+      this.tooltipLeft = rect.left + 'px'
+      this.tooltipTop = rect.top + 'px'
+      this.tooltipIsVisible = true
+    },
+    onMouseLeave() {
+      this.tooltipIsVisible = false
     },
   },
   mounted() {
@@ -230,8 +252,19 @@ export default defineComponent({
 }
 
 .tooltip {
+  position: fixed;
+  top: v-bind(tooltipTop);
+  left: v-bind(tooltipLeft);
+  background-color: #000000aa;
+  border-radius: 12px;
   display: flex;
   flex-flow: column nowrap;
+  font-size: 12px;
+  white-space: nowrap;
+  padding: 10px 14px;
+  color: #ffffff;
+  gap: 1px;
+  transform: translate(-50%, -100%) translate(0, -10px);
 }
 
 .tooltip-row {
