@@ -27,7 +27,6 @@ import {
   LineController,
   TimeScale,
 } from 'chart.js'
-import { shortStash } from './utils'
 
 ChartJS.register(
   Title,
