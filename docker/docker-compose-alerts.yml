@@ -18,7 +18,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - ../data/redis:/data
+      - redis-data:/data
   ibp-datastore:
     container_name: ibp-datastore
     image: mariadb:10.11.2
@@ -150,3 +150,7 @@ services:
 # volumes:
 #   ibp-keys:
 #     name: ibp-keys
+
+volumes:
+  redis-data:
+    driver: local
