@@ -66,6 +66,7 @@ import CheckList from './CheckList.vue'
 import ServiceTable from './ServiceTable.vue'
 import ServiceList from './ServiceList.vue'
 import { shortStash } from './utils'
+import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceC',
@@ -77,7 +78,8 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-    return { store }
+    const route = useRoute()
+    return { store, route }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
@@ -91,8 +93,8 @@ export default defineComponent({
     shortStash,
   },
   created() {
-    console.debug(this.$route.params)
-    this.store.dispatch('monitor/setMonitor', this.$route.params.monitorId)
+    console.debug(this.route.params)
+    this.store.dispatch('monitor/setMonitor', this.route.params.monitorId)
   },
 })
 </script>

@@ -48,6 +48,7 @@
 import { defineComponent, PropType } from 'vue'
 import { IMember, IService } from './types'
 import { mapState, useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceList',
@@ -69,7 +70,8 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore()
-    return { store }
+    const router = useRouter()
+    return { store, router }
   },
   computed: {
     ...mapState('geoDnsPool', { geoDnsPools: 'list' }),
@@ -77,7 +79,7 @@ export default defineComponent({
   methods: {
     gotoService(serviceUrl: string) {
       console.debug('gotoService', serviceUrl)
-      this.$router.push(`/service/${encodeURIComponent(serviceUrl)}`)
+      this.router.push(`/service/${encodeURIComponent(serviceUrl)}`)
     },
   },
   created() {

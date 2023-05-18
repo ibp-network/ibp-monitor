@@ -39,6 +39,7 @@ import { defineComponent, PropType } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import { IService } from './types'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceTable',
@@ -56,7 +57,8 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore()
-    return { store }
+    const router = useRouter()
+    return { store, router }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
@@ -65,7 +67,7 @@ export default defineComponent({
   methods: {
     gotoService(serviceUrl: string) {
       console.debug('gotoService', serviceUrl)
-      this.$router.push(`/service/${encodeURIComponent(serviceUrl)}`)
+      this.router.push(`/service/${encodeURIComponent(serviceUrl)}`)
     },
     formatDateTime(value: any): string {
       return moment(value).format(this.dateTimeFormat)

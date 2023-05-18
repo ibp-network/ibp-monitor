@@ -103,6 +103,7 @@ import NodeTable from './NodeTable.vue'
 import MonitorTable from './MonitorTable.vue'
 import MonitorList from './MonitorList.vue'
 import { IMember } from './types'
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceC',
@@ -118,7 +119,9 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-    return { store }
+    const route = useRoute()
+    const router = useRouter()
+    return { store, route, router }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
@@ -139,7 +142,7 @@ export default defineComponent({
   methods: {
     gotoService(serviceId: string) {
       this.store.dispatch('service/setService', serviceId)
-      this.$router.push(`/service/${serviceId}`)
+      this.router.push(`/service/${serviceId}`)
     },
     formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
@@ -152,8 +155,8 @@ export default defineComponent({
     }
   },
   created() {
-    console.debug(this.$route.params)
-    this.store.dispatch('service/setService', this.$route.params.serviceId)
+    console.debug(this.route.params)
+    this.store.dispatch('service/setService', this.route.params.serviceId)
     this.store.dispatch('geoDnsPool/getList')
   },
   mounted() {

@@ -6,6 +6,8 @@ import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
 import { defineConfig } from 'vite'
 import { fileURLToPath, URL } from 'node:url'
 
+import '../dotenv.js'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
@@ -28,10 +30,10 @@ export default defineConfig({
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
   server: {
-    port: 30001,
+    port: Number(process.env.HTTP_PORT || 30001),
     // https://vitejs.dev/config/server-options.html#server-proxy
     proxy: {
-      '/api': 'http://localhost:30002',
+      '/api': `http://localhost:${process.env.API_PORT || 30002}`,
       // '/api': {
       //   target: 'http://localhost/30002',
       //   changeOrigin: true
