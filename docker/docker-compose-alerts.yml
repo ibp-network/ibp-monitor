@@ -17,14 +17,16 @@ services:
     restart: unless-stopped
     ports:
       - '6379:6379'
+    command: >
+      redis-server --requirepass ${ABOT_REDIS_PASSWORD}
     volumes:
-      - redis-data:/data
+      - ../data/redis:/data
   ibp-datastore:
     container_name: ibp-datastore
     image: mariadb:10.11.2
     restart: unless-stopped
     environment:
-      - MARIADB_ROOT_PASSWORD=thisIsASecret
+      - MARIADB_ROOT_PASSWORD=${MARIADB_ROOT_PASSWORD}
       - MARIADB_USER=ibp_monitor
       - MARIADB_PASSWORD=ibp_monitor
       - MARIADB_DATABASE=ibp_monitor
@@ -99,8 +101,6 @@ services:
         condition: service_completed_successfully
     ports:
       - '3000:3000'
-    extra_hosts:
-      - "host.docker.internal:192.168.0.10"
     command: >
       bash -c "node workers.js"
   wait-for-ibp-api-ready:
@@ -141,6 +141,7 @@ services:
       - ABOT_API_HOST=ibp-abot
       - ABOT_API_PORT=5001
       - ABOT_REDIS_HOSTNAME=ibp-redis:6379
+      - ABOT_REDIS_PASSWORD=${ABOT_REDIS_PASSWORD}
 
     volumes:
       - ../data/abot:/data
@@ -150,7 +151,3 @@ services:
 # volumes:
 #   ibp-keys:
 #     name: ibp-keys
-
-volumes:
-  redis-data:
-    driver: local

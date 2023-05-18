@@ -11,6 +11,7 @@ import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery'
 import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string'
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string'
 import { createEd25519PeerId, createFromJSON } from '@libp2p/peer-id-factory'
+import IORedis from 'ioredis';
 
 import { DataStore } from './data/data-store.js'
 import { MessageHandler } from './lib/message-handler.js'
@@ -33,7 +34,7 @@ import { config as configLocal } from './config/config.local.js'
 const cfg = Object.assign(config, configLocal)
 
 const queueOpts = {
-  connection: cfg.redis,
+  connection: new IORedis(cfg.redis),
 }
 const jobRetention = {
   timeout: 60 * 1000, // active jobs timeout after 60 seconds
