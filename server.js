@@ -1,3 +1,6 @@
+'use strict'
+import './dotenv.js'
+
 import fs from 'fs'
 import { createLibp2p } from 'libp2p'
 import { bootstrap } from '@libp2p/bootstrap'
@@ -97,13 +100,13 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   if (process.env.P2P_PUBLIC_IP && process.env.P2P_PUBLIC_IP.length > 0) {
     if (isIPv4(process.env.P2P_PUBLIC_IP)) {
       const multiaddress = `/ip4/${process.env.P2P_PUBLIC_IP}/tcp/${
-        config.listenPort
+        cfg.listenPort
       }/p2p/${peerId.toString()}`
       console.log(`Announcing P2P IPv4 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else if (isIPv6(process.env.P2P_PUBLIC_IP)) {
       const multiaddress = `/ip6/${process.env.P2P_PUBLIC_IP}/tcp/${
-        config.listenPort
+        cfg.listenPort
       }/p2p/${peerId.toString()}`
       console.log(`Announcing P2P IPv6 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
@@ -117,7 +120,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   if (process.env.P2P_PUBLIC_HOST && process.env.P2P_PUBLIC_HOST.length > 0) {
     if (isValidHostname(process.env.P2P_PUBLIC_HOST)) {
       const multiaddress = `/dnsaddr/${process.env.P2P_PUBLIC_HOST}/tcp/${
-        config.listenPort
+        cfg.listenPort
       }/p2p/${peerId.toString()}`
       console.log(`Announcing P2P DNS multiaddress: ${multiaddress}`)
       announce.push(multiaddress)

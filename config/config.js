@@ -1,6 +1,8 @@
-const GOSSIP_PORT = 30000 // 0 for development/debugging, 30000 for deployment
-// set HTTP_PORT in docker-compose.yml
+'use strict'
+
+const GOSSIP_PORT = process.env.GOSSIP_PORT || 30000 // 0 for development/debugging, 30000 for deployment
 const HTTP_PORT = process.env.HTTP_PORT || 30001
+const API_PORT = process.env.API_PORT || 30002
 
 // you can overwrite this in config.local.js
 
@@ -23,35 +25,24 @@ const config = {
     host: 'ibp-redis',
     port: 6379,
   },
-  peerId: {
-    // TODO: each member should register a known peerId
-  },
-  knownPeers: [
-    // TODO: list all peers/members public keys...?
-  ],
   httpPort: HTTP_PORT,
   listenPort: GOSSIP_PORT,
-  allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck'],
+  apiPort: API_PORT,
+  allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck', '/ibp/signedMessage'],
   updateInterval: 5 * 60 * 1000, // 5 mins, as milliseconds
   bootstrapPeers: [
-    '/ip4/31.22.13.147/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
+    // metaspan:dns
     '/dnsaddr/ibp-bootstrap.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
+    // helikon:ip4
     '/ip4/78.181.100.160/tcp/30000/p2p/12D3KooWFZzcMsKumdpNyTKtivcGPukPfQAtCaW5o8qinFzSzHuf',
+    // helikon:dns
     '/dnsaddr/ibp-monitor.helikon.io/tcp/30000/p2p/12D3KooWFZzcMsKumdpNyTKtivcGPukPfQAtCaW5o8qinFzSzHuf',
   ],
-  checkOwnServices: false,
-  checkOtherServices: true,
   gossipResults: true,
   relay: null,
-  services: [
-    // put these in your config.local.js
-  ],
   pruning: {
     age: 90 * 24 * 60 * 60, // 90 days as seconds
     interval: 1 * 60 * 60, // 1 hour as seconds
-  },
-  performance: {
-    sla: 500, // ms - used for performance graph, and later for alerts
   },
 }
 

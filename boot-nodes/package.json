@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-docker-api": "^1.1.22"
+    "node-docker-api": "^1.1.22",
+    "split2": "^4.2.0"
   }
 }
