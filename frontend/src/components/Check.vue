@@ -66,6 +66,7 @@ import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
+import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'CheckC',
@@ -75,7 +76,9 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-    return { store }
+    const router = useRouter()
+    const route = useRoute()
+    return { store, route, router }
   },
   methods: {
     formatDateTime(value: any) {
@@ -88,7 +91,7 @@ export default defineComponent({
     },
     gotoMember(memberId: string) {
       // console.debug('gotoMember()', memberId)
-      this.$router.push({
+      this.router.push({
         path: `/member/${memberId}`,
         params: { memberId },
         query: { tab: 'checks' },
@@ -96,8 +99,8 @@ export default defineComponent({
     },
   },
   created() {
-    console.debug(this.$route.params)
-    this.store.dispatch('healthCheck/setHealthCheck', this.$route.params.id)
+    console.debug(this.route.params)
+    this.store.dispatch('healthCheck/setHealthCheck', this.route.params.id)
   },
 })
 </script>

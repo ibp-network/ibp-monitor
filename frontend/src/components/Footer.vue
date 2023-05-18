@@ -11,7 +11,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn color="white" text>
+      <v-btn color="white">
         <small>
           <!-- <small> -->
           ui: {{ packageVersion }} <br />

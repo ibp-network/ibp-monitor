@@ -68,6 +68,7 @@ import { useStore, mapState } from 'vuex'
 import moment from 'moment'
 import { shortStash } from './utils'
 import { IMember } from './types'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MemberTable',
@@ -85,9 +86,8 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-    return {
-      store,
-    }
+    const router = useRouter()
+    return { store, router }
   },
   data() {
     return {
@@ -106,7 +106,7 @@ export default defineComponent({
     },
     async gotoMember(memberId: string) {
       await this.store.dispatch('member/setModel', memberId)
-      this.$router.push(`/member/${memberId}`)
+      this.router.push(`/member/${memberId}`)
     },
   },
   created() {

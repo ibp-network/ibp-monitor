@@ -25,6 +25,7 @@ import moment from 'moment'
 import IsLocalMonitor from './IsLocalMonitor.vue'
 import { shortStash } from './utils'
 import { IMonitor } from './types'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MonitorTable',
@@ -46,7 +47,8 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-    return { store }
+    const router = useRouter()
+    return { store, router }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
@@ -59,7 +61,7 @@ export default defineComponent({
     },
     async gotoMonitor(monitorId: string) {
       await this.store.dispatch('monitor/setMonitor', monitorId)
-      this.$router.push(`/monitor/${monitorId}`)
+      this.router.push(`/monitor/${monitorId}`)
     },
   },
   created() {
