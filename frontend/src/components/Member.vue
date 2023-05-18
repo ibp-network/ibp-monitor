@@ -93,6 +93,7 @@ import NodeTable from './NodeTable.vue'
 import ServiceTable from './ServiceTable.vue'
 import ServiceList from './ServiceList.vue'
 import { IService } from './types'
+import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'MemberC',
@@ -114,7 +115,8 @@ export default defineComponent({
     const store = useStore()
     const propTab = props.tab
     const activeTab = ref(propTab)
-    return { store, activeTab }
+    const route = useRoute()
+    return { store, activeTab, route }
   },
   computed: {
     ...mapState(['dateTimeFormat']),
@@ -136,7 +138,7 @@ export default defineComponent({
     moment: moment,
   },
   created() {
-    console.debug(this.$route.params)
+    console.debug(this.route.params)
   },
   mounted() {
     this.$nextTick(() => {
@@ -146,12 +148,12 @@ export default defineComponent({
         behavior: 'smooth',
       })
     })
-    if (this.member.id !== this.$route.params.memberId) {
-      this.store.dispatch('member/setModel', this.$route.params.memberId)
+    if (this.member.id !== this.route.params.memberId) {
+      this.store.dispatch('member/setModel', this.route.params.memberId)
     }
     this.store.dispatch('member/getChecks', this.member.id)
     this.store.dispatch('member/getNodes', this.member.id)
-    this.activeTab = this.$route.params.tab?.toString() || 'performance'
+    this.activeTab = this.route.params.tab?.toString() || 'performance'
   },
 })
 </script>

@@ -52,12 +52,15 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { mapState, useStore } from 'vuex'
 
 export default defineComponent({
   setup() {
     const store = useStore()
-    return { store }
+    const route = useRoute()
+    const router = useRouter()
+    return { store, route, router }
   },
   computed: {
     ...mapState(['packageVersion', 'apiVersion']),
@@ -75,8 +78,8 @@ export default defineComponent({
     navTo(route: string) {
       this.isActive = false
       // console.debug(this.$route)
-      if (this.$route.path !== route) {
-        this.$router.push(route)
+      if (this.route.path !== route) {
+        this.router.push(route)
       }
     },
   },
