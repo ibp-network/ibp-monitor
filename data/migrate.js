@@ -2,7 +2,7 @@ import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 import { config } from '../config/config.js'
 import { config as configLocal } from '../config/config.local.js'
-import { DataStore } from '../data/data-store.js'
+import { DataStore } from './data-store.js'
 import axios from 'axios'
 
 const cfg = Object.assign(config, configLocal)
@@ -60,13 +60,17 @@ async function updateMembers() {
       if (data.endpoints) {
         for (const [chainId, serviceUrl] of Object.entries(data.endpoints)) {
           const service = await ds.Service.findOne({ where: { chainId, type: 'rpc' } })
-          const memberService = {
-            memberId,
-            serviceId: service.id,
-            serviceUrl,
-            status: 'active',
+          if (service != null) {
+            const memberService = {
+              memberId,
+              serviceId: service.id,
+              serviceUrl,
+              status: 'active',
+            }
+            await ds.MemberService.upsert(memberService)
+          } else {
+            console.log(`WARNING: Service not defined for chainId: ${chainId} and serviceUrl: ${serviceUrl}`);
           }
-          await ds.MemberService.upsert(memberService)
         }
       }
     }
