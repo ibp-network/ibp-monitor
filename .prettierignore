@@ -3,9 +3,6 @@ target
 node_modules
 dist
 build
-static/assets
-static/css
-static/js
-static/favicon*.*
+**/static
 **/docker-compose.yml
 *.md
