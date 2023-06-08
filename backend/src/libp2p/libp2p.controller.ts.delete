@@ -1,0 +1,202 @@
+import { Inject, Controller, Get, Req, Logger } from '@nestjs/common';
+import { MessagePattern } from '@nestjs/microservices';
+import { Sequelize } from 'sequelize-typescript';
+
+import { PeerInfo } from '@libp2p/interface-peer-info';
+import { toString as uint8ArrayToString } from 'uint8arrays/to-string';
+import { Connection } from '@libp2p/interface-connection';
+
+import { CustomEvent, Message } from '../interface/polyfill.js';
+
+// import zmq from 'zeromq';
+
+// import { IMessage } from '@chainsafe/libp2p-gossipsub/src/message/rpc';
+
+import { type Monitor } from '../models/monitor.js';
+import { Libp2pService } from './libp2p.service.js';
+// import { MonitorsService } from '../monitors/monitors.service.js';
+import { type MemberService } from '../models/member-service.js';
+import { type HealthCheck } from '../models/health-check.js';
+
+const logger = new Logger('Libp2p:Controller');
+
+@Controller('libp2p')
+export class Libp2pController {
+  constructor(
+    // private readonly libp2pService: Libp2pService,
+    @Inject('SEQUELIZE') private sequelize: Sequelize,
+  ) {}
+
+  // @MessagePattern('local:peerId')
+  // async handlePubsubPeers(message: CustomEvent<Message>) {
+  //   //this.libp2pService.pubsub.
+  // }
+
+  // @MessagePattern('peer:discovery')
+  // async handlePeerDiscovery(peerInfo: CustomEvent<PeerInfo>) {
+  //   // logger.debug('handlePeerDiscovery', data);
+  //   logger.debug('handlePeerDiscovery', peerInfo.detail.id.toString());
+  //   // const monitor = await this.monitorsRepository.findByPk(peerInfo.id.toString());
+  //   await this.sequelize.models.Monitor.upsert({
+  //     id: peerInfo.detail.id.toString(),
+  //     multiaddress: peerInfo.detail.multiaddrs,
+  //     status: 'active',
+  //     updatedAt: new Date(),
+  //   });
+  // }
+
+  // @MessagePattern('peer:connect')
+  // async handlePeerConnect(connection: CustomEvent<Connection>) {
+  //   logger.debug(
+  //     `handlePeerConnect: ${connection.detail.remotePeer.toString()}`,
+  //   );
+  //   // logger.debug(`handlePeerConnect: ${JSON.stringify(connection.detail)}`);
+  //   // update the monitor details
+  //   // const ex = {
+  //   //   id: 'cew7gd1685454407052',
+  //   //   remoteAddr:
+  //   //     '/ip4/192.168.1.91/tcp/30000/p2p/12D3KooWEhSdbKnDJ4T8Gu57fcqrMyRyHQwh5FkcJ6P9ryi55j1G',
+  //   //   remotePeer: '12D3KooWEhSdbKnDJ4T8Gu57fcqrMyRyHQwh5FkcJ6P9ryi55j1G',
+  //   //   stat: {
+  //   //     status: 'OPEN',
+  //   //     direction: 'outbound',
+  //   //     timeline: { open: 1685454406978, upgraded: 1685454407052 },
+  //   //     multiplexer: '/mplex/6.7.0',
+  //   //     encryption: '/noise',
+  //   //   },
+  //   //   tags: [],
+  //   //   _closing: false,
+  //   // };
+  //   const remotePeer = connection.detail.remotePeer;
+  //   if (!remotePeer) return;
+
+  //   let monitor = (await this.sequelize.models.Monitor.findByPk(
+  //     connection.detail.remotePeer.toString(),
+  //   )) as Monitor;
+
+  //   if (monitor) {
+  //     const addrss = monitor.multiaddress;
+  //     if (!addrss.includes(connection.detail.remoteAddr.toString())) {
+  //       addrss.push(connection.detail.remoteAddr.toString());
+  //       await monitor.save();
+  //     }
+  //   } else {
+  //     // we don't have a monitor record
+  //     logger.warn(
+  //       `We have a new monitor: ${connection.detail.remotePeer.toString()}`,
+  //     );
+  //     monitor = (await this.sequelize.models.Monitor.create({
+  //       id: connection.detail.remotePeer.toString(),
+  //       // name: '',
+  //       multiaddress: [connection.detail.remoteAddr.toString()],
+  //       status: 'active',
+  //     })) as Monitor;
+  //   }
+  // }
+
+  // @MessagePattern('peer:disconnect')
+  // handlePeerDisconnect(connection: CustomEvent<Connection>) {
+  //   // logger.debug('handlePeerConnect', data);
+  //   logger.debug(
+  //     `handlePeerDisconnect: ${connection.detail.remotePeer.toString()}`,
+  //   );
+  // }
+
+  // @MessagePattern('pubsub:message')
+  // async handlePubsubMessage(evt: CustomEvent<IMessage>) {
+  //   // logger.debug('handlePeerConnect', data);
+  //   logger.debug(
+  //     `handlePubsubMessage: ${
+  //       evt.detail.topic
+  //     } from ${evt.detail.from.toString()}`,
+  //     // uint8ArrayToString(evt.detail.data),
+  //   );
+  //   let model: any;
+  //   const record = JSON.parse(uint8ArrayToString(evt.detail.data));
+  //   const monitorId = evt.detail.from.toString();
+
+  //   switch (evt.detail.topic) {
+  //     // a peer has published some results
+  //     case '/ibp/healthCheck':
+  //       const { memberId, serviceId, peerId } = record;
+  //       logger.debug(
+  //         `/ibp/healthCheck from ${monitorId} for ${memberId}, ${serviceId}, ${peerId}`,
+  //       );
+  //       model = {
+  //         ...record,
+  //         monitorId,
+  //         // serviceUrl: record.serviceUrl,
+  //         // level: record.level || 'info',
+  //         source: 'gossip',
+  //       };
+  //       // make sure the monitor exists - it's possible to get a healthCheck before a monitor publishes its peerId
+  //       await this.sequelize.models.Monitor.upsert({
+  //         id: monitorId,
+  //         // multiaddress: [],
+  //         status: 'active',
+  //       });
+  //       // console.log('model for update', model)
+  //       const memberServiceNode =
+  //         await this.sequelize.models.MemberServiceNode.findByPk(peerId);
+  //       if (!memberServiceNode) {
+  //         const memberService =
+  //           (await this.sequelize.models.MemberService.findOne({
+  //             where: { memberId, serviceId },
+  //           })) as MemberService;
+  //         if (memberService) {
+  //           if (!peerId) {
+  //             console.log('New member service node has null stash. Ignore.');
+  //           } else {
+  //             console.log(
+  //               'New member service node:',
+  //               memberId,
+  //               serviceId,
+  //               peerId,
+  //             );
+  //             const node = {
+  //               peerId,
+  //               serviceId,
+  //               memberId,
+  //               memberServiceId: memberService.id,
+  //             };
+  //             await this.sequelize.models.MemberServiceNode.create(node);
+  //           }
+  //         } else {
+  //           console.error('Member service not found:', memberId, serviceId);
+  //           break;
+  //         }
+  //       }
+  //       const hc = (await this.sequelize.models.HealthCheck.create(
+  //         model,
+  //       )) as HealthCheck;
+  //       logger.debug(
+  //         `Created health check ${hc.id} for ${memberId}, ${serviceId}, ${peerId}`,
+  //       );
+  //       break;
+  //     // case '/ibp/signedMessage':
+  //     //   console.log(
+  //     //     `received: ${uint8ArrayToString(
+  //     //       evt.detail.data
+  //     //     )} from ${evt.detail.from.toString()} on topic ${evt.detail.topic}`
+  //     //   )
+  //     //   if (evt.detail.from.toString() !== this._libp2p.peerId.toString()) {
+  //     //     const message = JSON.parse(uint8ArrayToString(evt.detail.data))
+  //     //     this._rpc.handleMessage(message)
+  //     //   }
+  //     //   break
+  //     default:
+  //       logger.warn(
+  //         `received: ${uint8ArrayToString(
+  //           evt.detail.data,
+  //         )} from ${evt.detail.from.toString()} on topic ${evt.detail.topic}`,
+  //       );
+  //   }
+  // }
+
+  // @MessagePattern('/ibp/ping')
+  // handlePing({stream, connection}: any) {
+  //   logger.debug('handlePing');
+  //   // logger.debug('handlePubsubSubscribed', data);
+  //   this.libp2pServer.publishMessage('/ibp/pong', null);
+  // }
+}
