@@ -48,7 +48,7 @@
     "hello": "world"
   }
     </textarea>
-    <button class="button" @click="sign()">Sign</button>
+    <button class="button" @click="signMessage()">Sign</button>
 
     <p class="title h4">Signature</p>
     <textarea
@@ -59,7 +59,7 @@
     ></textarea>
 
     <div class="control has-icons-left">
-      <label class="label">Peer</label>
+      <!-- <label class="label">Peer</label>
       <div class="control">
         <div class="select">
           <select v-model="selPeer">
@@ -67,20 +67,19 @@
               {{ peer.id }} ({{ peer.remotePeer.toString() }})
             </option>
           </select>
-          <!-- {{filteredAccounts.length}} {{selAccount}} -->
         </div>
         <div class="icon is-small is-left">
           <i class="fa-solid fa-wallet"></i>
         </div>
-      </div>
+      </div> -->
     </div>
-    <button class="button" @click="submit()">Submit</button>
+    <button class="button" @click="sendMessage()">Submit</button>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import { mapState } from 'vuex'
+import { defineComponent, ref, onBeforeMount, computed, watch } from 'vue'
+import { useStore } from 'vuex'
 // import { Libp2p } from 'libp2p'
 import { Keyring } from '@polkadot/keyring'
 import { web3Accounts, web3Enable, web3FromAddress, web3FromSource } from '@polkadot/extension-dapp'
@@ -151,22 +150,100 @@ interface IAccount {
 // export default defineComponent<IData, IMethods, IComputed, IProps>({
 export default defineComponent({
   name: 'MessageC',
-  computed: {
-    ...mapState(['localMonitorId']),
-    filteredAccounts(): any[] {
-      return this.accounts.filter((f: IAccount) => f.meta.source === this.selPlugin.name)
-    },
-  },
-  data() {
+  setup() {
+    const store = useStore()
+    const localMonitorId = store.state.localMonitorId
+    const injected = ref<IPlugin[]>([])
+    const selPlugin = ref<IPlugin>()
+    const peers = ref<any[]>()
+    const selPeer: any = ref()
+    const accounts = ref<IAccount[]>([])
+    const selAccount = ref<IAccount>()
+    const exampleMessage = {
+      module: 'service',
+      method: 'chill',
+      params: { memberId: 'metaspan', serviceId: 'kusama' },
+    }
+    const message = ref(JSON.stringify(exampleMessage))
+    const result = ref('')
+
+    const filteredAccounts = computed((): any[] => {
+      return accounts.value.filter((f: IAccount) => f.meta.source === selPlugin.value?.name)
+    })
+
+    const allInjected = async () => {
+      injected.value = (await web3Enable('Dotsama IBP Monitor')) as []
+    }
+    const allAccounts = async () => {
+      if (!injected.value) await allInjected()
+      const web3accs = await web3Accounts()
+      console.debug('web3accs', web3accs)
+      accounts.value = web3accs as []
+    }
+    const submit = () => {
+      console.log('not implemented!')
+    }
+    const signMessage = async () => {
+      if (!injected.value) allInjected()
+      // const accounts = await web3Accounts();
+      const account = selAccount.value
+      if (account?.meta.source) {
+        const injector = await web3FromSource(account?.meta?.source) // could we get this from the extension?
+        const signRaw = injector?.signer?.signRaw
+        if (signRaw) {
+          // after making sure that signRaw is defined
+          // we can use it to sign our message
+          try {
+            const { signature } = await signRaw({
+              address: account.address,
+              data: stringToHex(message.value),
+              type: 'bytes',
+            })
+            result.value = signature
+          } catch (err: any) {
+            result.value = err.toString()
+          }
+        } else {
+          result.value = 'unknown?'
+        }
+      }
+      // this.getPeers()
+    }
+    const sendMessage = async () => {
+      store.dispatch('message/sendSignedMessage', {
+        message: message.value,
+        signature: result.value,
+        address: selAccount.value?.address,
+        // result: result.value,
+        // peerId: selPeer.value.remotePeer.toString()
+      })
+    }
+
+    onBeforeMount(async () => {
+      const resp = await allInjected()
+      console.debug(resp, injected.value)
+      if (injected.value.length > 0) {
+        selPlugin.value = injected.value[0]
+      }
+      allAccounts()
+      console.debug('this.filteredAccounts.length', accounts.value, filteredAccounts.value.length)
+      if (filteredAccounts.value.length > 0) selAccount.value = filteredAccounts.value[0]
+    })
+
     return {
-      injected: [] as IPlugin[],
-      selPlugin: {} as IPlugin,
-      peers: [] as any[],
-      selPeer: {},
-      accounts: [] as IAccount[],
-      selAccount: {} as IAccount,
-      message: '{\n    "hello": "world"\n}',
-      result: '',
+      localMonitorId,
+      injected,
+      selPlugin,
+      peers,
+      selPeer,
+      accounts,
+      selAccount,
+      message,
+      result,
+      filteredAccounts,
+      shortStash,
+      signMessage,
+      sendMessage,
     }
   },
   watch: {
@@ -182,43 +259,6 @@ export default defineComponent({
     },
   },
   methods: {
-    shortStash,
-    async allInjected() {
-      this.injected = (await web3Enable('Dotsama IBP Monitor')) as []
-    },
-    async allAccounts() {
-      if (!this.injected) await this.allInjected()
-      const web3accs = await web3Accounts()
-      console.debug('web3accs', web3accs)
-      this.accounts = web3accs as []
-    },
-    submit() {
-      console.log('not implemented!')
-    },
-    async sign() {
-      //   if (!this.injected) this.allInjected()
-      //   // const accounts = await web3Accounts();
-      //   const account = this.selAccount
-      //   const injector = await web3FromSource(account?.meta.source) // could we get this from the extension?
-      //   const signRaw = injector?.signer?.signRaw
-      //   if (signRaw) {
-      //     // after making sure that signRaw is defined
-      //     // we can use it to sign our message
-      //     try {
-      //       const { signature } = await signRaw({
-      //         address: account.address,
-      //         data: stringToHex(this.message),
-      //         type: 'bytes'
-      //       })
-      //       this.result = signature
-      //     } catch (err: any) {
-      //       this.result = err.toString()
-      //     }
-      //   } else {
-      //     this.result = 'unknown?'
-      //   }
-      //   this.getPeers()
-    },
     // async getPeers () {
     //   const peers = this.$libp2p.connectionManager.getConnections()
     //   console.debug(peers)
@@ -250,16 +290,6 @@ export default defineComponent({
     //     console.log('listenerCount', this.$libp2p.connectionManager.listenerCount(''))
     //   }
     // }
-  },
-  async mounted() {
-    const resp = await this.allInjected()
-    console.debug(resp, this.injected)
-    if (this.injected.length > 0) {
-      this.selPlugin = this.injected[0]
-    }
-    this.allAccounts()
-    console.debug('this.filteredAccounts.length', this.accounts, this.filteredAccounts.length)
-    if (this.filteredAccounts.length > 0) this.selAccount = this.filteredAccounts[0]
   },
 })
 </script>

@@ -10,6 +10,7 @@ import { IState as IRootState } from '../index'
 // declare let window: PolkadotWindow
 export interface IState {
   list: any[]
+  peers: string[]
   monitor: any
   healthChecks: any[]
 }
@@ -21,12 +22,16 @@ const monitor: Module<IState, IRootState> = {
   namespaced: true,
   state: {
     list: [],
+    peers: [],
     monitor: {},
     healthChecks: [],
   },
   mutations: {
     SET_LIST(state: IState, list: any[]) {
       state.list = list
+    },
+    SET_PEERS(state: IState, peers: string[]) {
+      state.peers = peers
     },
     SET_MONITOR(state: IState, value: any) {
       console.debug('SET_MONITOR()', value)
@@ -42,6 +47,7 @@ const monitor: Module<IState, IRootState> = {
     async getList({ commit, dispatch }: any) {
       const res = await axios.get('/api/monitor')
       commit('SET_LIST', res.data.monitors)
+      commit('SET_PEERS', res.data.peers)
       // dispatch('init')
       dispatch('setLocalMonitorId', res.data.localMonitorId, { root: true })
     },

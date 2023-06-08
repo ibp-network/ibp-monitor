@@ -93,6 +93,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
 import moment from 'moment'
 import MemberList from './MemberList.vue'
 import MemberTable from './MemberTable.vue'
@@ -103,7 +104,6 @@ import NodeTable from './NodeTable.vue'
 import MonitorTable from './MonitorTable.vue'
 import MonitorList from './MonitorList.vue'
 import { IMember } from './types'
-import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceC',

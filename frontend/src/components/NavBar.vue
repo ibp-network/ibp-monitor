@@ -58,9 +58,9 @@ import { mapState, useStore } from 'vuex'
 export default defineComponent({
   setup() {
     const store = useStore()
-    const route = useRoute()
     const router = useRouter()
-    return { store, route, router }
+    const route = useRoute()
+    return { store, router, route }
   },
   computed: {
     ...mapState(['packageVersion', 'apiVersion']),

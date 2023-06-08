@@ -5,9 +5,7 @@ import edns from 'evil-dns'
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { serializeError } from 'serialize-error'
 
-import { config } from '../config/config.js'
-import { config as configLocal } from '../config/config.local.js'
-const cfg = Object.assign(config, configLocal)
+import { config as cfg } from '../config.js'
 
 // eDns has patched node:dns and not node:dns/promises
 async function lookupAsync(domain) {
@@ -138,9 +136,6 @@ export async function checkService(job) {
 
     const networkState = api.rpc.system.networkState // () // not a function?
     const syncState = await api.rpc.system.syncState()
-    const finalizedBlockHash = await api.rpc.chain.getFinalizedHead()
-    const { number: finalizedBlock } = await api.rpc.chain.getHeader(finalizedBlockHash)
-    // const blockDrift = syncState.currentBlock.toNumber() - finalizedBlock
     const version = await api.rpc.system.version()
     const timing = end - start
     // console.debug(health.toString())
@@ -165,7 +160,6 @@ export async function checkService(job) {
         health,
         networkState,
         syncState,
-        finalizedBlock,
         version,
         // peerCount,
         performance: timing,

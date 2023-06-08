@@ -9,7 +9,7 @@
     </v-breadcrumbs> -->
     <v-toolbar>
       <v-btn icon to="/monitor"><v-icon size="small">mdi-chevron-left</v-icon></v-btn>
-      <v-toolbar-title>{{ shortStash(monitor.monitorId) }}</v-toolbar-title>
+      <v-toolbar-title>{{ shortStash(monitor.id) }}</v-toolbar-title>
     </v-toolbar>
 
     <table class="table is-bordered">
@@ -18,21 +18,14 @@
           <th>Monitor ID</th>
           <td>{{ monitor.id }}</td>
         </tr>
-        <tr>
+        <!-- <tr>
           <th>Name</th>
           <td>{{ monitor.name }}</td>
-        </tr>
+        </tr> -->
         <tr>
           <th>Addresses</th>
           <td>{{ monitor.multiaddress }}</td>
         </tr>
-        <!-- <tr>
-          <th>Polkadot.js</th>
-          <td><a :href="`https://polkadot.js.org/apps/?rpc=${monitor.monitorId}`" target="_blank">
-            {{monitor.monitorId}}
-            <sup><small><i class="fa-solid fa-arrow-up-right-from-square"></i></small></sup>
-          </a></td>
-        </tr> -->
         <tr>
           <th>Updated</th>
           <td>{{ formatDateTime(monitor.updatedAt) }}</td>
@@ -51,7 +44,7 @@
     <CheckTable
       v-if="$vuetify.display.width > 599"
       :healthChecks="monitor.healthChecks"
-      :columns="['id', 'serviceUrl', 'source', 'version', 'performance', 'updatedAt']"
+      :columns="['id', 'serviceId', 'memberId', 'version', 'performance', 'updatedAt']"
     ></CheckTable>
     <CheckList v-if="$vuetify.display.width < 600" :healthChecks="monitor.healthChecks"></CheckList>
   </v-container>
@@ -60,13 +53,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import moment from 'moment'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
 import ServiceTable from './ServiceTable.vue'
 import ServiceList from './ServiceList.vue'
 import { shortStash } from './utils'
-import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceC',

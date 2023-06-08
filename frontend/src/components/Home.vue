@@ -65,18 +65,21 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, computed } from 'vue'
+import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { mapState } from 'vuex'
 
 export default defineComponent({
   name: 'HomeC',
   setup() {
+    const store = useStore()
     const router = useRouter()
-    return { router }
-  },
-  computed: {
-    ...mapState(['apiVersion', 'memberCount', 'monitorCount', 'serviceCount', 'checkCount']),
+    const apiVersion = computed(() => store.state.apiVersion)
+    const memberCount = computed(() => store.state.memberCount)
+    const monitorCount = computed(() => store.state.monitorCount)
+    const serviceCount = computed(() => store.state.serviceCount)
+    const checkCount = computed(() => store.state.checkCount)
+    return { router, apiVersion, memberCount, monitorCount, serviceCount, checkCount }
   },
 })
 </script>

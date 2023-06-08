@@ -9,6 +9,7 @@ import monitor from './modules/monitor'
 import healthCheck from './modules/health-check'
 import status from './modules/status'
 import libp2p from './modules/libp2p'
+import message from './modules/message'
 
 export interface IState {
   apiVersion: string
@@ -45,7 +46,8 @@ export const store = createStore({
       oceania: { name: 'Oceania' },
       asia: { name: 'Asia' },
     },
-    packageVersion: process.env.PACKAGE_VERSION || '0',
+    // defined in vite.config.js, injected by webpack.DefinePlugin
+    packageVersion: PACKAGE_VERSION || '0.0.0',
     dateTimeFormat: 'DD/MM/YYYY HH:mm:ss',
   },
   getters: {},
@@ -74,6 +76,7 @@ export const store = createStore({
   },
   actions: {
     async init({ dispatch, commit }) {
+      console.debug('init')
       dispatch('member/getList', {}, { root: true })
       dispatch('service/getList', {}, { root: true })
       const res = await axios.get('/api/home')
@@ -104,6 +107,7 @@ export const store = createStore({
     monitor,
     healthCheck,
     libp2p,
+    message,
     status,
   },
 })

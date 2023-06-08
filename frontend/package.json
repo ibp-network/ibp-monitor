@@ -1,6 +1,6 @@
 {
   "name": "ibp-monitor-frontend",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
@@ -10,9 +10,18 @@
   },
   "dependencies": {
     "@mdi/font": "7.2.96",
+    "@polkadot/api": "^10.8.1",
+    "@polkadot/extension-dapp": "^0.46.4",
+    "@polkadot/keyring": "^12.2.2",
+    "@polkadot/util": "^12.2.2",
+    "@polkadot/util-crypto": "^12.2.2",
+    "axios": "^1.4.0",
     "chart.js": "^4.3.0",
     "chartjs-adapter-date-fns": "^3.0.0",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.1.4",
+    "it-pipe": "^3.0.1",
+    "moment": "^2.29.4",
     "roboto-fontface": "*",
     "vue": "^3.3.2",
     "vue-chartjs": "^5.2.0",

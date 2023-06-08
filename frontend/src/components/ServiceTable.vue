@@ -37,16 +37,16 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { mapState, useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
 import { IService } from './types'
-import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceTable',
   props: {
     services: {
       // type: Array
-      type: Object as PropType<[IService]>,
+      type: Object as PropType<IService[]>,
     },
     columns: {
       type: Array,

@@ -65,10 +65,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { mapState, useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
 import { shortStash } from './utils'
 import { IMember } from './types'
-import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MemberTable',

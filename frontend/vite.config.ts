@@ -22,7 +22,10 @@ export default defineConfig({
       autoImport: true,
     }),
   ],
-  define: { 'process.env': {} },
+  define: {
+    'process.env': {},
+    PACKAGE_VERSION: JSON.stringify(process.env.npm_package_version),
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -32,8 +35,10 @@ export default defineConfig({
   server: {
     port: Number(process.env.HTTP_PORT || 30001),
     // https://vitejs.dev/config/server-options.html#server-proxy
+    // Note: this will only be used in development when the frontend is served manually
+    // You will need a backend to connect to, so configure that in ../config/config.js
     proxy: {
-      '/api': `http://localhost:${process.env.API_PORT || 30002}`,
+      '/api': `http://localhost:${process.env.API_PORT || 4000}`,
       // '/api': {
       //   target: 'http://localhost/30002',
       //   changeOrigin: true

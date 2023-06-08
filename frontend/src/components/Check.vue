@@ -64,9 +64,9 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
 import moment from 'moment'
 import { shortStash } from './utils'
-import { useRoute, useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'CheckC',
@@ -76,8 +76,8 @@ export default defineComponent({
   },
   setup() {
     const store = useStore()
-    const router = useRouter()
     const route = useRoute()
+    const router = useRouter()
     return { store, route, router }
   },
   methods: {
