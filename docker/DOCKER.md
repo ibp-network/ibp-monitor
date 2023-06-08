@@ -42,8 +42,6 @@ docker compose buildx build --platform linux/amd64 -t ${REGISTRY}/ibp/ibp-redis 
 - ibp-monitor-workers
 - ibp-monitor-frontend
 
-
-
 # these can't be run together
 # --load: load the image locally, this should make subsequent builds faster
 # --push: push the image to the registry

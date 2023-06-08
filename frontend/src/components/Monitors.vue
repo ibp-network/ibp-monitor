@@ -10,7 +10,7 @@
       <v-toolbar-title>Monitors</v-toolbar-title>
     </v-toolbar>
 
-    <MonitorTable :monitors="list" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
+    <MonitorTable :monitors="list" :peers="peers" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
   </v-container>
 </template>
 
@@ -29,7 +29,7 @@ export default defineComponent({
     return { store }
   },
   computed: {
-    ...mapState('monitor', ['list']),
+    ...mapState('monitor', ['list', 'peers']),
   },
   created() {
     this.store.dispatch('monitor/getList')

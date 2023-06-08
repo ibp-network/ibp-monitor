@@ -46,16 +46,16 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
+import { useRouter } from 'vue-router'
 import { IMember, IService } from './types'
 import { mapState, useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'ServiceList',
   props: {
     services: {
       // type: Array
-      type: Object as PropType<[IService]>,
+      type: Object as PropType<IService[]>,
     },
     member: {
       type: Object as PropType<IMember>,

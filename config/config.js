@@ -28,7 +28,7 @@ const config = {
   httpPort: HTTP_PORT,
   listenPort: GOSSIP_PORT,
   apiPort: API_PORT,
-  allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck', '/ibp/signedMessage'],
+  allowedTopics: ['/ibp', '/ibp/healthCheck', '/ibp/signedMessage'],
   updateInterval: 5 * 60 * 1000, // 5 mins, as milliseconds
   bootstrapPeers: [
     // metaspan:dns

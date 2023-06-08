@@ -1,7 +1,9 @@
 <template>
   <table class="table is-fullwidth">
+    <!-- {{ peers }} -->
     <thead>
       <th v-if="columns.includes('id')">Monitor</th>
+      <th>Connected</th>
       <th>Last Seen (UTC)</th>
       <th>Discovered</th>
     </thead>
@@ -11,6 +13,9 @@
           <a @click="gotoMonitor(monitor.id)">{{ shortStash(monitor.id) }}</a>
           <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%> -->
           <sup><IsLocalMonitor :monitorId="monitor.id"></IsLocalMonitor></sup>
+        </td>
+        <td>
+          {{ connection(monitor.id) }}
         </td>
         <td>{{ formatDateTime(monitor.updatedAt) }}</td>
         <td>{{ formatDateTime(monitor.createdAt) }}</td>
@@ -22,11 +27,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { mapState, useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
 import IsLocalMonitor from './IsLocalMonitor.vue'
 import { shortStash } from './utils'
 import { IMonitor } from './types'
-import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MonitorTable',
@@ -37,6 +42,12 @@ export default defineComponent({
     monitors: {
       // type: Array
       type: Object as PropType<[IMonitor]>,
+    },
+    peers: {
+      type: Object as PropType<[string]>,
+      default() {
+        return [] as PropType<[string]>
+      },
     },
     columns: {
       type: Array,
@@ -52,11 +63,16 @@ export default defineComponent({
     return { store, router }
   },
   computed: {
-    ...mapState(['dateTimeFormat']),
+    ...mapState(['dateTimeFormat', 'localMonitorId']),
   },
   methods: {
     shortStash,
     moment,
+    connection(monitorId: string) {
+      if (this.peers.includes(monitorId)) return '🟢';
+      if (this.localMonitorId === monitorId) return '🔵';
+      return '🟠';
+    },
     formatDateTime(value: any) {
       return moment.utc(value).format(this.dateTimeFormat)
     },

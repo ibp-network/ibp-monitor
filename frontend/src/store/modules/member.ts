@@ -10,8 +10,6 @@ export interface IState {
   healthChecks: any[]
 }
 
-// Vue.use(Vuex)
-
 const member: Module<IState, IRootState> = {
   namespaced: true,
   state: {
@@ -41,6 +39,7 @@ const member: Module<IState, IRootState> = {
     async getList({ commit, dispatch }: any) {
       const res = await axios.get('/api/member')
       commit('SET_LIST', res.data.members)
+      dispatch('setLocalMonitorId', res.data.localMonitorId, { root: true })
     },
     async setModel({ state, commit }: any, memberId: string) {
       const res = await axios.get(`/api/member/${memberId}`)

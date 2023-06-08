@@ -33,7 +33,7 @@ export default defineComponent({
   props: {
     nodes: {
       // type: Array
-      type: Object as PropType<[IMemberServiceNode]>,
+      type: Object as PropType<IMemberServiceNode[]>,
     },
     columns: {
       type: Array,

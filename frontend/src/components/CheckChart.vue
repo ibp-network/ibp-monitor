@@ -173,6 +173,7 @@ export default defineComponent({
           borderColor: colors[index % colors.length],
           backgroundColor: colors[index % colors.length],
           borderWidth: 1,
+          lineTension: 0.3,
           blineTension: 0.2,
         })
         index++

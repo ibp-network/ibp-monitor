@@ -64,11 +64,11 @@
 
 <script lang="ts">
 import { defineComponent, computed, PropType } from 'vue'
-import { useStore, mapState } from 'vuex'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
 import moment from 'moment'
 import { shortStash } from './utils'
 import { IMember } from './types'
-import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'MemberTable',
@@ -87,7 +87,10 @@ export default defineComponent({
   setup() {
     const store = useStore()
     const router = useRouter()
-    return { store, router }
+    return {
+      store,
+      router,
+    }
   },
   data() {
     return {

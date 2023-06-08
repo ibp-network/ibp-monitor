@@ -14,11 +14,11 @@
           <tbody>
             <tr>
               <th>Name</th>
-              <td>{{ member.name }}</td>
+              <td>{{ member.name || '' }}</td>
             </tr>
             <tr>
               <th>Membership</th>
-              <td>{{ member.membershipLevel.name }}</td>
+              <td>{{ member.membershipLevel?.name }}</td>
             </tr>
             <!-- <tr>
               <th>Status</th>
@@ -75,7 +75,7 @@
       <CheckTable
         v-if="$vuetify.display.width > 599"
         :health-checks="healthChecks"
-        :columns="['id', 'serviceId', 'performance']"
+        :columns="['id', 'serviceId', 'source', 'monitorId', 'performance']"
       ></CheckTable>
       <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
     </v-container>
@@ -83,8 +83,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-import { mapState, useStore } from 'vuex'
+import { defineComponent, ref, computed, onBeforeMount } from 'vue'
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 import moment from 'moment'
 import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
@@ -93,7 +94,6 @@ import NodeTable from './NodeTable.vue'
 import ServiceTable from './ServiceTable.vue'
 import ServiceList from './ServiceList.vue'
 import { IService } from './types'
-import { useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'MemberC',
@@ -113,32 +113,50 @@ export default defineComponent({
   },
   setup(props) {
     const store = useStore()
-    const propTab = props.tab
-    const activeTab = ref(propTab)
     const route = useRoute()
-    return { store, activeTab, route }
-  },
-  computed: {
-    ...mapState(['dateTimeFormat']),
-    ...mapState('service', { services: 'list' }),
-    ...mapState('member', { member: 'model', healthChecks: 'healthChecks', nodes: 'nodes' }),
-    servicesForMember() {
-      return this.services.filter(
-        (service: IService) => service.membershipLevel.id <= this.member.membershipLevelId
+
+    const memberId =route.params.memberId.toString()
+    const member = computed(() => store.state.member.model)
+
+    const dateTimeFormat = computed(() => store.state.dateTimeFormat)
+    const services = computed<IService[]>(() => store.state.service.list)
+    const healthChecks = computed(() => store.state.member.healthChecks)
+    const nodes = computed<any[]>(() => store.state.member.nodes)
+
+    // const propTab = computed(() => route.params.tab?.toString() || props.tab)
+    var activeTab = ref(route.params.tab?.toString() || props.tab)
+
+    const servicesForMember = computed(() => {
+      return services.value.filter(
+        (service: IService) => service.membershipLevel.id <= member.value.membershipLevelId
       )
-    },
-    nodesForMember() {
-      return this.nodes
-    },
+    })
+    const nodesForMember = computed(() => {
+      return nodes.value
+    })
+
+    onBeforeMount(async () => {
+      if (member.value.id !== memberId) {
+        await store.dispatch('member/setModel', memberId)
+        await store.dispatch('member/getChecks', memberId)
+        await store.dispatch('member/getNodes', memberId)
+      } else {
+        await store.dispatch('member/getChecks', member.value.id)
+        await store.dispatch('member/getNodes', member.value.id)
+      }
+    })
+
+    return {
+      dateTimeFormat, member, services, healthChecks, nodes, activeTab, route,
+      servicesForMember,
+      nodesForMember,
+    }
   },
   methods: {
     formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
     },
     moment: moment,
-  },
-  created() {
-    console.debug(this.route.params)
   },
   mounted() {
     this.$nextTick(() => {
@@ -148,12 +166,6 @@ export default defineComponent({
         behavior: 'smooth',
       })
     })
-    if (this.member.id !== this.route.params.memberId) {
-      this.store.dispatch('member/setModel', this.route.params.memberId)
-    }
-    this.store.dispatch('member/getChecks', this.member.id)
-    this.store.dispatch('member/getNodes', this.member.id)
-    this.activeTab = this.route.params.tab?.toString() || 'performance'
   },
 })
 </script>

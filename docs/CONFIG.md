@@ -1,5 +1,18 @@
 # How to configure the monitor
 
+
+## Configuration files
+- `.env` - environment variables
+- `docker/.env` - environment variables for docker-compose
+- `config/config.js` - default configuration
+- `config/config.local.js` - local configuration (not checked in to git)
+
+### bootstrap process
+
+1. The app starts up and runs `import `
+2. reads `config/config.js`
+
+
 1. Copy `config/config.js` to `config/config.local.js`
   Do not modify `config.js`, this could prevent you from pulling updates from GitHub.
 2. Edit `config.local.js` as needed.

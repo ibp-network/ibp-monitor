@@ -26,6 +26,7 @@ const sequelize = new Sequelize(
 )
 
 class DataStore {
+  peerId = undefined
   Chain = undefined
   GeoDnsPool = undefined
   HealthCheck = undefined
@@ -45,6 +46,7 @@ class DataStore {
   constructor(config = {}) {
     console.debug('DataStore()', config)
 
+    this.peerId = config.peerId
     this.pruning = Object.assign(this.pruning, config.pruning)
     // define chain
     const Chain = sequelize.define(chainModel.options.tableName, chainModel.definition, {
@@ -182,7 +184,7 @@ class DataStore {
     Monitor.hasMany(HealthCheck, {
       as: 'healthChecks',
       foreignKey: 'monitorId',
-      onDelete: 'RESTRICT',
+      onDelete: 'CASCADE',
       onUpdate: 'RESTRICT',
     })
     HealthCheck.belongsTo(Monitor, {
@@ -309,6 +311,13 @@ class DataStore {
     // result = await this.Service.destroy({ where: { status: 'stale', updatedAt: { [Op.lt]: marker } } })
     // console.debug('Services.prune: stale', result)
     // TODO prune stale monitors
+    const prunedMonitors = await this.Monitor.destroy({
+      where: { 
+        id: { [Op.notIn]: [this.peerId] },
+        updatedAt: { [Op.lt]: marker.format('YYYY-MM-DD HH:mm:ss') }
+      }
+    })
+    console.debug('prunedMonitors', prunedMonitors)
   }
 }
 
