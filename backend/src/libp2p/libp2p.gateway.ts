@@ -18,6 +18,7 @@ import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string';
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string';
 import { isIPv4, isIPv6 } from 'is-ip';
 import isValidHostname from 'is-valid-hostname';
+import { PublishResult } from '@libp2p/interface-pubsub';
 import { CustomEvent, Message } from '../interface/polyfill.js';
 
 import { ILibp2pOptions } from './libp2p.interfaces.js';
@@ -271,7 +272,7 @@ export class Libp2pGateway implements OnModuleInit {
    * @param topic
    * @param data
    */
-  async publish(topic: string, data: Uint8Array) {
+  async publish(topic: string, data: Uint8Array): Promise<PublishResult> {
     logger.debug('publish', topic, uint8ArrayToString(data));
     if (!this.server.pubsub) {
       logger.warn('pubsub not started??!!');
