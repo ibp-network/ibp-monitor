@@ -1,8 +1,8 @@
 {
-  "name": "nest-typescript-starter",
+  "name": "ibp-monitor-frontend",
   "private": true,
   "version": "0.2.0/dev",
-  "description": "Nest TypeScript starter repository",
+  "description": "IBP Monitor Frontend",
   "license": "MIT",
   "type": "module",
   "scripts": {
