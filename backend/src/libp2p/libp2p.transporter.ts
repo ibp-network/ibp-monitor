@@ -30,6 +30,7 @@ import { toString as uint8ArrayToString } from 'uint8arrays/to-string';
 import { isIPv4, isIPv6 } from 'is-ip';
 import isValidHostname from 'is-valid-hostname';
 import zmq from 'zeromq';
+import { PublishResult } from '@libp2p/interface-pubsub';
 
 import { ILibp2pOptions } from './libp2p.interfaces.js';
 import { Libp2pRpcRequest, Libp2pRpcResponse } from './libp2p.interfaces';
@@ -407,7 +408,7 @@ export class Libp2pServer extends Server implements CustomTransportStrategy {
   /**
    * Publish a message to a topic on the pubsub network.
    */
-  async publishMessage(protocol: string, message: any) {
+  async publishMessage(protocol: string, message: any): Promise<PublishResult> {
     // console.debug('publishMessage', protocol, message);
     logger.debug('publishMessage', protocol, message);
     const res = await this.libp2p.pubsub.publish(
