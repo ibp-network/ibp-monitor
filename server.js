@@ -229,22 +229,32 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   const checkServiceEvents = new QueueEvents('checkService', queueOpts)
   const handleCheckServiceResult = async ({ jobId }) => {
     const job = await Job.fromId(checkServiceQueue, jobId)
-    console.log('handleCheckServiceResult', jobId, job.returnvalue)
+    console.log('handleCheckServiceResult', jobId, JSON.stringify(job.returnvalue))
     if (!job.returnvalue) {
       return
     }
     const { member, service } = job.data
     const result = job.returnvalue
+    // we could get hc for monitor that has not connected yet
+    if (result.monitorId) {
+      let monitor = await ds.Monitor.upsert({ id: result.monitorId, multiaddress: [], status: 'active' }, { fields: ['status'] });
+    }
     // upsert member service node
     if (result.peerId) {
       let memberService = await ds.MemberService.findOne({ where: { serviceId: service.id } })
+      // FIXME: we need to add a memberService from the memnbers.json file
+      if (!memberService) { 
+        console.error('No memberService for', member.id, service.id);
+        return;
+      }
       await ds.MemberServiceNode.upsert({
         peerId: result.peerId,
         serviceId: service.id,
         memberId: member.id,
         memberServiceId: memberService.id,
         name: null,
-      })
+        status: 'active',
+      }, { fields: ['status'] })
     }
     // insert health check
     await ds.HealthCheck.create(result)
@@ -256,6 +266,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
         '/ibp/healthCheck',
         uint8ArrayFromString(JSON.stringify(result))
       )
+      // debug recipient list
+      console.debug(res)
     }
   }
   checkServiceQueue.on('completed', handleCheckServiceResult)
