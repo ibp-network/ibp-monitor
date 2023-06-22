@@ -142,6 +142,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     connectionEncryption: [new noise()],
     connectionManager: {
       autoDial: true,
+      minConnections: 3, // does this force a reconnect?
+      maxConnections: 10,
     },
     peerDiscovery: [
       mdns({
