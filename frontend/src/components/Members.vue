@@ -12,6 +12,7 @@
     </v-toolbar>
 
     <MemberList v-if="showList" :list="list" class="d-inline s-sm-none"></MemberList>
+
     <MemberTable
       v-if="!showList"
       :list="list"

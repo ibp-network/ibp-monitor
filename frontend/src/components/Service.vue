@@ -4,48 +4,47 @@
       <v-btn icon to="/service"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
     </v-toolbar>
-
-    <table class="table is-fullwidth" v-if="service.chain">
-      <tbody>
-        <tr>
-          <th>Name</th>
-          <td>{{ service.chain.name }}</td>
-        </tr>
-        <tr>
-          <th>Level Required</th>
-          <td>{{ service.membershipLevelId }}</td>
-        </tr>
-        <tr>
-          <th>Status</th>
-          <td>{{ service.status }}</td>
-        </tr>
-        <tr v-if="service.chain.relayChainId">
-          <th>Parachain</th>
-          <td>
-            Yes (on:
-            <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
-            >)
-          </td>
-        </tr>
-        <tr v-if="service.status === 'active'">
-          <th>Polkadot.js</th>
-          <td>
-            <div v-for="geoDnsPool in geoDnsPools" v-bind:key="geoDnsPool.id">
-              <a
-                :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
-                target="_blank"
-              >
-                wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{
-                  service.chain.id
-                }}
-              </a>
-              (level: {{ service.membershipLevelId }})
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
+        <table class="table is-fullwidth table-container is-hoverable" v-if="service.chain">
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>{{ service.chain.name }}</td>
+            </tr>
+            <tr>
+              <th>Level Required</th>
+              <td>{{ service.membershipLevelId }}</td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>{{ service.status }}</td>
+            </tr>
+            <tr v-if="service.chain.relayChainId">
+              <th>Parachain</th>
+              <td>
+                Yes (on:
+                <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
+                >)
+              </td>
+            </tr>
+            <tr v-if="service.status === 'active'">
+              <th>Polkadot.js</th>
+              <td>
+                <div v-for="geoDnsPool in geoDnsPools" v-bind:key="geoDnsPool.id">
+                  <a
+                    :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
+                    target="_blank"
+                  >
+                    wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{
+                      service.chain.id
+                    }}
+                  </a>
+                  (level: {{ service.membershipLevelId }})
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>  
+    
     <v-tabs v-model="activeTab">
       <v-tab value="performance">Performance</v-tab>
       <v-tab value="members">Providers</v-tab>
@@ -87,6 +86,7 @@
       <!-- </v-window-item>
     </v-window> -->
     </v-container>
+    
   </v-container>
 </template>
 

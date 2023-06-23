@@ -1,5 +1,7 @@
 <template>
-  <table class="table is-fullwidth">
+  <div class="columns">
+  <div class="column is-8-desktop is-offset-2-desktop">
+  <table class="table is-fullwidth table-container is-hoverable">
     <thead>
       <th v-if="columns.includes('logo')"></th>
       <th v-if="columns.includes('name')">Name</th>
@@ -30,8 +32,60 @@
           </div>
         </td>
       </tr>
+
+      <!-- for testing only, remove when done -->
+      <tr 
+        v-for="n in 30"
+        v-bind:key="n"
+        style="cursor: pointer"
+       
+        >
+        <!-- Logo -->
+        <td>
+            <v-avatar size="x-small">
+              <v-img src="."></v-img>
+            </v-avatar>
+          </td>
+          <!-- memberID -->
+          <!-- 
+          <td>
+            
+          </td>
+          -->
+          <!-- Name -->
+          <td style="cursor: pointer">
+            Brigehub Kusama
+          </td>
+          <!-- Endpoint -->
+          <td>Bridgehub-Kusama</td>
+          
+          <!--- MAKE SURE TO ADD ->> :class="service.status" AS CLASS -->
+          <td :class="`status service.status`">
+            planned
+          </td>
+          
+          <td class="text-center">
+            <div>
+              <a
+                v-for="n in 2"
+
+              >
+                IBP.{{ n }}
+              </a>
+           </div>
+          </td>
+          <!--
+          <td>1</td>
+          <td>1</td>
+          -->
+        </tr>
+      <!-- for testing only, remove when done -->
+
+
     </tbody>
   </table>
+  </div>
+  </div>
 </template>
 
 <script lang="ts">

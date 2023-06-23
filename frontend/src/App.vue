@@ -17,8 +17,8 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { useStore } from 'vuex'
-import NavBar from './components/NavBar.vue'
-import Footer from './components/Footer.vue'
+import NavBar  from './components/NavBar.vue'
+import Footer  from './components/Footer.vue'
 import SideNav from './components/SideNav.vue'
 // import HelloWorld from '@/components/HelloWorld.vue'
 

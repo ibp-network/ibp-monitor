@@ -1,5 +1,7 @@
 <template>
-  <table class="table is-fullwidth">
+  <div class="columns">
+  <div class="column is-8-desktop is-offset-2-desktop">
+  <table class="table is-fullwidth table-container is-hoverable">
     <thead>
       <th v-if="columns.includes('logo')"></th>
       <th v-if="columns.includes('memberId')">ID</th>
@@ -16,11 +18,12 @@
       <th v-if="columns.includes('updatedAt')">Last Seen (UTC)</th>
       <th v-if="columns.includes('createdAt')">Discovered</th>
     </thead>
+
     <tbody>
       <tr
         v-for="member in list"
         v-bind:key="member.id"
-        style="cursor: pointer"
+        style="cursor: pointer;"
         @click="gotoMember(member.id)"
       >
         <!-- Logo -->
@@ -58,8 +61,57 @@
         <td v-if="columns.includes('updatedAt')">{{ formatDateTime(member.updatedAt) }}</td>
         <td v-if="columns.includes('createdAt')">{{ formatDateTime(member.createdAt) }}</td>
       </tr>
+
+      <!-- for testing only, remove when done -->
+        <tr 
+        v-for="n in 30"
+        v-bind:key="n"
+        style="cursor: pointer"
+       
+        >
+        <!-- Logo -->
+        <td>
+            <v-avatar size="x-small">
+              <v-img src="."></v-img>
+            </v-avatar>
+          </td>
+          <!-- memberID -->
+          <!-- 
+          <td>
+            
+          </td>
+          -->
+          <!-- Name -->
+          <td style="cursor: pointer">
+            Stake Plus
+          </td>
+          <!-- Region -->
+          <td>North America</td>
+          <!-- 
+          <td class="text-center">
+            7
+          </td>
+          -->
+          <td>Pro</td>
+          <td>
+            7
+          </td>
+          
+          <td class="text-center">
+            2022/03/21
+          </td>
+          <!--
+          <td>1</td>
+          <td>1</td>
+          -->
+        </tr>
+      <!-- for testing only, remove when done -->
+
+
     </tbody>
   </table>
+</div>
+</div>
 </template>
 
 <script lang="ts">
@@ -116,5 +168,6 @@ export default defineComponent({
   created() {
     console.debug('MemberTable', 'created')
   },
+
 })
 </script>

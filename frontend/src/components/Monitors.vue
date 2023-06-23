@@ -9,8 +9,11 @@
       <v-btn icon><v-icon size="small">mdi-monitor-eye</v-icon></v-btn>
       <v-toolbar-title>Monitors</v-toolbar-title>
     </v-toolbar>
-
-    <MonitorTable :monitors="list" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
+    <div class="columns">
+      <div class="column is-8-desktop is-offset-2-desktop">
+        <MonitorTable :monitors="list" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
+      </div>
+    </div>
   </v-container>
 </template>
 

@@ -1,27 +1,6 @@
 <template>
   <v-container fluid>
-    <div class="columns">
-
-      <div class="column ">
-        <div class="columns">
-          <HomeCard title="Members"  :data= memberCount    link="/member" />
-          <HomeCard title="Services" :data= serviceCount   link="/service" />
-        </div>
-
-        <div class="columns">
-          <HomeCard title="Monitors" :data= monitorCount   link="/monitor" />
-          <HomeCard title="Checks"   :data= checkCount     link="/healthCheck" />
-        </div>
-      </div>
-
-        <div class="column">
-          <iframe class="is-full" style="height: 100%; width: 100%;" title="IBP Coverage Map" :src="mapPath" ></iframe>
-        </div>
-        
-
-    </div>
-
-      <!--
+    <div class="columns ">
       <div class="column is-one-quarter is-offset-one-quarter-desktop" style="cursor: pointer" @click="router.push('/member')">
         <div class="card has-text-centered">
           <div class="card-header ibp-grey">
@@ -36,8 +15,7 @@
           </div>
         </div>
       </div>
-      
-    
+
       <div class="column is-one-quarter" style="cursor: pointer">
         
         <div class="card ">
@@ -71,7 +49,6 @@
 
         </div>
       </div>
-      
     </div>
     <div class="columns">
       <div class="column is-one-quarter is-offset-one-quarter-desktop" style="cursor: pointer" @click="router.push('/monitor')">
@@ -110,8 +87,7 @@
           </div>
         </div>
       </div>
-      -->
-    
+    </div>
   </v-container>
 </template>
 
@@ -128,18 +104,12 @@ export default defineComponent({
     const router = useRouter()
     return { router }
   },
-  data(){
-    return{
-      mapPath: window.location.origin + '/node-map.html'
-    };
-  },
   computed: {
     ...mapState(['apiVersion', 'memberCount', 'monitorCount', 'serviceCount', 'checkCount']),
   },
   components: {
-    HomeCard
-  },
 
+  }
 })
 </script>
 

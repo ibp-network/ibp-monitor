@@ -16,7 +16,7 @@ import { createVuetify } from 'vuetify'
 export default createVuetify({
   ssr: true,
   theme: {
-    // dark: true,
+    defaultTheme: 'dark',
     themes: {
       dark: {
         dark: true,
