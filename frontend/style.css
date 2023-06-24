@@ -9,6 +9,13 @@
     --red: #FF4F3E;
     --yellow: #F0B132;
 }
+.v-toolbar{
+    margin-bottom: 5rem;
+}
+
+footer > .v-toolbar{
+    margin-bottom: 0;
+}
 .ibp-red{
     color: var(--red);
 }
@@ -47,10 +54,15 @@ p.ibp-white{
     font-weight: 500;
     font-size: 0.825rem;
 }
-.table td{
+.table td, .table th{
     border-color: var(--light-grey);
     padding: 1em 1em;
     margin: 1rem;
+}
+.table th{
+    color: var(--white);
+    font-weight: bold;
+ 
 }
 
 .table thead th{
@@ -59,7 +71,7 @@ p.ibp-white{
     font-weight: bold;
 }
 
-.table-container, tr, tbody, table{
+.table-container, tr, tbody, table, .table{
     background-color: var(--grey);
     
 }
@@ -73,7 +85,7 @@ p.ibp-white{
     border: solid var(--light-grey) 1px;
     border-radius: 0.5rem;
     border-collapse: separate !important;
-    margin-top: 5rem;
+  
     box-shadow: 0 2px 2px rgba(0,0,0,0.12), 
               0 4px 4px rgba(0,0,0,0.12), 
               0 8px 8px rgba(0,0,0,0.12), 
@@ -81,12 +93,17 @@ p.ibp-white{
               0 32px 32px rgba(0,0,0,0.12);
 }
 
+
+
 .table{
     background-color: var(--grey);
     padding: 1rem 3rem 1rem 3rem;
 }
 
-
+.is-sticky{
+    position: -webkit-sticky;
+    position: sticky;
+}
 th {
     position: -webkit-sticky;
     position: sticky;
@@ -97,10 +114,10 @@ th {
 
   }
 
-td > div > a, td > a{
+td > div > a, td > a, a.link{
     color: var(--blue);
 }
-td > div > a:hover, td > a:hover{
+td > div > a:hover, td > a:hover, a.link:hover{
     color: var(--blue);
     text-decoration:underline;
 }
@@ -154,6 +171,10 @@ ul.pagination-list > .button.is-white{
     background-color: transparent;
     color: var(--white);
   
+}
+.chart-container{
+    background-color: var(--white);
+    padding: 1rem;
 }
 /* TEMP REMOVE */
 .v-overlay__content, .v-overlay__scrim{

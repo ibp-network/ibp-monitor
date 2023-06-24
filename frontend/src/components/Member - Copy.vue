@@ -8,9 +8,9 @@
       </v-btn>
     </v-toolbar>
 
-   
-      <div class="offset-1">
-        <table density="compact" class="table table-container is-sticky">
+    <v-row>
+      <v-col cols="8">
+        <table density="compact" class="table is-bordered">
           <tbody>
             <tr>
               <th>Name</th>
@@ -34,27 +34,21 @@
             </tr>
           </tbody>
         </table>
- 
-      <!--
+      </v-col>
       <v-col cols="4" fill-height class="text-center">
         <v-avatar size="96">
-          
           <v-img :src="member.logo" width="96px" height="96px"></v-img>
-          
         </v-avatar>
-        
       </v-col>
-      -->
-    
-    
-      <v-tabs v-model="activeTab">
-        <v-tab value="performance">Performance</v-tab>
-        <v-tab value="services">Provides</v-tab>
-        <v-tab value="nodes">Nodes</v-tab>
-        <v-tab value="checks">Healthchecks</v-tab>
-      </v-tabs>
+    </v-row>
 
-    
+    <v-tabs v-model="activeTab">
+      <v-tab value="performance">Performance</v-tab>
+      <v-tab value="services">Provides</v-tab>
+      <v-tab value="nodes">Nodes</v-tab>
+      <v-tab value="checks">Healthchecks</v-tab>
+    </v-tabs>
+
     <v-container v-show="activeTab === 'performance'">
       <CheckChart :health-checks="healthChecks" :group-by="'serviceId'"></CheckChart>
     </v-container>
@@ -85,10 +79,7 @@
       ></CheckTable>
       <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
     </v-container>
-    
-  </div>
   </v-container>
-  
 </template>
 
 <script lang="ts">

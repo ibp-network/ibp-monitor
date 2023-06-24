@@ -18,7 +18,7 @@
         </td>
         <td v-if="columns.includes('name')" style="cursor: pointer">{{ service.chain.name }}</td>
         <td v-if="columns.includes('endpoint')">{{ service.chain.id }}</td>
-        <td v-if="columns.includes('status')">{{ service.status }}</td>
+        <td v-if="columns.includes('status')" :class="`status service.status`">{{ service.status }}</td>
         <td v-if="columns.includes('pjs')" class="text-center">
           <div>
             <a
@@ -33,33 +33,25 @@
         </td>
       </tr>
 
-      <!-- for testing only, remove when done -->
+      <!-- for testing only, remove when done 
       <tr 
         v-for="n in 30"
         v-bind:key="n"
         style="cursor: pointer"
        
         >
-        <!-- Logo -->
         <td>
             <v-avatar size="x-small">
               <v-img src="."></v-img>
             </v-avatar>
           </td>
-          <!-- memberID -->
-          <!-- 
-          <td>
-            
-          </td>
-          -->
-          <!-- Name -->
+
           <td style="cursor: pointer">
             Brigehub Kusama
           </td>
-          <!-- Endpoint -->
+   
           <td>Bridgehub-Kusama</td>
           
-          <!--- MAKE SURE TO ADD ->> :class="service.status" AS CLASS -->
           <td :class="`status service.status`">
             planned
           </td>
@@ -74,12 +66,9 @@
               </a>
            </div>
           </td>
-          <!--
-          <td>1</td>
-          <td>1</td>
-          -->
+
         </tr>
-      <!-- for testing only, remove when done -->
+      for testing only, remove when done -->
 
 
     </tbody>

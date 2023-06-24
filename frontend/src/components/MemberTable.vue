@@ -62,36 +62,26 @@
         <td v-if="columns.includes('createdAt')">{{ formatDateTime(member.createdAt) }}</td>
       </tr>
 
-      <!-- for testing only, remove when done -->
+      <!-- for testing only, remove when done 
         <tr 
         v-for="n in 30"
         v-bind:key="n"
         style="cursor: pointer"
        
         >
-        <!-- Logo -->
+ 
         <td>
             <v-avatar size="x-small">
               <v-img src="."></v-img>
             </v-avatar>
           </td>
-          <!-- memberID -->
-          <!-- 
-          <td>
-            
-          </td>
-          -->
-          <!-- Name -->
+ 
           <td style="cursor: pointer">
             Stake Plus
           </td>
-          <!-- Region -->
+        
           <td>North America</td>
-          <!-- 
-          <td class="text-center">
-            7
-          </td>
-          -->
+
           <td>Pro</td>
           <td>
             7
@@ -100,12 +90,9 @@
           <td class="text-center">
             2022/03/21
           </td>
-          <!--
-          <td>1</td>
-          <td>1</td>
-          -->
+
         </tr>
-      <!-- for testing only, remove when done -->
+      for testing only, remove when done -->
 
 
     </tbody>

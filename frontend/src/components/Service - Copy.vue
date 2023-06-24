@@ -1,11 +1,10 @@
 <template>
-  <v-container fluid class="pa-0 ma-0 ">
+  <v-container fluid class="pa-0 ma-0">
     <v-toolbar>
       <v-btn icon to="/service"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
     </v-toolbar>
-    <div class="offset-1">
-        <table class="table table-container is-hoverable" v-if="service.chain">
+        <table class="table is-fullwidth table-container is-hoverable" v-if="service.chain">
           <tbody>
             <tr>
               <th>Name</th>
@@ -19,7 +18,7 @@
               <th>Status</th>
               <td>{{ service.status }}</td>
             </tr>
-            <tr>
+            <tr v-if="service.chain.relayChainId">
               <th>Parachain</th>
               <td>
                 Yes (on:
@@ -45,8 +44,7 @@
               </td>
             </tr>
           </tbody>
-        </table> 
-
+        </table>  
     
     <v-tabs v-model="activeTab">
       <v-tab value="performance">Performance</v-tab>
@@ -92,8 +90,7 @@
       <!-- </v-window-item>
     </v-window> -->
     </v-container>
-  </div>
-
+    
   </v-container>
 </template>
 

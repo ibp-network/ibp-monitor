@@ -15,7 +15,7 @@
         <th v-if="columns.includes('serviceId')" class="has-text-centered">Service</th>
         <th v-if="columns.includes('memberId')" class="has-text-centered">Member</th>
         <th v-if="columns.includes('monitorId')" class="has-text-centered">Monitor</th>
-        <th v-if="columns.includes('source')" class="has-text-centered">Source</th>
+        <th v-if="columns.includes('source')" >Source</th>
         <th v-if="columns.includes('version')" class="has-text-centered">Version</th>
         <th v-if="columns.includes('performance')" class="has-text-right">
           <span class="d-none d-md-inline">Performance</span>
@@ -53,19 +53,23 @@
           <td v-if="columns.includes('source')">{{ hc.source }}</td>
           <td v-if="columns.includes('version')">{{ hc.record?.version || 'unknown' }}</td>
           <td v-if="columns.includes('performance')" class="has-text-right">
-            {{ hc.record?.performance?.toFixed(4) }}
+            
+            <p v-if="hc.record?.performance?.toFixed(4) >= 150" class="has-text-right ibp-red">{{ hc.record?.performance?.toFixed(4) }}</p>
+            <p v-if="hc.record?.performance?.toFixed(4) < 150 && hc.record?.performance?.toFixed(4) > 100" 
+              class="has-text-right ibp-yellow">{{ hc.record?.performance?.toFixed(4) }}</p>
+            <p v-if="hc.record?.performance?.toFixed(4) <= 100" class="has-text-right ibp-green">{{ hc.record?.performance?.toFixed(4) }}</p>
+
           </td>
           <td>{{ formatDateTime(hc.createdAt) }}</td>
         </tr>
 
-        <!-- TESTING ONLY REMOVE AFTER -->
+        <!-- TESTING ONLY REMOVE AFTER
         <tr v-for="n in 1">
           <td :class="`has-text-centered`">
           </td>
           <td>
             <router-link :to="`/healthCheck/262701`">262701</router-link>
           </td>
-          <!-- <td><a href="/peer/<%= hc.peerId %> "><%= shortStash(hc.peerId) %></a></td> -->
           <td>
             <router-link :to="`/service/262701`">westmint</router-link>
           </td>
@@ -74,11 +78,9 @@
           </td>
           <td v-if="columns.includes('monitorId')">
             <router-link :to="`/monitor/`">	12D3Ko...QkBLMT</router-link>
-            <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: hc.monitorId, localMonitorId }); -%> -->
           </td>
           <td >check</td>
           <td >0.9.39-1-298b4aefe1b	</td>
-          <!-- conditional render based on ping (perhaps theres a better way to do it)-->
           <td v-if="testPing >= 150" class="has-text-right ibp-red">
             {{ testPing }}
           </td>
@@ -93,7 +95,7 @@
           <td>09/06/2023 03:01:06</td>
         </tr>
 
-        <!-- ./TESTING ONLY REMOVE AFTER-->
+        ./TESTING ONLY REMOVE AFTER-->
       </tbody>
       <Loading :loading="loading"></Loading>
     </table>
