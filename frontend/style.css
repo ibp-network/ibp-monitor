@@ -176,7 +176,27 @@ ul.pagination-list > .button.is-white{
     background-color: var(--white);
     padding: 1rem;
 }
-/* TEMP REMOVE */
-.v-overlay__content, .v-overlay__scrim{
-    display: none !important;
+
+.service-name > div{
+    color: var(--white);
+    font-family: 'Inter';
 }
+
+.status-inner .status{
+    background-color: var(--grey);
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
+}
+.no-data{
+    background-color: var(--light-grey);
+}
+
+.error{
+    background-color: var(--red);
+}
+
+.success{
+    background-color: var(--green);
+}
+
+
