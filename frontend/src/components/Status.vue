@@ -15,7 +15,7 @@
           <div class="service">
             <div class="service-name">
               <img :src="service.chain.logoUrl" v-if="service.chain.logoUrl" />
-              <div>{{ service.chain.name }}</div>
+              <div style="color: #f4f4f4;">{{ service.chain.name }}</div>
             </div>
             <div class="service-status-container">
               <div class="service-status-slot" v-for="hourTimestamp in getHourTimestamps()">
