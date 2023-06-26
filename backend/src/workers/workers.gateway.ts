@@ -3,6 +3,7 @@ import { Inject, Logger } from '@nestjs/common';
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import {
   MessageBody,
+  OnGatewayConnection,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -80,10 +81,10 @@ interface JobResultResponse {
     origin: '*',
   },
 })
-export class WorkersGateway {
+export class WorkersGateway implements OnGatewayConnection {
   private readonly logger = new Logger('WorkersGateway');
   private workersService: WorkersService;
-  protected workers: Map<string, Socket> = new Map();
+  protected clients: Map<string, Socket> = new Map();
   protected jobs: Map<string, any> = new Map();
 
   constructor(
@@ -149,10 +150,15 @@ export class WorkersGateway {
   @WebSocketServer()
   server: Server;
 
-  handleConnection(client: Socket, ...args: any[]) {
-    // console.log('handleConnection', client.id, args);
+  /**
+   * 
+   * @param client 
+   * @param args 
+   * @returns void
+   */
+  handleConnection(client: Socket, ...args: any[]): void {
     this.logger.debug('handleConnection', client.id); // , client.handshake.query);
-    // TODO check if client is allowed to connect
+    // check if client is allowed to connect
     const { apiKey, workerId, capabilities = [] } = client.handshake.query;
     if (apiKey !== config.workers.apiKey) {
       this.logger.debug('handleConnection: invalid apiKey', apiKey);
@@ -164,18 +170,16 @@ export class WorkersGateway {
         `handleConnection from worker ${workerId}`,
         capabilities,
       );
+      // let the service handle application logic
       this.workersService.handleConnection(client);
-      this.workers.set(client.id, client);
-      // client.emit('jobs', [
-      //   { name: 'ping', params: {} },
-      //   { name: 'ping', params: {} },
-      // ]);
+      this.clients.set(client.id, client);
     }
   }
 
-  handleDisconnect(client: any) {
+  handleDisconnect(client: any): void {
     this.logger.debug('handleDisconnect', client);
-    if (this.workers.delete(client.id)) {
+    if (this.clients.delete(client.id)) {
+      // let the service handle application logic
       this.workersService.handleDisconnect(client);
       this.logger.debug('worker disconnected', client.id);
     }
@@ -208,6 +212,16 @@ export class WorkersGateway {
   //   return data;
   // }
 
+  sendToClient(clientId: string, event: string, data: any) {
+    this.logger.debug(`sendToWoker: ${event}`, JSON.stringify(data));
+    const worker = this.clients.get(clientId);
+    if (worker) {
+      worker.emit(event, data);
+    } else {
+      this.logger.warn(`sendToClient: client ${clientId} not found`);
+    }
+  }
+
   /**
    * Send event to all workers
    * @param event 
@@ -221,7 +235,7 @@ export class WorkersGateway {
       this.logger.debug('jobs', jobs);
       jobs.forEach((job) => {
         const { name, params } = job;
-        this.workers.forEach((worker) => {
+        this.clients.forEach((worker) => {
           const { workerId, capabilities = [] } = worker.handshake.query;
           if (capabilities?.includes(name)) {
             const heard = worker.emit(event, [job]);

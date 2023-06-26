@@ -6,6 +6,8 @@ import {
   Sequelize,
   BelongsTo,
 } from 'sequelize-typescript';
+// import { EventEmitter2 } from '@nestjs/event-emitter';
+import { emitter } from './event-emitter.js';
 import { Monitor } from './monitor.js';
 import { Service } from './service.js';
 import { Member } from './member.js';
@@ -19,6 +21,18 @@ import { MemberServiceNode } from './member-service-node.js';
       exclude: [],
     },
     order: [['id', 'DESC']],
+  },
+  hooks: {
+    afterCreate: (instance, options) => {
+      // console.debug('healthCheck_created', instance);
+      emitter.emit('healthCheck_created', instance);
+    },
+    afterUpdate: (instance, options) => {
+      emitter.emit('healthCheck_updated', instance);
+    },
+    afterDestroy: (instance, options) => {
+      emitter.emit('healthCheck_deleted', instance);
+    },
   },
 })
 export class HealthCheck extends Model {
