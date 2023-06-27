@@ -51,41 +51,44 @@ export async function checkService(job) {
   const { subdomain, member, service, monitorId } = job.data
   console.debug('[worker] checkService', subdomain, member.id, service.id)
 
-  // const service = services[domain]
   const domain = `${subdomain}.dotters.network`
   const endpoint = `wss://${domain}/${service.chainId}`
-  //const service_address = member.services_address
-  //console.debug('address', service_address)
 
   var timeout = null
   var result
   var peerId = ''
-  // TODO different types of service? http / substrate / ...?
-  try {
+
+  async function retry(fn, retriesLeft = 3, interval = 1000) {
+    try {
+      return await fn();
+    } catch (error) {
+      // typically a timeout error
+      job.log('attempt', retriesLeft)
+      job.log(error)
+      if (retriesLeft) {
+        // Wait interval milliseconds before next try
+        await new Promise(resolve => setTimeout(resolve, interval));
+        return retry(fn, retriesLeft - 1, interval);
+      } else {
+        throw new Error('Max retries exceeded');
+      }
+    }
+  }
+
+  const performCheck = async () => {
     job.log(`checkService: ${domain}, ${member.id}, ${service.id}`)
 
     // amend DNS
     await setDNS(domain, member.serviceIpAddress)
-
-    // catch & throw promise reject()
-    // const provider = new WsProvider(service.serviceUrl, false, {}, 10 * 1000) // 10 seconds timeout
     const provider = new WsProvider(endpoint, false, {}, 10 * 1000) // 10 seconds timeout
     // any error is 'out of context' in the handler and does not stop the `await provider.isReady`
     // provider.on('connected | disconnected | error')
     job.log('connecting to provider...')
     // https://github.com/polkadot-js/api/issues/5249#issue-1392411072
     await new Promise((resolve, reject) => {
-      // provider.on('disconnected', () => {
-      //   job.log('provider disconnected...')
-      //   console.log('provider disconnected')
-      //   resolve()
-      // })
       provider.on('error', async (err) => {
         job.log('== got providerError for ', service.serviceUrl)
         job.log(err.toString())
-        // result = handleProviderError(err, service, peerId)
-        // await provider.disconnect()
-        // throw new Error(err)
         reject(err)
       })
       provider.on('connected', () => {
@@ -113,16 +116,15 @@ export async function checkService(job) {
     await api.isReady
     job.log('api is ready...')
 
-    // handle Timeout 30 seconds
+    // handle Timeout n seconds
     timeout = setTimeout(async () => {
-      // throw new TimeoutException('function timeout, 30 seconds')
       console.debug('[worker] TimeoutException')
       job.log('TimeoutException')
       await api.disconnect()
       await provider.disconnect()
       await job.discard()
-      return { error: 'TimeoutException' }
-    }, 70 * 1000) // job should timeout based on jobOpts anyway
+      throw new Error('TimeoutException')
+    }, 70 * 1000)
 
     job.log('getting stats from provider / api...')
 
@@ -143,7 +145,7 @@ export async function checkService(job) {
     // const blockDrift = syncState.currentBlock.toNumber() - finalizedBlock
     const version = await api.rpc.system.version()
     const timing = end - start
-    // console.debug(health.toString())
+
     result = {
       // our peerId will be added by the receiver of the /ibp/healthCheck messate
       monitorId,
@@ -172,18 +174,19 @@ export async function checkService(job) {
       },
     }
     await provider.disconnect()
-    // not here, we'll do it in the app-server
-    // await this.datastore.Service.update({ status: 'online' }, { where: { serviceUrl: service.serviceUrl } })
-    // save healthCheck in storage
-    // console.debug('checkService() done 1')
+  }
+
+  try {
+    // retry 3 times, wait 5 seconds between each try
+    await retry(performCheck, 3, 5 * 1000);
+
   } catch (err) {
-    console.warn('[worker] WE GOT AN ERROR --------------')
+    console.warn('[worker] WE GOT AN ERROR AFTER RETRIES --------------')
     console.error(err)
-    job.log('WE GOT AN ERROR --------------')
+    job.log('WE GOT AN ERROR AFTER RETRIES --------------')
     job.log(err)
     job.log(err.toString())
-    // mark the service errorCount
-    // result = await this.handleGenericError(err, service, peerId)
+
     result = {
       // our peerId will be added by the receiver of the /ibp/healthCheck message
       monitorId,
