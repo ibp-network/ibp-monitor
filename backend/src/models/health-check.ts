@@ -26,14 +26,14 @@ import { MemberServiceNode } from './member-service-node.js';
     afterCreate: (instance, options) => {
       // console.debug('healthCheck_created', instance);
       const data = instance.toJSON();
+      // createdAt: { fn: 'now', args: [] },
       data.createdAt = new Date(); // instance.getDataValue('createdAt');
-      console.log("AFTERCREATE");
-      console.log(data);
+      // console.log(data);
       emitter.emit('healthCheck_created', data);
     },
     afterUpdate: (instance, options) => {
       const data = instance.toJSON();
-      data.updatedAt = instance.getDataValue('updatedAt');
+      data.updatedAt = new Date(); // instance.getDataValue('updatedAt');
       emitter.emit('healthCheck_updated', data);
     },
     afterDestroy: (instance, options) => {

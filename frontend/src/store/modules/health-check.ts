@@ -7,6 +7,7 @@ export interface IState {
   loading: boolean
   offset: number
   limit: number
+  where: Record<string, any>
   pagination: any
   healthCheck: any
   // healthChecks: any[]
@@ -19,6 +20,7 @@ const healthCheck: Module<IState, IRootState> = {
     loading: false,
     offset: 0,
     limit: 15,
+    where: {},
     healthCheck: {},
     pagination: { pages: [] },
     // healthChecks: []
@@ -39,22 +41,37 @@ const healthCheck: Module<IState, IRootState> = {
     SET_LIMIT(state: IState, value: number) {
       state.limit = value
     },
+    SET_WHERE(state: IState, value: any) {
+      state.where = value
+    },
     SET_HEALTH_CHECK(state: IState, value: any) {
       console.debug('SET_HEALTH_CHECK()', value)
       state.healthCheck = value
     },
   },
   actions: {
-    async getList({ state, commit, dispatch }: any, { offset, limit }: any) {
+    // async init({ commit }) {
+    //   let res = await axios.get('/api/service')
+    // },
+    async getList({ state, commit, dispatch }: any, { offset, limit, where }: any) {
       if (offset) {
         commit('SET_OFFSET', offset)
       }
       if (limit) {
         commit('SET_LIMIT', limit)
       }
+      if (where) {
+        commit('SET_WHERE', where)
+      }
       commit('SET_LOADING', true)
       const res = await axios.get('/api/healthCheck', {
-        params: { offset: offset || state.offset, limit: limit || state.limit },
+        params: {
+          offset: offset || state.offset,
+          limit: limit || state.limit,
+          memberId: state.where.memberId || '',
+          serviceId: state.where.serviceId || '',
+          source: state.where.source || '',
+        },
       })
       commit('SET_LIST', res.data.models)
       commit('SET_LOADING', false)
