@@ -1,4 +1,10 @@
 import fs from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PeerId } from '@libp2p/interface-peer-id';
@@ -16,7 +22,7 @@ export class AppService {
     private readonly config: ConfigService,
     private readonly libp2pService: Libp2pService,
   ) {
-    const pkg = JSON.parse(fs.readFileSync('../package.json', 'utf8'));
+    const pkg = JSON.parse(fs.readFileSync(__dirname + '/../../package.json', 'utf8'));
     this.logger.log(`Package version: ${pkg.version}`);
     this.version = pkg.version;
   }
