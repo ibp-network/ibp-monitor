@@ -25,10 +25,16 @@ import { MemberServiceNode } from './member-service-node.js';
   hooks: {
     afterCreate: (instance, options) => {
       // console.debug('healthCheck_created', instance);
-      emitter.emit('healthCheck_created', instance);
+      const data = instance.toJSON();
+      data.createdAt = new Date(); // instance.getDataValue('createdAt');
+      console.log("AFTERCREATE");
+      console.log(data);
+      emitter.emit('healthCheck_created', data);
     },
     afterUpdate: (instance, options) => {
-      emitter.emit('healthCheck_updated', instance);
+      const data = instance.toJSON();
+      data.updatedAt = instance.getDataValue('updatedAt');
+      emitter.emit('healthCheck_updated', data);
     },
     afterDestroy: (instance, options) => {
       emitter.emit('healthCheck_deleted', instance);

@@ -17,7 +17,7 @@ import config from '../config/config.js';
 import { AppModule } from './app.module.js';
 
 const logger = new Logger('Main');
-const HTTP_PORT = config.httpPort || 4000;
+const HTTP_PORT = config.httpPort || 30001;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
