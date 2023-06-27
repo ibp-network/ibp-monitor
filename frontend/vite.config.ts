@@ -32,17 +32,19 @@ export default defineConfig({
     },
     extensions: ['.js', '.json', '.jsx', '.mjs', '.ts', '.tsx', '.vue'],
   },
+
+  // F O R   D E V E L O P M E N T   O N L Y  !!
+  // For production the frontend is compiled to static html and served by the backend
   server: {
-    port: Number(process.env.HTTP_PORT || 30001),
+    // allow inbound network connections
+    host: '0.0.0.0',
+    port: 30002, // Number(process.env.HTTP_PORT || 30001),
     // https://vitejs.dev/config/server-options.html#server-proxy
     // Note: this will only be used in development when the frontend is served manually
-    // You will need a backend to connect to, so configure that in ../config/config.js
+    // You will need a backend to connect to, so match this to ../backend/config/config.local.js HTTP_PORT
     proxy: {
-      '/api': `http://localhost:${process.env.API_PORT || 4000}`,
-      // '/api': {
-      //   target: 'http://localhost/30002',
-      //   changeOrigin: true
-      // }
+      '/api': 'http://localhost:30001',
     },
   },
+
 })
