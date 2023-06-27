@@ -68,6 +68,7 @@ const healthCheck: Module<IState, IRootState> = {
         params: {
           offset: offset || state.offset,
           limit: limit || state.limit,
+          status: state.where.status || '',
           memberId: state.where.memberId || '',
           serviceId: state.where.serviceId || '',
           source: state.where.source || '',

@@ -9,7 +9,10 @@
 
     <v-row>
       <v-col>
-        <v-select density="compact" v-model="serviceIdsel" label="Service" :items="serviceIds" multiple></v-select>       
+        <v-select density="compact" v-model="statusSel" label="Status" :items="statusIds" multiple></v-select>
+      </v-col>
+      <v-col>
+        <v-select density="compact" v-model="serviceIdsel" label="Service" :items="serviceIds" multiple></v-select>
       </v-col>
       <v-col>
         <v-select density="compact" v-model="memberIdsel" label="Member" :items="memberIds" multiple></v-select>
@@ -100,8 +103,8 @@ export default defineComponent({
   },
   data() {
     return {
-      // members: ['metaspan', 'gatotech', 'stakeplus'],
-      // services: ['polkadot-rpc', 'kusama-rpc', 'westend-rpc'],
+      statusIds: ['success', 'warning', 'error'],
+      statusSel: [],
       memberIdsel: [],
       serviceIdsel: [],
       source: '',
@@ -112,21 +115,25 @@ export default defineComponent({
     }
   },
   watch: {
+    statusSel(newVal: string) {
+      const params = { offset: this.offset, limit: this.limit, where: { status: newVal, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
+      this.store.dispatch('healthCheck/getList', params)
+    },
     memberIdsel(newVal: string) {
-      const params = { offset: this.offset, limit: this.limit, where: { memberId: newVal, serviceId: this.serviceIdsel, source: this.source } }
+      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: newVal, serviceId: this.serviceIdsel, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
     serviceIdsel(newVal: string) {
-      const params = { offset: this.offset, limit: this.limit, where: { memberId: this.memberIdsel, serviceId: newVal, source: this.source } }
+      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: newVal, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
     source(newVal: string) {
-      const params = { offset: this.offset, limit: this.limit, where: { memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: newVal } }
+      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: newVal } }
       this.store.dispatch('healthCheck/getList', params)
     },
     itemsPerPage(newVal: number) {
       console.debug('watch.itemsPerPage', newVal)
-      const params = { offset: 0, limit: newVal, where: { memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
+      const params = { offset: 0, limit: newVal, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
   },

@@ -25,6 +25,7 @@ export class HealthChecksController {
       ? parseInt(request.query.limit.toString())
       : 10;
     const where = {}
+    if (request.query.status) where['status'] = request.query.status
     if (request.query.serviceId) where['serviceId'] = request.query.serviceId
     if (request.query.memberId) where['memberId'] = request.query.memberId
     if (request.query.source) where['source'] = request.query.source
