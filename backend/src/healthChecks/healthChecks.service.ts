@@ -21,7 +21,7 @@ export class HealthChecksService {
 
   async findAll(query: any): Promise<any> {
     const { where = {}, offset = 0, limit = 10 } = query;
-    const count = await this.hcRepository.count();
+    const count = await this.hcRepository.count({ where });
     // const limit = 10;
     // const offset = 0;
     const localMonitorId = this.getPeerId();
