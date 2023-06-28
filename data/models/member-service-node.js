@@ -15,10 +15,6 @@ export const memberServiceNodeModel = {
       type: DataTypes.STRING(128),
       allowNull: false,
     },
-    memberServiceId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
     name: {
       type: DataTypes.STRING(128),
       allowNull: true,

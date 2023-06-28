@@ -253,7 +253,6 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
         peerId: result.peerId,
         serviceId: service.id,
         memberId: member.id,
-        memberServiceId: memberService.id,
         name: null,
         status: 'active',
       }, { fields: ['status'] })

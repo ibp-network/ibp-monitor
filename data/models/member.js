@@ -23,6 +23,10 @@ export const memberModel = {
       type: DataTypes.STRING(64),
       allowNull: false,
     },
+    monitorUrl: {
+      type: DataTypes.STRING(256),
+      allowNull: true,
+    },
     membershipType: {
       type: DataTypes.ENUM('hobbyist', 'professional'),
       allowNull: false,
