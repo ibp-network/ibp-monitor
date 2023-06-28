@@ -129,12 +129,10 @@ export class WorkersService {
     // for each subscription to this event
     // send the data to the client
     // this.logger.debug('handleHealthCheckCreated', data);
-    // if(!this.subscriptions['healthCheck']) {
-      this.subscriptions['healthCheck']?.forEach((id) => {
-        // this.workers.get(id).emit('healthCheck', data);
-        this.workersGateway.sendToClient(id, 'healthCheck', data);
-      });
-    // }
+    this.subscriptions['healthCheck']?.forEach((id) => {
+      // this.workers.get(id).emit('healthCheck', data);
+      this.workersGateway.sendToClient(id, 'healthCheck', data);
+    });
   }
 
   // Event managed in TasksService

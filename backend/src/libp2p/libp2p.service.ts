@@ -150,7 +150,7 @@ export class Libp2pService implements OnModuleInit {
                 peerId,
                 serviceId,
                 memberId,
-                memberServiceId: memberService.id,
+                // memberServiceId: memberService.id,
               };
               await this.sequelize.models.MemberServiceNode.create(node);
             }

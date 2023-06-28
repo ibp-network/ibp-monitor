@@ -18,6 +18,7 @@ export interface IStatus {
 export interface IState {
   services: any[]
   members: any[]
+  loading: boolean
   status: {
     [serviceId: string]: {
       [hourTimestamp: number]: {
@@ -32,6 +33,7 @@ const status: Module<IState, IRootState> = {
   state: {
     services: [],
     members: [],
+    loading: false,
     status: {},
   },
   mutations: {
@@ -44,13 +46,24 @@ const status: Module<IState, IRootState> = {
     SET_STATUS(state: IState, status: {}) {
       state.status = status
     },
+    SET_LOADING(state: IState, loading: boolean) {
+      state.loading = loading
+    },
   },
   actions: {
-    async getData({ commit, dispatch }: any) {
+    async getData({ commit }: any) {
+      // a small delay before showing the loading indicator
+      const timeout = setTimeout(() => {
+        commit('SET_LOADING', true)
+      }, 500)
+      // testing: wait for 2 seconds
+      // await new Promise(resolve => setTimeout(resolve, 2000))
       const statusData: IState = (await axios.get('/api/status')).data
       commit('SET_SERVICES', statusData.services)
       commit('SET_MEMBERS', statusData.members)
       commit('SET_STATUS', statusData.status)
+      if(timeout) clearTimeout(timeout)
+      commit('SET_LOADING', false)
     },
   },
 }

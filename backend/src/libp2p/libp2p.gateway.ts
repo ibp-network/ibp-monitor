@@ -233,7 +233,7 @@ export class Libp2pGateway implements OnModuleInit {
       logger.debug(
         'pubsub:message',
         evt.detail.topic.toString(),
-        evt.detail.data.toString(),
+        uint8ArrayToString(evt.detail.data),
       );
       // await mh.handleMessage(evt);
       // await this.handlePubsubMessage(evt);
