@@ -38,6 +38,9 @@ export class Member extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   membershipLevelTimestamp: number;
 
+  @Column({ type: DataType.STRING(132), allowNull: true })
+  monitorUrl: string;
+
   @Column({ type: DataType.ENUM('active', 'pending'), allowNull: false })
   status: string;
 

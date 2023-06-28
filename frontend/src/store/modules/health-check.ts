@@ -63,7 +63,12 @@ const healthCheck: Module<IState, IRootState> = {
       if (where) {
         commit('SET_WHERE', where)
       }
-      commit('SET_LOADING', true)
+      // a small delay before showing the loading indicator
+      const timeout = setTimeout(() => {
+        commit('SET_LOADING', true)
+      }, 500)
+      // testing: wait for 2 seconds
+      // await new Promise(resolve => setTimeout(resolve, 2000))
       const res = await axios.get('/api/healthCheck', {
         params: {
           offset: offset || state.offset,
@@ -74,6 +79,7 @@ const healthCheck: Module<IState, IRootState> = {
           source: state.where.source || '',
         },
       })
+      if(timeout) clearTimeout(timeout)
       commit('SET_LIST', res.data.models)
       commit('SET_LOADING', false)
       commit('SET_PAGINATION', res.data.pagination)
