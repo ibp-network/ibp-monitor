@@ -53,7 +53,7 @@ export const memberModel = {
         'north_america',
         'oceania'
       ),
-      allowNull: false,
+      allowNull: true,
     },
     latitude: {
       type: DataTypes.FLOAT,
