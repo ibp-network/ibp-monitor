@@ -2,19 +2,15 @@ import { DataTypes, Sequelize } from 'sequelize'
 
 export const memberServiceModel = {
   definition: {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      allowNull: false,
-      primaryKey: true,
-    },
     memberId: {
       type: DataTypes.STRING(128),
       allowNull: false,
+      primaryKey: true,
     },
     serviceId: {
       type: DataTypes.STRING(128),
       allowNull: false,
+      primaryKey: true,
     },
     serviceUrl: {
       type: DataTypes.STRING(256),

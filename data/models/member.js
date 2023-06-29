@@ -23,6 +23,10 @@ export const memberModel = {
       type: DataTypes.STRING(64),
       allowNull: false,
     },
+    monitorUrl: {
+      type: DataTypes.STRING(256),
+      allowNull: true,
+    },
     membershipType: {
       type: DataTypes.ENUM('hobbyist', 'professional'),
       allowNull: false,
@@ -41,6 +45,7 @@ export const memberModel = {
     },
     region: {
       type: DataTypes.ENUM(
+        '',
         'africa',
         'asia',
         'central_america',
@@ -49,7 +54,7 @@ export const memberModel = {
         'north_america',
         'oceania'
       ),
-      allowNull: false,
+      allowNull: true,
     },
     latitude: {
       type: DataTypes.FLOAT,

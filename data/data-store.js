@@ -9,10 +9,7 @@ import { memberServiceModel } from '../data/models/member-service.js'
 import { memberServiceNodeModel } from '../data/models/member-service-node.js'
 import { monitorModel } from '../data/models/monitor.js'
 import { healthCheckModel } from '../data/models/health-check.js'
-import { logModel } from '../data/models/log.js'
 import { geoDnsPoolModel } from '../data/models/geo-dns-pool.js'
-
-// import { Umzug, SequelizeStorage } from 'umzug'
 
 import { config } from '../config/config.js'
 import { config as configLocal } from '../config/config.local.js'
@@ -29,7 +26,6 @@ class DataStore {
   Chain = undefined
   GeoDnsPool = undefined
   HealthCheck = undefined
-  Log = undefined
   Member = undefined
   MembershipLevel = undefined
   MemberService = undefined
@@ -157,16 +153,23 @@ class DataStore {
       as: 'member',
       foreignKey: 'memberId',
     })
+    // This is a hack to get around the fact that sequelize does not support composite foreign keys
     MemberService.hasMany(MemberServiceNode, {
-      as: 'nodes',
-      foreignKey: 'memberServiceId',
+      as: 'memberNodes',
+      foreignKey: 'memberId',
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
     })
-    MemberServiceNode.belongsTo(MemberService, {
-      as: 'memberService',
-      foreignKey: 'memberServiceId',
+    MemberService.hasMany(MemberServiceNode, {
+      as: 'serviceNodes',
+      foreignKey: 'serviceId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'RESTRICT',
     })
+    // MemberServiceNode.belongsTo(MemberService, {
+    //   as: 'memberService',
+    //   foreignKey: 'memberServiceId',
+    // })
 
     // define monitor
     const Monitor = sequelize.define('member_service_node', monitorModel.definition, {
@@ -220,29 +223,6 @@ class DataStore {
       foreignKey: 'peerId',
     })
 
-    // define log
-    const Log = sequelize.define('log', logModel.definition, { ...logModel.options, sequelize })
-    MemberServiceNode.hasMany(Log, {
-      as: 'logs',
-      foreignKey: 'peerId',
-      onDelete: 'RESTRICT',
-      onUpdate: 'RESTRICT',
-    })
-    Log.belongsTo(MemberServiceNode, {
-      as: 'node',
-      foreignKey: 'peerId',
-    })
-    MemberService.hasMany(Log, {
-      as: 'logs',
-      foreignKey: 'memberServiceId',
-      onDelete: 'RESTRICT',
-      onUpdate: 'RESTRICT',
-    })
-    Log.belongsTo(MemberService, {
-      as: 'memberService',
-      foreignKey: 'memberServiceId',
-    })
-
     const GeoDnsPool = sequelize.define('geo_dns_pool', geoDnsPoolModel.definition, {
       ...geoDnsPoolModel.options,
       sequelize,
@@ -251,7 +231,6 @@ class DataStore {
     this.Chain = Chain
     this.GeoDnsPool = GeoDnsPool
     this.HealthCheck = HealthCheck
-    this.Log = Log
     this.Member = Member
     this.MembershipLevel = MembershipLevel
     this.MemberService = MemberService
@@ -261,6 +240,7 @@ class DataStore {
   }
 
   /*
+  // migrations are handled by ./data/migrate.js - see the readme for more info
   async migrate() {
     const umzug = new Umzug({
       migrations: { glob: './data/migrations/*.js' },
@@ -277,13 +257,74 @@ class DataStore {
     return await sequelize.close()
   }
 
-  async log(level = 'info', data) {
-    const model = {
-      level,
-      data,
+  async readMemberJson() {
+    // get updated members.json
+    const membersResponse = await axios.get(
+      'https://raw.githubusercontent.com/ibp-network/config/main/members.json'
+    )
+    if (membersResponse.data) {
+      for (const [memberId, data] of Object.entries(membersResponse.data.members)) {
+        console.log('Upserting member: ', memberId)
+        // member
+        const {
+          name,
+          website,
+          logo,
+          membership,
+          current_level,
+          active,
+          level_timestamp,
+          services_address,
+          endpoints,
+          monitor_url,
+          region,
+          latitude,
+          longitude,
+          payments,
+        } = data
+        if (current_level == 0) {
+          continue
+        }
+        const record = {
+          id: memberId,
+          name,
+          websiteUrl: website,
+          logoUrl: logo,
+          membershipType: membership,
+          membershipLevelId: Number(current_level),
+          membershipLevelTimestamp: Number(level_timestamp[current_level]),
+          status: Number(active) == 1 ? 'active' : 'pending',
+          serviceIpAddress: services_address,
+          monitorUrl: monitor_url,
+          region,
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+        }
+        await ds.Member.upsert(record)
+        // member endpoints
+        if (data.endpoints) {
+          for (const [chainId, serviceUrl] of Object.entries(data.endpoints)) {
+            const service = await ds.Service.findOne({ where: { chainId, type: 'rpc' } })
+            const memberService = {
+              memberId,
+              serviceId: service.id,
+              serviceUrl,
+              status: 'active',
+            }
+            await ds.MemberService.upsert(memberService)
+          }
+        }
+      }
     }
-    return this.Log.create(model)
   }
+
+  // async log(level = 'info', data) {
+  //   const model = {
+  //     level,
+  //     data,
+  //   }
+  //   return this.Log.create(model)
+  // }
 
   async prune() {
     console.debug('DataStore.prune()', this.pruning)
