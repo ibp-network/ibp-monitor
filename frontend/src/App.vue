@@ -2,15 +2,17 @@
   <v-app>
     <SideNav></SideNav>
     <NavBar></NavBar>
-    <v-main>
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in" :duration="150">
-          <component :is="Component" />
-        </transition>
-      </router-view>
-      <!-- <HelloWorld /> -->
+    <div class="content-wrapper">
+      <v-main>
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in" :duration="150">
+            <component :is="Component" />
+          </transition>
+        </router-view>
+        <!-- <HelloWorld /> -->
+      </v-main>
       <Footer></Footer>
-    </v-main>
+    </div>
   </v-app>
 </template>
 
@@ -34,3 +36,16 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+Footer {
+  max-height: 120px;
+  margin-top: auto;
+}
+</style>
