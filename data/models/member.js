@@ -45,6 +45,7 @@ export const memberModel = {
     },
     region: {
       type: DataTypes.ENUM(
+        '',
         'africa',
         'asia',
         'central_america',
