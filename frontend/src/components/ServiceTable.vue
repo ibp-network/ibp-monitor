@@ -5,7 +5,7 @@
       <th v-if="columns.includes('name')">Name</th>
       <th v-if="columns.includes('endpoint')">Endpoint</th>
       <th v-if="columns.includes('status')">Status</th>
-      <th v-if="columns.includes('pjs')" class="text-center">P.JS</th>
+      <th v-if="columns.includes('pjs')" class="text-center">polkadot.js</th>
     </thead>
     <tbody>
       <tr v-for="service in services" v-bind:key="service.id" @click="gotoService(service.id)">
@@ -19,14 +19,15 @@
         <td v-if="columns.includes('status')">{{ service.status }}</td>
         <td v-if="columns.includes('pjs')" class="text-center">
           <div>
-            <a
+            <v-btn flat size="small"
               v-for="geoDnsPool in geoDnsPools"
               v-bind:key="geoDnsPool.id"
               :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
               target="_blank"
+              @click.stop="openPJS"
             >
               IBP.{{ geoDnsPool.id }}
-            </a>
+            </v-btn>
           </div>
         </td>
       </tr>
@@ -65,6 +66,10 @@ export default defineComponent({
     ...mapState('geoDnsPool', { geoDnsPools: 'list' }),
   },
   methods: {
+    openPJS(event: any) {
+      console.debug('openPJS')
+      window.open(event.currentTarget.href, '_blank');
+    },
     gotoService(serviceUrl: string) {
       console.debug('gotoService', serviceUrl)
       this.router.push(`/service/${encodeURIComponent(serviceUrl)}`)

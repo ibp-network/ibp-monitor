@@ -1,4 +1,5 @@
 import { Injectable, Inject, Logger, OnModuleInit } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { ModuleRef } from '@nestjs/core';
 import { Sequelize } from 'sequelize-typescript';
 
@@ -6,6 +7,7 @@ import { Sequelize } from 'sequelize-typescript';
 // import { Libp2p, createLibp2p } from 'libp2p';
 import { PeerId } from '@libp2p/interface-peer-id';
 import { PeerInfo } from '@libp2p/interface-peer-info';
+import { Multiaddr } from '@multiformats/multiaddr';
 // import { bootstrap } from '@libp2p/bootstrap';
 // import { mdns } from '@libp2p/mdns';
 // import { tcp } from '@libp2p/tcp';
@@ -15,14 +17,14 @@ import { PeerInfo } from '@libp2p/interface-peer-info';
 // import { gossipsub } from '@chainsafe/libp2p-gossipsub';
 // import { pubsubPeerDiscovery } from '@libp2p/pubsub-peer-discovery';
 // import { createEd25519PeerId, createFromJSON } from '@libp2p/peer-id-factory';
-// import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string';
+import { fromString as uint8ArrayFromString } from 'uint8arrays/from-string';
 import { toString as uint8ArrayToString } from 'uint8arrays/to-string';
 // import { isIPv4, isIPv6 } from 'is-ip';
 // import isValidHostname from 'is-valid-hostname';
 import { CustomEvent, Message } from '../interface/polyfill.js';
 
 // import { Libp2pServer } from './libp2p.transporter.js';
-// import config from '../../config/config.js';
+import config from '../../config/config.js';
 import { Libp2pGateway } from './libp2p.gateway.js';
 // import { ILibp2pOptions } from './libp2p.interfaces.js';
 
@@ -52,6 +54,19 @@ export class Libp2pService implements OnModuleInit {
     this.libp2pGateway = this.moduleRef.get<Libp2pGateway>(Libp2pGateway);
   }
 
+  async setPeer(peerId: PeerId, addresses: Multiaddr[]) {
+    this.peerId = peerId;
+    await this.sequelize.models.Monitor.upsert({
+      id: peerId.toString(),
+      multiaddress: addresses,
+      meta: {
+        name: config.name,
+      },
+      status: 'active',
+      updatedAt: new Date(),
+    });
+  }
+
   getPeerId() {
     // return this.peerId;
     return this.libp2pGateway.getPeerId();
@@ -62,6 +77,19 @@ export class Libp2pService implements OnModuleInit {
   // }
   async getPeers() {
     return this.libp2pGateway.getPeers();
+  }
+
+  /**
+   * announce the monitor's metadata to the libp2p network via pubsub
+   * managed by tasks.task-service.ts
+   */
+  @OnEvent('announceMeta')
+  async announceMeta() {
+    logger.debug('announce');
+    const meta = JSON.stringify({
+      name: config.name,
+    });
+    return await this.libp2pGateway.publish('/ibp/announce', uint8ArrayFromString(meta));
   }
 
   /**
@@ -77,10 +105,14 @@ export class Libp2pService implements OnModuleInit {
   async handlePeerDiscovery(peerInfo: CustomEvent<PeerInfo>) {
     logger.debug(`handlePeerDiscovery' ${peerInfo.detail.id.toString()}`);
     if (peerInfo.detail && peerInfo.detail.id && peerInfo.detail.multiaddrs) {
-      await this.sequelize.models.Monitor.upsert({
-        id: peerInfo.detail.id.toString(),
-        multiaddress: peerInfo.detail.multiaddrs,
-      });
+      try {
+        await this.sequelize.models.Monitor.upsert({
+          id: peerInfo.detail.id.toString(),
+          multiaddress: peerInfo.detail.multiaddrs,
+        });
+      } catch (err) {
+        logger.error(err);
+      }
     }
   }
 
@@ -88,6 +120,10 @@ export class Libp2pService implements OnModuleInit {
     logger.debug(
       `handlePeerConnect' ${connection.detail.remotePeer?.toString()}`,
     );
+    await this.sequelize.models.Monitor.upsert({
+      id: connection.detail.remotePeer.toString(),
+      updatedAt: new Date(),
+    }, { fields: ['updatedAt'] });
   }
 
   async handlePeerDisconnect(connection) {
@@ -109,6 +145,14 @@ export class Libp2pService implements OnModuleInit {
     const monitorId = evt.detail.from.toString();
 
     switch (evt.detail.topic) {
+      // a peer has announced itself
+      case '/ibp/announce':
+        logger.debug(`/ibp/announce from ${monitorId}`);
+        await this.sequelize.models.Monitor.upsert({
+          id: monitorId,
+          status: 'active',
+          meta: record,
+        });
       // a peer has published some results
       case '/ibp/healthCheck':
         const { memberId, serviceId, peerId } = record;
@@ -123,6 +167,7 @@ export class Libp2pService implements OnModuleInit {
           source: 'gossip',
         };
         // make sure the monitor exists - it's possible to get a healthCheck before a monitor publishes its peerId
+        logger.debug('upsert monitor', monitorId);
         await this.sequelize.models.Monitor.upsert({
           id: monitorId,
           // multiaddress: [],
@@ -159,6 +204,7 @@ export class Libp2pService implements OnModuleInit {
             break;
           }
         }
+        logger.debug('upsert health check', memberId, serviceId, peerId);
         const hc = (await this.sequelize.models.HealthCheck.create(
           model,
         )) as HealthCheck;

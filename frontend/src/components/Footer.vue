@@ -2,7 +2,7 @@
   <v-footer
     class="mt-5 bg-grey-lighten-4 text-black text-center d-flex flex-column text-body-2">
     <div>&nbsp;</div>
-    <v-container fluid class="ma-0 pa-0" style="border-top: 1px grey;">
+    <v-container class="ma-0 pa-0" style="border-top: 1px grey;">
       <v-row width="100%">
       <v-col class="text-left">
         <ul>

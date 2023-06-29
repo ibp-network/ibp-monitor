@@ -10,15 +10,19 @@
     <tbody>
       <tr v-for="monitor in monitors" v-bind:key="monitor.id">
         <td v-if="columns.includes('id')" style="cursor: pointer">
-          <a @click="gotoMonitor(monitor.id)">{{ shortStash(monitor.id) }}</a>
+          <a @click="gotoMonitor(monitor.id)">
+            {{ monitor.meta?.name ? monitor.meta.name : shortStash(monitor.id) }}
+          </a>
           <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%> -->
           <sup><IsLocalMonitor :monitorId="monitor.id"></IsLocalMonitor></sup>
         </td>
         <td>
           {{ connection(monitor.id) }}
         </td>
-        <td>{{ formatDateTime(monitor.updatedAt) }}</td>
-        <td>{{ formatDateTime(monitor.createdAt) }}</td>
+        <!-- <td>{{ formatDateTime(monitor.updatedAt) }}</td> -->
+        <td>{{ moment(monitor.updatedAt).fromNow() }}</td>
+        <!-- <td>{{ formatDateTime(monitor.createdAt) }}</td> -->
+        <td>{{ moment(monitor.createdAt).fromNow() }}</td>
       </tr>
     </tbody>
   </table>

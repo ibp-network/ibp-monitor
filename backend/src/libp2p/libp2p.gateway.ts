@@ -4,7 +4,6 @@ import { Injectable, Inject, Logger, OnModuleInit } from '@nestjs/common';
 import fs from 'fs';
 import { Libp2p, createLibp2p } from 'libp2p';
 import { PeerId } from '@libp2p/interface-peer-id';
-import { PeerInfo } from '@libp2p/interface-peer-info';
 import { bootstrap } from '@libp2p/bootstrap';
 import { mdns } from '@libp2p/mdns';
 import { tcp } from '@libp2p/tcp';
@@ -193,13 +192,8 @@ export class Libp2pGateway implements OnModuleInit {
     this.started = true;
     logger.debug('libp2p started', libp2p.getMultiaddrs());
 
-    // TODO: where do we upsert our own peerId?
-    // // update our monitor record with computed multiAddrs
-    // await this.sequelize.models.Monitor.upsert({
-    //   id: this.peerId.toString(),
-    //   name: 'local',
-    //   multiaddress: libp2p.getMultiaddrs(),
-    // });
+    // upsert our own peerId?
+    await this.libp2pService.setPeer(this.peerId, libp2p.getMultiaddrs());
 
     /*
      * Handle peer connections =================================================

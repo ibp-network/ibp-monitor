@@ -41,10 +41,12 @@ export class HomeController {
     const checkCount = await this.sequelize.models.HealthCheck.count();
     const version = this.configService.get<string>('app.version');
     logger.log('home', { memberCount, monitorCount, serviceCount, checkCount, version });
+    // sanitize config
+    const { name, dateTimeFormat, httpPort, libp2p, updateInterval, pruning } = config
     return {
       version,
       localMonitorId: this.appService.getPeerId(),
-      config: { dateTimeFormat: config.dateTimeFormat },
+      config: { name, dateTimeFormat, httpPort, libp2p, updateInterval, pruning },
       memberCount,
       monitorCount,
       serviceCount,
