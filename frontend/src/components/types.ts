@@ -58,6 +58,7 @@ export interface IMonitor {
   id: string
   addresses: string[]
   status: string
+  meta: any
   createdAt: number
   updatedAt: number
 }

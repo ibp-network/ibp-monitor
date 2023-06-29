@@ -35,7 +35,7 @@ export class ServicesService {
 
   async getHealthChecks(serviceId: string): Promise<any> {
     // return await this.healthChecksService.findAll({ where: { serviceId }, order: [['createdAt', 'DESC']], limit: 50 });
-    return await this.sequelize.models.HealthCheck.findAll({ where: { serviceId }, order: [['createdAt', 'DESC']], limit: 50 });
+    return await this.sequelize.models.HealthCheck.findAll({ where: { serviceId }, order: [['createdAt', 'DESC']], limit: 150 });
   }
 
   async getMemberServiceNodes(serviceId: string): Promise<any[]> {

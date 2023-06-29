@@ -108,7 +108,7 @@ export class MembersController {
   async memberChecks(@Req() request: Request): Promise<any> {
     console.log('memberChecks', request.params);
     const memberId = request.params.memberId;
-    const healthChecks = await this.sequelize.models.HealthCheck.findAll({ where: { memberId }, order: [['createdAt', 'DESC']], limit: 50 });
+    const healthChecks = await this.sequelize.models.HealthCheck.findAll({ where: { memberId }, order: [['createdAt', 'DESC']], limit: 150 });
     return { healthChecks };
   }
 

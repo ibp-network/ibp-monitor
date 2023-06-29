@@ -34,6 +34,12 @@ export class Monitor extends Model {
   })
   status: string;
   @Column({
+    type: DataType.JSON,
+    allowNull: true,
+    defaultValue: {},
+  })
+  meta: JSON;
+  @Column({
     type: DataType.DATE,
     allowNull: false,
     defaultValue: Sequelize.fn('now'),

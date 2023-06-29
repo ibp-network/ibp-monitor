@@ -2,9 +2,9 @@
   <v-container fluid class="pa-0 ma-0">
     <v-toolbar>
       <v-btn icon to="/member"><v-icon>mdi-chevron-left</v-icon></v-btn>
-      <v-toolbar-title>{{ member.name || 'Member' }}</v-toolbar-title>
+      <v-toolbar-title>Member: {{ member.name || 'Member' }}</v-toolbar-title>
       <v-btn icon>
-        <v-img :src="member.logo" width="32px" height="32px"></v-img>
+        <v-img :src="member.logoUrl" width="32px" height="32px"></v-img>
       </v-btn>
     </v-toolbar>
 
@@ -18,7 +18,8 @@
             </tr>
             <tr>
               <th>Membership</th>
-              <td>{{ member.membershipLevel?.name }}</td>
+              <td>{{ member.membershipType }}
+                {{ member.membershipLevel?.id }}</td>
             </tr>
             <!-- <tr>
               <th>Status</th>

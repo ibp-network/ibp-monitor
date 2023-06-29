@@ -2,7 +2,10 @@
   <v-container fluid class="pa-0 ma-0">
     <v-toolbar>
       <v-btn icon to="/service"><v-icon>mdi-chevron-left</v-icon></v-btn>
-      <v-toolbar-title>{{ service.name || 'Service' }}</v-toolbar-title>
+      <v-toolbar-title>Service: {{ service.chain?.name || 'Service' }}</v-toolbar-title>
+      <v-btn icon>
+        <v-img :src="service.chain?.logoUrl || ''" width="32px" height="32px"></v-img>
+      </v-btn>
     </v-toolbar>
 
     <table class="table is-fullwidth" v-if="service.chain">
@@ -51,23 +54,18 @@
       <v-tab value="members">Providers</v-tab>
       <v-tab value="nodes">Nodes</v-tab>
       <v-tab value="checks">HealthChecks</v-tab>
+      <!-- <v-tab value="parachains" v-show="!service.chain?.relayChainId">Parachains</v-tab> -->
     </v-tabs>
 
-    <!-- <v-window v-model="activeTab" direction="false">
-    <v-window-item value="performance"> -->
     <v-container v-show="activeTab === 'performance'">
       <a :href="`/api/metrics/${service.id}`" target="_blank">
         Prometheus &nbsp;<img src="/image/prometheus-logo-orange.svg" alt="" width="18px" />
       </a>
       <CheckChart :healthChecks="service.healthChecks" :group-by="'memberId'"></CheckChart>
     </v-container>
-    <!-- </v-window-item>
-    <v-window-item value="members"> -->
     <v-container v-show="activeTab === 'members'">
       <MemberList :list="membersForService"></MemberList>
     </v-container>
-    <!-- </v-window-item>
-    <v-window-item value="checks"> -->
     <v-container v-show="activeTab === 'nodes'">
       <NodeTable
         :nodes="service.nodes"
@@ -84,8 +82,9 @@
         v-if="$vuetify.display.width < 600"
         :healthChecks="service.healthChecks"
       ></CheckList>
-      <!-- </v-window-item>
-    </v-window> -->
+    </v-container>
+    <v-container v-show="activeTab === 'parachains'">
+      TODO
     </v-container>
   </v-container>
 </template>
@@ -96,13 +95,13 @@ import { mapState, useStore } from 'vuex'
 import { useRoute, useRouter } from 'vue-router'
 import moment from 'moment'
 import MemberList from './MemberList.vue'
-import MemberTable from './MemberTable.vue'
+// import MemberTable from './MemberTable.vue'
 import CheckChart from './CheckChart.vue'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
 import NodeTable from './NodeTable.vue'
-import MonitorTable from './MonitorTable.vue'
-import MonitorList from './MonitorList.vue'
+// import MonitorTable from './MonitorTable.vue'
+// import MonitorList from './MonitorList.vue'
 import { IMember } from './types'
 
 export default defineComponent({
@@ -113,9 +112,9 @@ export default defineComponent({
     CheckList,
     NodeTable,
     MemberList,
-    MemberTable,
-    MonitorTable,
-    MonitorList,
+    // MemberTable,
+    // MonitorTable,
+    // MonitorList,
   },
   setup() {
     const store = useStore()
@@ -141,8 +140,8 @@ export default defineComponent({
   },
   methods: {
     gotoService(serviceId: string) {
-      this.store.dispatch('service/setService', serviceId)
-      this.router.push(`/service/${serviceId}`)
+      this.store.dispatch('service/setService', `${serviceId}-rpc`)
+      this.router.push(`/service/${serviceId}-rpc`)
     },
     formatDateTime(value: any) {
       return moment(value).format(this.dateTimeFormat)
