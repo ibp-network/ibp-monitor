@@ -4,6 +4,7 @@ const P2P_PORT = process.env.P2P_PORT || 30000; // 0 for development/debugging, 
 const HTTP_PORT = process.env.HTTP_PORT || 30001;
 
 export default {
+  name: '🌐 metaspan-dev',
   dateTimeFormat: 'DD/MM/YYYY HH:mm',
   sequelize: {
     database: 'ibp_monitor',
@@ -23,7 +24,8 @@ export default {
     tcpPort: P2P_PORT,
     allowedTopics: [
       '/ibp',
-      '/ibp/services',
+      '/ibp/announce', // announce new peer with metadata
+      '/ibp/services', // @deprecated
       '/ibp/healthCheck',
       '/ibp/signedMessage',
     ],

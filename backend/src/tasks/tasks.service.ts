@@ -31,6 +31,15 @@ export class TasksService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  // Announce the monitor's metadata to the libp2p network via pubsub
+  // @Interval(5 * 1000) // every 30 seconds
+  @Interval(config.updateInterval)
+  async announceMeta() {
+    this.logger.debug('announceMeta...');
+    // handler in ../workers/workers.service.ts
+    this.eventEmitter.emit('announceMeta');
+  }
+
   // @Cron('0 */5 * * * *') // every 5 minutes
   // Trigger message for workers to run jobs
   // @Interval(30 * 1000) // every 30 seconds

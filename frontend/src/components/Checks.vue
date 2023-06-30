@@ -3,7 +3,24 @@
     <v-toolbar>
       <v-btn icon><v-icon size="small">mdi-pulse</v-icon></v-btn>
       <v-toolbar-title>Checks</v-toolbar-title>
+      <v-toolbar-items>
+      </v-toolbar-items>
     </v-toolbar>
+
+    <v-row>
+      <v-col>
+        <v-select density="compact" v-model="statusSel" label="Status" :items="statusIds" multiple></v-select>
+      </v-col>
+      <v-col>
+        <v-select density="compact" v-model="serviceIdsel" label="Service" :items="serviceIds" multiple></v-select>
+      </v-col>
+      <v-col>
+        <v-select density="compact" v-model="memberIdsel" label="Member" :items="memberIds" multiple></v-select>
+      </v-col>
+      <v-col>
+        <v-select density="compact" v-model="source" label="Source" :items="['', 'gossip', 'check']"></v-select>
+      </v-col>
+    </v-row>
 
     <CheckTable
       v-if="$vuetify.display.width > 599"
@@ -74,19 +91,49 @@ export default defineComponent({
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('healthCheck', ['list', 'loading', 'pagination']),
+    ...mapState('healthCheck', ['list', 'loading', 'pagination', 'where']),
+    ...mapState('service', { services: 'list' }),
+    ...mapState('member', { members: 'list' }),
+    serviceIds() {
+      return this.services.map((s: any) => s.id)
+    },
+    memberIds() {
+      return this.members.map((s: any) => s.id)
+    },
   },
   data() {
     return {
+      statusIds: ['success', 'warning', 'error'],
+      statusSel: [],
+      memberIdsel: [],
+      serviceIdsel: [],
+      source: '',
       currentPage: 1,
       itemsPerPage: 10,
-      limit: 10,
+      offset: 0,
+      limit: 15,
     }
   },
   watch: {
+    statusSel(newVal: string) {
+      const params = { offset: this.offset, limit: this.limit, where: { status: newVal, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
+      this.store.dispatch('healthCheck/getList', params)
+    },
+    memberIdsel(newVal: string) {
+      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: newVal, serviceId: this.serviceIdsel, source: this.source } }
+      this.store.dispatch('healthCheck/getList', params)
+    },
+    serviceIdsel(newVal: string) {
+      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: newVal, source: this.source } }
+      this.store.dispatch('healthCheck/getList', params)
+    },
+    source(newVal: string) {
+      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: newVal } }
+      this.store.dispatch('healthCheck/getList', params)
+    },
     itemsPerPage(newVal: number) {
       console.debug('watch.itemsPerPage', newVal)
-      const params = { offset: 0, limit: newVal }
+      const params = { offset: 0, limit: newVal, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
   },
@@ -123,6 +170,9 @@ export default defineComponent({
   },
   mounted() {
     this.itemsPerPage = this.store.state.healthCheck.limit
+    this.memberIdsel = this.store.state.healthCheck.where.memberId
+    this.serviceIdsel = this.store.state.healthCheck.where.serviceId
+    this.source = this.store.state.healthCheck.where.source
     this.store.dispatch('healthCheck/getList', {})
   },
 })

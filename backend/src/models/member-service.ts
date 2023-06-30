@@ -9,25 +9,27 @@ import {
 } from 'sequelize-typescript';
 import { Member } from './member.js';
 import { MemberServiceNode } from './member-service-node.js';
-import { Log } from './log.js';
+// import { Log } from './log.js';
 
 @Table({ tableName: 'member_service' })
 export class MemberService extends Model {
-  @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  })
-  id: number;
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   autoIncrement: true,
+  //   allowNull: false,
+  //   primaryKey: true,
+  // })
+  // id: number;
   @Column({
     type: DataType.STRING(128),
     allowNull: false,
+    primaryKey: true,
   })
   memberId: string;
   @Column({
     type: DataType.STRING(128),
     allowNull: false,
+    primaryKey: true,
   })
   @Column
   serviceId: string;
@@ -60,16 +62,16 @@ export class MemberService extends Model {
     foreignKey: 'memberId',
   })
   member: Model<Member>;
-  @HasMany(() => MemberServiceNode, {
-    foreignKey: 'memberServiceId',
-    onDelete: 'RESTRICT',
-    onUpdate: 'RESTRICT',
-  })
+  // @HasMany(() => MemberServiceNode, {
+  //   foreignKey: 'memberServiceId',
+  //   onDelete: 'RESTRICT',
+  //   onUpdate: 'RESTRICT',
+  // })
   nodes: Model<MemberServiceNode>[];
-  @HasMany(() => Log, {
-    foreignKey: 'memberServiceId',
-    onDelete: 'RESTRICT',
-    onUpdate: 'RESTRICT',
-  })
-  logs: Model<Log>[];
+  // @HasMany(() => Log, {
+  //   foreignKey: 'memberServiceId',
+  //   onDelete: 'RESTRICT',
+  //   onUpdate: 'RESTRICT',
+  // })
+  // logs: Model<Log>[];
 }

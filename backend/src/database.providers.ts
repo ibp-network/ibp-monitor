@@ -4,7 +4,7 @@ import { Provider } from '@nestjs/common';
 import { Chain } from './models/chain.js';
 import { GeoDnsPool } from './models/geo-dns-pool.js';
 import { HealthCheck } from './models/health-check.js';
-import { Log } from './models/log.js';
+// import { Log } from './models/log.js';
 import { Member } from './models/member.js';
 import { MemberService } from './models/member-service.js';
 import { MemberServiceNode } from './models/member-service-node.js';
@@ -37,7 +37,7 @@ export const databaseProviders = [
         Chain,
         GeoDnsPool,
         HealthCheck,
-        Log,
+        // Log,
         Member,
         MemberService,
         MemberServiceNode,

@@ -9,7 +9,9 @@
     </v-breadcrumbs> -->
     <v-toolbar>
       <v-btn icon to="/monitor"><v-icon size="small">mdi-chevron-left</v-icon></v-btn>
-      <v-toolbar-title>{{ shortStash(monitor.id) }}</v-toolbar-title>
+      <v-toolbar-title>
+        Monitor: {{ monitor.meta?.name ? `${monitor.meta?.name} ( ${shortStash(monitor.id)} )` : shortStash(monitor.id) }}
+      </v-toolbar-title>
     </v-toolbar>
 
     <table class="table is-bordered">
@@ -22,6 +24,10 @@
           <th>Name</th>
           <td>{{ monitor.name }}</td>
         </tr> -->
+        <tr>
+          <th>Meta</th>
+          <td>{{ monitor.meta }}</td>
+        </tr>
         <tr>
           <th>Addresses</th>
           <td>{{ monitor.multiaddress }}</td>
@@ -37,45 +43,53 @@
       </tbody>
     </table>
 
-    <v-tabs>
-      <v-tab>Checks</v-tab>
+    <v-tabs v-model="tab">
+      <v-tab value="checks">Checks</v-tab>
+      <v-tab value="config" v-show="monitor.id === localMonitorId">Config</v-tab>
     </v-tabs>
-    <!-- <%- include(templateDir + '/checksTable.ejs', { healthChecks }); -%> -->
-    <CheckTable
-      v-if="$vuetify.display.width > 599"
-      :healthChecks="monitor.healthChecks"
-      :columns="['id', 'serviceId', 'memberId', 'version', 'performance', 'updatedAt']"
-    ></CheckTable>
-    <CheckList v-if="$vuetify.display.width < 600" :healthChecks="monitor.healthChecks"></CheckList>
+    <v-window v-model="tab">
+      <v-window-item value="checks">
+        <CheckTable
+          v-if="$vuetify.display.width > 599"
+          :healthChecks="monitor.healthChecks"
+          :columns="['id', 'serviceId', 'memberId', 'version', 'performance', 'updatedAt']"
+        ></CheckTable>
+        <CheckList v-if="$vuetify.display.width < 600" :healthChecks="monitor.healthChecks"></CheckList>
+      </v-window-item>
+      <v-window-item value="config">
+        <pre>{{ config }}</pre>
+      </v-window-item>
+    </v-window>
   </v-container>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { mapState, useStore } from 'vuex'
 import { useRoute } from 'vue-router'
 import moment from 'moment'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
-import ServiceTable from './ServiceTable.vue'
-import ServiceList from './ServiceList.vue'
+// import ServiceTable from './ServiceTable.vue'
+// import ServiceList from './ServiceList.vue'
 import { shortStash } from './utils'
 
 export default defineComponent({
   name: 'ServiceC',
   components: {
-    ServiceTable,
-    ServiceList,
+    // ServiceTable,
+    // ServiceList,
     CheckTable,
     CheckList,
   },
   setup() {
     const store = useStore()
     const route = useRoute()
-    return { store, route }
+    const tab = ref('checks')
+    return { store, route, tab }
   },
   computed: {
-    ...mapState(['dateTimeFormat']),
+    ...mapState(['dateTimeFormat', 'localMonitorId', 'config']),
     ...mapState('monitor', ['monitor']),
   },
   methods: {

@@ -4,6 +4,8 @@
       <v-toolbar>
         <v-btn icon><v-icon size="small">mdi-radar</v-icon></v-btn>
         <v-toolbar-title>System Status</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn icon @click="loadData()"><v-icon size="small">mdi-reload</v-icon></v-btn>
       </v-toolbar>
     </v-container>
 
@@ -38,6 +40,7 @@
         </div>
       </div>
     </div>
+    <Loading :loading="loading"></Loading>
   </div>
 </template>
 
@@ -46,11 +49,12 @@ import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 import { ref } from 'vue'
 
+import Loading from './Loading.vue'
 const left = ref(120)
 
 export default defineComponent({
   name: 'StatusC',
-  components: {},
+  components: { Loading },
   setup() {
     const store = useStore()
     return { store }
@@ -66,11 +70,12 @@ export default defineComponent({
   },
   computed: {
     ...mapState(['dateTimeFormat']),
-    ...mapState('status', ['services']),
-    ...mapState('status', ['members']),
-    ...mapState('status', ['status']),
+    ...mapState('status', ['services', 'members', 'status', 'loading']),
   },
   methods: {
+    loadData() {
+      this.store.dispatch('status/getData')
+    },
     getHourTimestamps(): number[] {
       const timestamps: number[] = []
       for (let hourIndex = 47; hourIndex >= 0; hourIndex--) {
@@ -161,7 +166,7 @@ export default defineComponent({
     },
   },
   mounted() {
-    this.store.dispatch('status/getData')
+    this.loadData()
   },
   created() {},
 })

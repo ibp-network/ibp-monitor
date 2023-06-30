@@ -11,7 +11,7 @@ import { Service } from './service.js';
 import { Member } from './member.js';
 import { MemberService } from './member-service.js';
 import { HealthCheck } from './health-check.js';
-import { Log } from './log.js';
+// import { Log } from './log.js';
 
 @Table({
   tableName: 'member_service_node',
@@ -36,11 +36,11 @@ export class MemberServiceNode extends Model {
     allowNull: false,
   })
   memberId: string;
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
-  memberServiceId: number;
+  // @Column({
+  //   type: DataType.INTEGER,
+  //   allowNull: false,
+  // })
+  // memberServiceId: number;
   @Column({
     type: DataType.STRING(128),
     allowNull: true,
@@ -67,20 +67,20 @@ export class MemberServiceNode extends Model {
     foreignKey: 'memberId',
   })
   member: Model<Member>;
-  @BelongsTo(() => MemberService, {
-    foreignKey: 'memberServiceId',
-  })
-  memberService: Model<MemberService>;
+  // @BelongsTo(() => MemberService, {
+  //   foreignKey: 'memberServiceId',
+  // })
+  // memberService: Model<MemberService>;
   @HasMany(() => HealthCheck, {
     foreignKey: 'peerId',
     onDelete: 'RESTRICT',
     onUpdate: 'RESTRICT',
   })
   healthChecks: Model<HealthCheck>[];
-  @HasMany(() => Log, {
-    foreignKey: 'peerId',
-    onDelete: 'RESTRICT',
-    onUpdate: 'RESTRICT',
-  })
-  logs: Model<Log>[];
+  // @HasMany(() => Log, {
+  //   foreignKey: 'peerId',
+  //   onDelete: 'RESTRICT',
+  //   onUpdate: 'RESTRICT',
+  // })
+  // logs: Model<Log>[];
 }
