@@ -126,7 +126,6 @@ export async function checkService(job) {
 
     peerId = await api.rpc.system.localPeerId()
     const chain = await api.rpc.system.chain()
-    const chainType = await api.rpc.system.chainType()
 
     // start
     var start = performance.now()
@@ -136,9 +135,21 @@ export async function checkService(job) {
 
     const networkState = api.rpc.system.networkState // () // not a function?
     const syncState = await api.rpc.system.syncState()
+    const finalizedBlockHash = await api.rpc.chain.getFinalizedHead()
+    const { number: finalizedBlock } = await api.rpc.chain.getHeader(finalizedBlockHash)
     const version = await api.rpc.system.version()
+
+    // check if node is archive by querying a random block 
+    const randBlockNumber =  Math.floor(Math.random() * (finalizedBlock / 2)) + 1;
+    const block_hash = await api.rpc.chain.getBlockHash(randBlockNumber)
+    const runtimeVersion = await api.rpc.state.getRuntimeVersion(block_hash)
+    const archiveState = {
+      randomBlock: randBlockNumber,
+      specVersion: runtimeVersion.specVersion.toString()
+    }
+    
     const timing = end - start
-    // console.debug(health.toString())
+
     result = {
       // our peerId will be added by the receiver of the /ibp/healthCheck messate
       monitorId,
@@ -156,12 +167,12 @@ export async function checkService(job) {
         endpoint,
         ipAddress: member.serviceIpAddress,
         chain,
-        chainType,
         health,
         networkState,
         syncState,
+        finalizedBlock,
+        archiveState,
         version,
-        // peerCount,
         performance: timing,
       },
     }
