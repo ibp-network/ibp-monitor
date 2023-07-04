@@ -1,30 +1,39 @@
 import { DataTypes } from 'sequelize'
 
 async function up({ context: queryInterface }) {
+  const transaction = await queryInterface.sequelize.transaction();
+  try {
   // Remove the foreign key constraint
   console.log('Removing the foreign key constraint')
-  queryInterface
-    .removeConstraint('member_service_node', 'member_service_node_ibfk_3')
-      // drop column memberServiceId from table member_service_node
-    .then(() =>
-      queryInterface.removeColumn('member_service_node', 'memberServiceId')
-    )
-    // Remove the AUTO_INCREMENT property from the id column
-    .then(() =>
-      queryInterface.changeColumn('member_service', 'id', {
+  await queryInterface
+    // .removeConstraint('member_service_node', 'member_service_node_ibfk_3')
+    .sequelize.query(`ALTER TABLE member_service_node DROP CONSTRAINT IF EXISTS member_service_node_ibfk_3;`, { transaction })
+    .then(async () => {
+      await queryInterface.sequelize.query(`ALTER TABLE member_service_node DROP CONSTRAINT IF EXISTS fk_member_service_node_member_service;`, { transaction })
+    })
+    .then(async () => {
+      console.log('Dropping column memberServiceId from table member_service_node')
+      // await queryInterface.removeColumn('member_service_node', 'memberServiceId', { transaction })
+      await queryInterface.sequelize.query(`ALTER TABLE member_service_node DROP COLUMN IF EXISTS memberServiceId;`, { transaction })
+    })
+    .then(async () => {
+      console.log('Removing the AUTO_INCREMENT property from the id column')
+      await queryInterface.changeColumn('member_service', 'id', {
         type: DataTypes.INTEGER,
         allowNull: true,
         autoIncrement: false,
-        // primaryKey: true,
-      })
-    )
+        primaryKey: false,
+      }, { transaction })
+    })
     // Remove the primary key constraint on column id
-    .then(() =>
-      queryInterface.removeConstraint('member_service', 'PRIMARY')
-    )
+    .then(async () => {
+      console.log('Removing the primary key constraint on column id')
+      await queryInterface.removeConstraint('member_service', 'PRIMARY', { transaction })
+    })
     // Populate a temporary table with the distinct records based on memberId and serviceId
-    .then(() =>
-      queryInterface.sequelize.query(`
+    .then(async () => {
+      console.log('Populating a temporary table with the distinct records based on memberId and serviceId')
+      await queryInterface.sequelize.query(`
         CREATE TEMPORARY TABLE temp_member_service AS 
         SELECT * FROM (
           SELECT *,
@@ -32,29 +41,39 @@ async function up({ context: queryInterface }) {
           FROM member_service
         ) t
         WHERE rn = 1;
-      `)
-    )
+      `, { transaction })
+    })
     // Delete the records in the member_service table that do not exist in the temporary table
-    .then(() =>
-      queryInterface.sequelize.query(`
+    .then(async () => {
+      console.log('Deleting the records in the member_service table that do not exist in the temporary table')
+      await queryInterface.sequelize.query(`
         DELETE FROM member_service
         WHERE (memberId, serviceId, updatedAt) NOT IN (
           SELECT memberId, serviceId, updatedAt FROM temp_member_service
         );
-      `)
-    )
+      `, { transaction })
+    })
     // Drop column id
-    .then(() =>
-      queryInterface.removeColumn('member_service', 'id')
-    )
+    .then(async () => {
+      console.log('Dropping column id from table member_service')
+      await queryInterface.removeColumn('member_service', 'id', { transaction })
+    })
     // Create the new PK constraint
-    .then(() =>
-      queryInterface.addConstraint('member_service', {
+    .then(async () => {
+      console.log('Creating the new PK constraint')
+      await queryInterface.addConstraint('member_service', {
         type: 'primary key',
         fields: ['memberId', 'serviceId'],
         name: 'member_service_pk',
-      })
-    )
+      }, { transaction })
+    })
+    await transaction.commit();
+
+  } catch (err) {
+    // If there is an error, rollback the transaction
+    await transaction.rollback();
+    throw err;
+  }
 
 }
 

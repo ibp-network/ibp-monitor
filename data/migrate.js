@@ -105,4 +105,8 @@ async function updateMembers() {
   console.log('Updating members...')
   await updateMembers()
   console.log('Completed.')
+
+  setTimeout(() => {
+    process.exit(0)
+  }, 1000)
 })()
