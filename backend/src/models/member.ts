@@ -46,6 +46,7 @@ export class Member extends Model {
 
   @Column({
     type: DataType.ENUM(
+      '',
       'africa',
       'asia',
       'central_america',

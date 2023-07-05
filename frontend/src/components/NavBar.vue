@@ -2,8 +2,8 @@
   <v-app-bar color="rgb(54,54,54)">
     <v-app-bar-title>
       <v-btn color="white" to="/" style="min-height: 25px">
-        <v-img src="/image/IBP2.png" width="28" height="28"></v-img>
-        &nbsp;IBP Dashboard
+        <v-img src="/image/IBP_Logo.png" width="28" height="28"></v-img>
+        &nbsp;Dashboard
       </v-btn>
     </v-app-bar-title>
 
@@ -42,6 +42,12 @@
     </v-toolbar-items>
     <v-spacer></v-spacer>
 
+    <v-btn
+      icon
+      color="white"
+      class="d-sm-flex d-none"
+      @click="toggleDark()"
+    ><v-icon size="small">mdi-theme-light-dark</v-icon></v-btn>
     <v-app-bar-nav-icon
       color="white"
       class="d-flex d-sm-none"
@@ -63,7 +69,7 @@ export default defineComponent({
     return { store, router, route }
   },
   computed: {
-    ...mapState(['packageVersion', 'apiVersion']),
+    ...mapState(['dark', 'packageVersion', 'apiVersion']),
   },
   data() {
     return {
@@ -74,6 +80,9 @@ export default defineComponent({
     toggleNavBar() {
       this.isActive = !this.isActive
       this.store.dispatch('toggleSideBar')
+    },
+    toggleDark () {
+      this.store.dispatch('setDark', !this.dark)
     },
     navTo(route: string) {
       this.isActive = false

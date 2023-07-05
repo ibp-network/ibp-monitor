@@ -1,20 +1,20 @@
 <template>
-  <table class="table is-fullwidth">
-    <thead>
-      <th v-if="columns.includes('logo')"></th>
-      <th v-if="columns.includes('memberId')">ID</th>
-      <th v-if="columns.includes('name')"><v-icon size="small">mdi-account</v-icon>Member</th>
-      <th v-if="columns.includes('region')"><v-icon size="small">mdi-map</v-icon> Region</th>
-      <th v-if="columns.includes('services')" class="text-centered">
+  <v-table class="bg-background">
+    <thead class="pa-2 ma-2">
+      <th v-if="columns.includes('logo')" class="text-left"></th>
+      <th v-if="columns.includes('memberId')" class="text-left">ID</th>
+      <th v-if="columns.includes('name')" class="text-left"><v-icon size="small">mdi-account</v-icon>Member</th>
+      <th v-if="columns.includes('region')" class="text-left"><v-icon size="small">mdi-map</v-icon> Region</th>
+      <th v-if="columns.includes('services')" class="text-left">
         <v-icon size="small">mdi-server</v-icon>Services
       </th>
-      <th v-if="columns.includes('membership')">Membership</th>
-      <th v-if="columns.includes('current_level')">
+      <th v-if="columns.includes('membership')" class="text-left">Membership</th>
+      <th v-if="columns.includes('current_level')" class="text-left">
         <v-icon size="small">mdi-seal-variant</v-icon>Level
       </th>
       <th v-if="columns.includes('level_timestamp')" class="text-center">Level Date</th>
-      <th v-if="columns.includes('updatedAt')">Last Seen (UTC)</th>
-      <th v-if="columns.includes('createdAt')">Discovered</th>
+      <th v-if="columns.includes('updatedAt')" class="text-left">Last Seen (UTC)</th>
+      <th v-if="columns.includes('createdAt')" class="text-left">Discovered</th>
     </thead>
     <tbody>
       <tr
@@ -59,7 +59,7 @@
         <td v-if="columns.includes('createdAt')">{{ formatDateTime(member.createdAt) }}</td>
       </tr>
     </tbody>
-  </table>
+  </v-table>
 </template>
 
 <script lang="ts">

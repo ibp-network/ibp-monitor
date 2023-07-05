@@ -1,38 +1,40 @@
 <template>
-  <table class="table is-fullwidth">
-    <thead>
-      <th v-if="columns.includes('logo')"></th>
-      <th v-if="columns.includes('name')">Name</th>
-      <th v-if="columns.includes('endpoint')">Endpoint</th>
-      <th v-if="columns.includes('status')">Status</th>
-      <th v-if="columns.includes('pjs')" class="text-center">polkadot.js</th>
-    </thead>
-    <tbody>
-      <tr v-for="service in services" v-bind:key="service.id" @click="gotoService(service.id)">
-        <td v-if="columns.includes('logo')" style="cursor: pointer">
-          <v-avatar size="x-small">
-            <v-img :src="service.chain.logoUrl"></v-img>
-          </v-avatar>
-        </td>
-        <td v-if="columns.includes('name')" style="cursor: pointer">{{ service.chain.name }}</td>
-        <td v-if="columns.includes('endpoint')">{{ service.chain.id }}</td>
-        <td v-if="columns.includes('status')">{{ service.status }}</td>
-        <td v-if="columns.includes('pjs')" class="text-center">
-          <div>
-            <v-btn flat size="small"
-              v-for="geoDnsPool in geoDnsPools"
-              v-bind:key="geoDnsPool.id"
-              :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
-              target="_blank"
-              @click.stop="openPJS"
-            >
-              IBP.{{ geoDnsPool.id }}
-            </v-btn>
-          </div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <!-- <v-container fluid class="ma-0 pa-0"> -->
+    <v-table class="bg-background">
+      <thead>
+        <th v-if="columns.includes('logo')"></th>
+        <th v-if="columns.includes('name')">Name</th>
+        <th v-if="columns.includes('endpoint')">Endpoint</th>
+        <th v-if="columns.includes('status')">Status</th>
+        <th v-if="columns.includes('pjs')" class="text-center">polkadot.js</th>
+      </thead>
+      <tbody>
+        <tr v-for="service in services" v-bind:key="service.id" @click="gotoService(service.id)">
+          <td v-if="columns.includes('logo')" style="cursor: pointer">
+            <v-avatar size="x-small">
+              <v-img :src="service.chain.logoUrl"></v-img>
+            </v-avatar>
+          </td>
+          <td v-if="columns.includes('name')" style="cursor: pointer">{{ service.chain.name }}</td>
+          <td v-if="columns.includes('endpoint')">{{ service.chain.id }}</td>
+          <td v-if="columns.includes('status')" :class="`status service.status`">{{ service.status }}</td>
+          <td v-if="columns.includes('pjs')" class="text-center">
+            <div>
+              <v-btn flat size="small"
+                v-for="geoDnsPool in geoDnsPools"
+                v-bind:key="geoDnsPool.id"
+                :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
+                target="_blank"
+                @click.stop="openPJS"
+              >
+                IBP.{{ geoDnsPool.id }}
+              </v-btn>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </v-table>
+  <!-- </v-container> -->
 </template>
 
 <script lang="ts">
@@ -68,7 +70,7 @@ export default defineComponent({
   methods: {
     openPJS(event: any) {
       console.debug('openPJS')
-      window.open(event.currentTarget.href, '_blank');
+      // window.open(event.currentTarget.href, '_blank');
     },
     gotoService(serviceUrl: string) {
       console.debug('gotoService', serviceUrl)
@@ -84,3 +86,10 @@ export default defineComponent({
   },
 })
 </script>
+
+<style>
+th {
+  text-align: left;
+  padding-left: 15px;
+}
+</style>

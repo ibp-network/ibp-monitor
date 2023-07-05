@@ -1,13 +1,11 @@
 <template>
-  <div>
-    <v-container fluid class="pa-0 ma-0">
-      <v-toolbar>
-        <v-btn icon><v-icon size="small">mdi-radar</v-icon></v-btn>
-        <v-toolbar-title>System Status</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn icon @click="loadData()"><v-icon size="small">mdi-reload</v-icon></v-btn>
-      </v-toolbar>
-    </v-container>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-0 rounded-pill">
+      <v-btn icon><v-icon size="small">mdi-radar</v-icon></v-btn>
+      <v-toolbar-title>System Status</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn icon @click="loadData()"><v-icon size="small">mdi-reload</v-icon></v-btn>
+    </v-toolbar>
 
     <div class="tooltip" id="tooltip" v-html="tooltipHTML" v-if="tooltipIsVisible"></div>
 
@@ -17,12 +15,13 @@
           <div class="service">
             <div class="service-name">
               <img :src="service.chain.logoUrl" v-if="service.chain.logoUrl" />
-              <div>{{ service.chain.name }}</div>
+              <div style="color: #f4f4f4;">{{ service.chain.name }}</div>
             </div>
             <div class="service-status-container">
-              <div class="service-status-slot" v-for="hourTimestamp in getHourTimestamps()">
+              <div class="service-status-slot" v-for="hourTimestamp in getHourTimestamps()" :key="hourTimestamp">
+
                 <template v-for="member in members">
-                  <div
+                  <div :key="hourTimestamp"
                     v-if="member.membershipLevelId >= service.membershipLevelId"
                     :class="`member-service-status ${getServiceHourMemberStatus(
                       service.id,
@@ -33,7 +32,29 @@
                     v-on:mouseleave="onMouseLeave()"
                   ></div>
                 </template>
-              </div>
+
+                <!-- <div v-for="member in getMembersForLevel(services.membershipLevelId)"
+                  :key="member.id"
+                  :class="`member-service-status ${getServiceHourMemberStatus(
+                      service.id,
+                      hourTimestamp,
+                      member.id
+                    )}`"
+                    v-on:mouseenter="onMouseEnter($event, service.id, hourTimestamp, member.id)"
+                    v-on:mouseleave="onMouseLeave()">
+                </div> -->
+                <!-- <template v-for="member in getMembersForLevel(services.membershipLevelId)">
+                  <div :class="`member-service-status ${getServiceHourMemberStatus(
+                      service.id,
+                      hourTimestamp,
+                      member.id
+                    )}`"
+                    v-on:mouseenter="onMouseEnter($event, service.id, hourTimestamp, member.id)"
+                    v-on:mouseleave="onMouseLeave()"
+                  ></div>
+                </template> -->
+
+              </div> <!--// service-status-slot -->
             </div>
           </div>
           <div class="service-separator" v-if="key + 1 != services.length"></div>
@@ -41,16 +62,15 @@
       </div>
     </div>
     <Loading :loading="loading"></Loading>
-  </div>
+
+  </v-container>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
-import { ref } from 'vue'
 
 import Loading from './Loading.vue'
-const left = ref(120)
 
 export default defineComponent({
   name: 'StatusC',
@@ -75,6 +95,10 @@ export default defineComponent({
   methods: {
     loadData() {
       this.store.dispatch('status/getData')
+    },
+    getMembersForLevel(levelId: any): any[] {
+      console.debug('getMembersForLevel', levelId, typeof levelId)
+      return this.members.filter((member: any) => member.membershipLevelId >= levelId)
     },
     getHourTimestamps(): number[] {
       const timestamps: number[] = []

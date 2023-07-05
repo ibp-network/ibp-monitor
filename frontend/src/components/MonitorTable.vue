@@ -1,5 +1,5 @@
 <template>
-  <table class="table is-fullwidth">
+  <v-table class="bg-background">
     <!-- {{ peers }} -->
     <thead>
       <th v-if="columns.includes('id')">Monitor</th>
@@ -25,7 +25,7 @@
         <td>{{ moment(monitor.createdAt).fromNow() }}</td>
       </tr>
     </tbody>
-  </table>
+  </v-table>
 </template>
 
 <script lang="ts">

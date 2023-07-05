@@ -1,5 +1,5 @@
 <template>
-  <table class="table is-fullwidth">
+  <v-table class="bg-background">
     <!--
       {"peerId":"12D3KooWR87dpwfWdg8nQVx243ugPM66vFCcVVQCUu7Cn733YY9q","chain":"Kusama",
       "chainType":{"live":null},
@@ -58,7 +58,7 @@
       </tr>
     </tbody>
     <Loading :loading="loading"></Loading>
-  </table>
+  </v-table>
 </template>
 
 <script lang="ts">
@@ -144,3 +144,12 @@ export default defineComponent({
   },
 })
 </script>
+
+<style>
+a {
+  text-decoration: none;
+}
+a:link, a:visited {
+    color: inherit;
+}
+</style>

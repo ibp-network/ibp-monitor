@@ -1,5 +1,5 @@
 <template>
-  <v-app>
+  <v-app :dark="dark">
     <SideNav></SideNav>
     <NavBar></NavBar>
     <div class="content-wrapper">
@@ -17,12 +17,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, computed, ref, watch } from 'vue'
 import { useStore } from 'vuex'
+import { useTheme } from 'vuetify/lib/framework.mjs'
 import NavBar from './components/NavBar.vue'
 import Footer from './components/Footer.vue'
 import SideNav from './components/SideNav.vue'
-// import HelloWorld from '@/components/HelloWorld.vue'
 
 export default defineComponent({
   components: {
@@ -32,7 +32,37 @@ export default defineComponent({
     Footer,
   },
   setup() {
-    useStore().dispatch('init')
+    const store = useStore()
+    const theme = useTheme()
+    const dark = computed(() => store.state.dark)
+
+    store.dispatch('init')
+    const matcher = ref()
+
+    const onDark = (evt: any) => {
+      console.debug('onDark', evt)
+      theme.global.name.value = evt.matches ? 'dark' : 'light'
+    }
+
+    watch(() => dark.value, newVal => {
+      theme.global.name.value = newVal ? 'dark' : 'light'
+    })
+
+    // onMounted(async () => {
+    //   console.debug('App.vue: mounted')
+    //   matcher.value = window.matchMedia('(prefers-color-scheme: dark)')
+    //   // set the initial state from the matcher await this.onDark(this.matcher)
+    //   matcher.value.addListener(onDark)
+    //   onDark(matcher.value)
+    //   // store.dispatch('init')
+    // })
+
+    return {
+      dark,
+      matcher,
+      theme
+    }
+
   },
 })
 </script>

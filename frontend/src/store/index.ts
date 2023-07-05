@@ -13,6 +13,7 @@ import message from './modules/message'
 
 export interface IState {
   apiVersion: string
+  dark: boolean
   config: Record<string, any>
   showSideBar: boolean
   monitorCount: number
@@ -29,6 +30,7 @@ export const key: InjectionKey<Store<IState>> = Symbol('$store')
 export const store = createStore({
   state: {
     apiVersion: '',
+    dark: true,
     config: {},
     showSideBar: false,
     localMonitorId: '',
@@ -73,6 +75,9 @@ export const store = createStore({
     SET_SIDE_BAR(state: IState, visible: boolean) {
       state.showSideBar = visible
     },
+    SET_DARK(state: IState, dark: boolean) {
+      state.dark = dark
+    },
   },
   actions: {
     async init({ dispatch, commit }) {
@@ -92,6 +97,9 @@ export const store = createStore({
     async getConfig({ commit }) {
       const res = await axios.get('/api/config')
       commit('SET_CONFIG', res.data)
+    },
+    setDark({ commit }, dark: boolean) {
+      commit('SET_DARK', dark)
     },
     setSideBar({ commit }, visible: boolean) {
       commit('SET_SIDE_BAR', visible)

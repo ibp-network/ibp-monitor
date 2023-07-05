@@ -12,6 +12,7 @@ export interface MemberDef {
   level_timestamp: { [key: string]: string };
   active: string;
   endpoints?: Record<string, string>;
+  monitor_url?: string;
   region: string;
   latitude: string;
   longitude: string;

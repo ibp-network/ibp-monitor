@@ -1,22 +1,18 @@
 <template>
-  <v-container fluid class="ma-0 pa-0">
-    <!-- <v-breadcrumbs class="d-none d-sm-flex">
-      <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item><b>Members</b></v-breadcrumbs-item>
-    </v-breadcrumbs> -->
-
-    <v-toolbar>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-0 rounded-pill">
       <v-btn icon><v-icon size="small">mdi-account-multiple</v-icon></v-btn>
       <v-toolbar-title>Members</v-toolbar-title>
     </v-toolbar>
 
-    <MemberList v-if="showList" :list="list" class="d-inline s-sm-none"></MemberList>
-    <MemberTable
-      v-if="!showList"
-      :list="list"
-      :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp']"
-    ></MemberTable>
+    <v-container>
+      <MemberList v-if="showList" :list="list" class="d-inline s-sm-none"></MemberList>
+      <MemberTable
+        v-if="!showList"
+        :list="list"
+        :columns="['logo', 'name', 'region', 'membership', 'current_level', 'level_timestamp']"
+      ></MemberTable>
+    </v-container>
   </v-container>
 </template>
 

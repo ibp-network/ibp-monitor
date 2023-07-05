@@ -4,7 +4,7 @@
     <div class="column">
       <div class="chart-container" style="position: relative; height: 40vh">
         <!-- <canvas id="myChart"></canvas> -->
-        <LineChart id="myChart" :options="chartOptions" :data="chartData"></LineChart>
+        <LineChart id="myChart" background-color="blue" color="yellow" :options="chartOptions" :data="chartData"></LineChart>
       </div>
     </div>
     <div class="column is-1 is-narrow-mobile"></div>
@@ -108,6 +108,7 @@ export default defineComponent({
   data() {
     return {
       chartOptions: {
+        backgroundColor: 'pink',
         responsive: true,
         maintainAspectRatio: false,
         scales: {

@@ -16,17 +16,24 @@ import { createVuetify } from 'vuetify'
 export default createVuetify({
   ssr: true,
   theme: {
-    // dark: true,
+    defaultTheme: 'dark',
     themes: {
       dark: {
         dark: true,
+        colors: {
+          background: '#222222',
+          // primary: '',
+          // secondary: '',
+
+        }
       },
-      // light: {
-      //   colors: {
+      light: {
+        colors: {
+          background: '#f4f4f4'
       //     primary: '#1867C0',
       //     secondary: '#5CBBF6',
-      //   },
-      // },
+        },
+      },
     },
   },
 })
