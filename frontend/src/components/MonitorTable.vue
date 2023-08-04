@@ -2,27 +2,29 @@
   <v-table class="bg-background">
     <!-- {{ peers }} -->
     <thead>
-      <th v-if="columns.includes('id')">Monitor</th>
-      <th>Connected</th>
-      <th>Last Seen (UTC)</th>
-      <th>Discovered</th>
+      <th v-if="columns.includes('id')" class="pl-4">Monitor</th>
+      <th class="text-center">Connected</th>
+      <th class="text-center">Last Seen (UTC)</th>
+      <th class="text-center">Discovered</th>
     </thead>
     <tbody>
       <tr v-for="monitor in monitors" v-bind:key="monitor.id">
         <td v-if="columns.includes('id')" style="cursor: pointer">
-          <a @click="gotoMonitor(monitor.id)">
+          <!-- <a @click="gotoMonitor(monitor.id)">
             {{ monitor.meta?.name ? monitor.meta.name : shortStash(monitor.id) }}
-          </a>
-          <!-- <%- include(templateDir + '/isLocalMonitor.ejs', { monitorId: monitor.monitorId, localMonitorId }); -%> -->
-          <sup><IsLocalMonitor :monitorId="monitor.id"></IsLocalMonitor></sup>
+          </a> -->
+          <router-link :to="`/monitor/${monitor.id}`">
+            {{ monitor.meta?.name ? monitor.meta.name : shortStash(monitor.id) }}
+            <sup><IsLocalMonitor :monitorId="monitor.id"></IsLocalMonitor></sup>
+          </router-link>
         </td>
-        <td>
+        <td class="text-center">
           {{ connection(monitor.id) }}
         </td>
         <!-- <td>{{ formatDateTime(monitor.updatedAt) }}</td> -->
-        <td>{{ moment(monitor.updatedAt).fromNow() }}</td>
+        <td class="text-center">{{ moment(monitor.updatedAt).fromNow() }}</td>
         <!-- <td>{{ formatDateTime(monitor.createdAt) }}</td> -->
-        <td>{{ moment(monitor.createdAt).fromNow() }}</td>
+        <td class="text-center">{{ moment(monitor.createdAt).fromNow() }}</td>
       </tr>
     </tbody>
   </v-table>
