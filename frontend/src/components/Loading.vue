@@ -1,13 +1,15 @@
 <template>
   <transition>
-    <v-dialog v-model="lloading" width="300" height="300">
-      <v-card>
-        <v-card-text>
-          Loading...
-          <progress class="progress is-small is-primary" max="100">15%</progress>
-        </v-card-text>
-      </v-card>
-    </v-dialog>
+    <div>
+      <v-dialog v-model="lloading" width="300" height="300">
+        <v-card>
+          <v-card-text>
+            Loading...
+            <progress class="progress is-small is-primary" max="100">15%</progress>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+    </div>
   </transition>
 </template>
 

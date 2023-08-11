@@ -43,7 +43,7 @@ export default defineConfig({
     // Note: this will only be used in development when the frontend is served manually
     // You will need a backend to connect to, so match this to ../backend/config/config.local.js HTTP_PORT
     proxy: {
-      '/api': 'http://localhost:30001',
+      '/api': 'http://localhost:4000',
     },
   },
 

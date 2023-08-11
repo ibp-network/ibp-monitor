@@ -1,90 +1,91 @@
 <template>
-  <v-container fluid class="pa-0 ma-0">
-    <v-toolbar>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-0 rounded-xl">
       <v-btn icon to="/service"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>Service: {{ service.chain?.name || 'Service' }}</v-toolbar-title>
       <v-btn icon>
         <v-img :src="service.chain?.logoUrl || ''" width="32px" height="32px"></v-img>
       </v-btn>
     </v-toolbar>
+    <v-container>
+      <v-table class="bg-background" density="compact" v-if="service.chain">
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <td>{{ service.chain.name }}</td>
+          </tr>
+          <tr>
+            <th>Level Required</th>
+            <td>{{ service.membershipLevelId }}</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>{{ service.status }}</td>
+          </tr>
+          <tr v-if="service.chain.relayChainId">
+            <th>Parachain</th>
+            <td>
+              Yes (on:
+              <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
+              >)
+            </td>
+          </tr>
+          <tr v-if="service.status === 'active'">
+            <th>Polkadot.js</th>
+            <td>
+              <div v-for="geoDnsPool in geoDnsPools" v-bind:key="geoDnsPool.id">
+                <a
+                  :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
+                  target="_blank"
+                >
+                  wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{
+                    service.chain.id
+                  }}
+                </a>
+                (level: {{ service.membershipLevelId }})
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
 
-    <table class="table is-fullwidth" v-if="service.chain">
-      <tbody>
-        <tr>
-          <th>Name</th>
-          <td>{{ service.chain.name }}</td>
-        </tr>
-        <tr>
-          <th>Level Required</th>
-          <td>{{ service.membershipLevelId }}</td>
-        </tr>
-        <tr>
-          <th>Status</th>
-          <td>{{ service.status }}</td>
-        </tr>
-        <tr v-if="service.chain.relayChainId">
-          <th>Parachain</th>
-          <td>
-            Yes (on:
-            <a @click="gotoService(service.chain.relayChainId)">{{ service.chain.relayChainId }}</a
-            >)
-          </td>
-        </tr>
-        <tr v-if="service.status === 'active'">
-          <th>Polkadot.js</th>
-          <td>
-            <div v-for="geoDnsPool in geoDnsPools" v-bind:key="geoDnsPool.id">
-              <a
-                :href="`https://polkadot.js.org/apps/?rpc=wss://${service.membershipLevel.subdomain}.${geoDnsPool.host}/${service.chain.id}`"
-                target="_blank"
-              >
-                wss://{{ service.membershipLevel.subdomain }}.{{ geoDnsPool.host }}/{{
-                  service.chain.id
-                }}
-              </a>
-              (level: {{ service.membershipLevelId }})
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+      <v-tabs v-model="activeTab">
+        <v-tab value="performance">Performance</v-tab>
+        <v-tab value="members">Providers</v-tab>
+        <v-tab value="nodes">Nodes</v-tab>
+        <v-tab value="checks">HealthChecks</v-tab>
+        <!-- <v-tab value="parachains" v-show="!service.chain?.relayChainId">Parachains</v-tab> -->
+      </v-tabs>
 
-    <v-tabs v-model="activeTab">
-      <v-tab value="performance">Performance</v-tab>
-      <v-tab value="members">Providers</v-tab>
-      <v-tab value="nodes">Nodes</v-tab>
-      <v-tab value="checks">HealthChecks</v-tab>
-      <!-- <v-tab value="parachains" v-show="!service.chain?.relayChainId">Parachains</v-tab> -->
-    </v-tabs>
-
-    <v-container v-show="activeTab === 'performance'">
-      <a :href="`/api/metrics/${service.id}`" target="_blank">
-        Prometheus &nbsp;<img src="/image/prometheus-logo-orange.svg" alt="" width="18px" />
-      </a>
-      <CheckChart :healthChecks="service.healthChecks" :group-by="'memberId'"></CheckChart>
-    </v-container>
-    <v-container v-show="activeTab === 'members'">
-      <MemberList :list="membersForService"></MemberList>
-    </v-container>
-    <v-container v-show="activeTab === 'nodes'">
-      <NodeTable
-        :nodes="service.nodes"
-        :columns="['peerId', 'memberId', 'updatedAt', 'createdAt']"
-      ></NodeTable>
-    </v-container>
-    <v-container v-show="activeTab === 'checks'">
-      <CheckTable
-        v-if="$vuetify.display.width > 599"
-        :healthChecks="service.healthChecks"
-        :columns="['id', 'monitorId', 'memberId', 'source', 'version', 'performance', 'createdAt']"
-      ></CheckTable>
-      <CheckList
-        v-if="$vuetify.display.width < 600"
-        :healthChecks="service.healthChecks"
-      ></CheckList>
-    </v-container>
-    <v-container v-show="activeTab === 'parachains'">
-      TODO
+      <v-container v-show="activeTab === 'performance'">
+        <a :href="`/api/metrics/${service.id}`" target="_blank">
+          Prometheus &nbsp;<img src="/image/prometheus-logo-orange.svg" alt="" width="18px" />
+        </a>
+        <CheckChart :healthChecks="service.healthChecks" :group-by="'memberId'"></CheckChart>
+      </v-container>
+      <v-container v-show="activeTab === 'members'">
+        <MemberList :list="membersForService"></MemberList>
+      </v-container>
+      <v-container v-show="activeTab === 'nodes'">
+        <NodeTable
+          :nodes="service.nodes"
+          :columns="['peerId', 'memberId', 'updatedAt', 'createdAt']"
+        ></NodeTable>
+      </v-container>
+      <v-container v-show="activeTab === 'checks'">
+        <CheckTable
+          v-if="$vuetify.display.width > 599"
+          :healthChecks="service.healthChecks"
+          :columns="['id', 'monitorId', 'memberId', 'source', 'version', 'performance', 'createdAt']"
+        ></CheckTable>
+        <CheckList
+          v-if="$vuetify.display.width < 600"
+          :healthChecks="service.healthChecks"
+        ></CheckList>
+      </v-container>
+      <v-container v-show="activeTab === 'parachains'">
+        TODO
+      </v-container>
     </v-container>
   </v-container>
 </template>

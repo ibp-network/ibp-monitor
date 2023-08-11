@@ -1,84 +1,98 @@
 <template>
-  <v-container fluid class="pa-0 ma-0">
-    <v-toolbar>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-0 rounded-pill">
       <v-btn icon to="/member"><v-icon>mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>Member: {{ member.name || 'Member' }}</v-toolbar-title>
-      <v-btn icon>
+      <v-btn icon :href="member.websiteUrl">
         <v-img :src="member.logoUrl" width="32px" height="32px"></v-img>
       </v-btn>
     </v-toolbar>
 
-    <v-row>
-      <v-col cols="8">
-        <table density="compact" class="table is-bordered">
-          <tbody>
-            <tr>
-              <th>Name</th>
-              <td>{{ member.name || '' }}</td>
-            </tr>
-            <tr>
-              <th>Membership</th>
-              <td>{{ member.membershipType }}
-                {{ member.membershipLevel?.id }}</td>
-            </tr>
-            <!-- <tr>
-              <th>Status</th>
-              <td>{{member.status}}</td>
-            </tr> -->
-            <tr>
-              <th>Discovered</th>
-              <td>{{ formatDateTime(member.createdAt) }}</td>
-            </tr>
-            <tr>
-              <th>Updated</th>
-              <td>{{ formatDateTime(member.updatedAt) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </v-col>
-      <v-col cols="4" fill-height class="text-center">
-        <v-avatar size="96">
-          <v-img :src="member.logo" width="96px" height="96px"></v-img>
-        </v-avatar>
-      </v-col>
-    </v-row>
+    <v-container>
+      <v-row>
+        <v-col>
+          <v-table density="compact" class="bg-background is-bordered full-width" style="width: 100%">
+            <tbody>
+              <tr>
+                <th>Name</th>
+                <td>{{ member.name || '' }}</td>
+              </tr>
+              <tr>
+                <th>Membership</th>
+                <td>{{ member.membershipType }}
+                  {{ member.membershipLevel?.id }}</td>
+              </tr>
+              <!-- <tr>
+                <th>Status</th>
+                <td>{{member.status}}</td>
+              </tr> -->
+              <tr>
+                <th>Website</th>
+                <td>
+                  <a :href="member.websiteUrl" target="_blank">{{ member.websiteUrl }} <sup><v-icon size="x-small">mdi-open-in-new</v-icon></sup></a>
+                </td>
+              </tr>
+              <tr>
+                <th>Monitor</th>
+                <td>
+                  <a :href="member.monitorUrl" target="_blank">{{ member.monitorUrl }} <sup><v-icon size="x-small">mdi-open-in-new</v-icon></sup></a>
+                </td>
+              </tr>
+              <tr>
+                <th>Discovered</th>
+                <td>{{ formatDateTime(member.createdAt) }}</td>
+              </tr>
+              <tr>
+                <th>Updated</th>
+                <td>{{ formatDateTime(member.updatedAt) }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </v-col>
+        <!-- <v-col cols="4" fill-height class="text-center">
+          <v-avatar size="96">
+            <v-img :src="member.logoUrl" width="64px" height="64px"></v-img>
+          </v-avatar>
+        </v-col> -->
+      </v-row>
 
-    <v-tabs v-model="activeTab">
-      <v-tab value="performance">Performance</v-tab>
-      <v-tab value="services">Provides</v-tab>
-      <v-tab value="nodes">Nodes</v-tab>
-      <v-tab value="checks">Healthchecks</v-tab>
-    </v-tabs>
+      <v-tabs v-model="activeTab">
+        <v-tab value="performance">Performance</v-tab>
+        <v-tab value="services">Provides</v-tab>
+        <v-tab value="nodes">Nodes</v-tab>
+        <v-tab value="checks">Healthchecks</v-tab>
+      </v-tabs>
 
-    <v-container v-show="activeTab === 'performance'">
-      <CheckChart :health-checks="healthChecks" :group-by="'serviceId'"></CheckChart>
-    </v-container>
-    <v-container v-show="activeTab === 'services'">
-      <ServiceTable
-        v-if="$vuetify.display.width > 599"
-        :member="member"
-        :services="servicesForMember"
-        :columns="['logo', 'name', 'serviceId', 'pjs']"
-      ></ServiceTable>
-      <ServiceList
-        v-if="$vuetify.display.width < 600"
-        :member="member"
-        :services="servicesForMember"
-      ></ServiceList>
-    </v-container>
-    <v-container v-show="activeTab === 'nodes'">
-      <NodeTable
-        :nodes="nodesForMember"
-        :columns="['peerId', 'serviceId', 'updatedAt', 'createdAt']"
-      ></NodeTable>
-    </v-container>
-    <v-container v-show="activeTab === 'checks'">
-      <CheckTable
-        v-if="$vuetify.display.width > 599"
-        :health-checks="healthChecks"
-        :columns="['id', 'serviceId', 'source', 'monitorId', 'performance']"
-      ></CheckTable>
-      <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
+      <v-container v-show="activeTab === 'performance'">
+        <CheckChart :health-checks="healthChecks" :group-by="'serviceId'"></CheckChart>
+      </v-container>
+      <v-container v-show="activeTab === 'services'">
+        <ServiceTable
+          v-if="$vuetify.display.width > 599"
+          :member="member"
+          :services="servicesForMember"
+          :columns="['logo', 'name', 'serviceId', 'pjs']"
+        ></ServiceTable>
+        <ServiceList
+          v-if="$vuetify.display.width < 600"
+          :member="member"
+          :services="servicesForMember"
+        ></ServiceList>
+      </v-container>
+      <v-container v-show="activeTab === 'nodes'">
+        <NodeTable
+          :nodes="nodesForMember"
+          :columns="['peerId', 'serviceId', 'updatedAt', 'createdAt']"
+        ></NodeTable>
+      </v-container>
+      <v-container v-show="activeTab === 'checks'">
+        <CheckTable
+          v-if="$vuetify.display.width > 599"
+          :health-checks="healthChecks"
+          :columns="['id', 'serviceId', 'source', 'monitorId', 'performance']"
+        ></CheckTable>
+        <CheckList v-if="$vuetify.display.width < 600" :health-checks="healthChecks"></CheckList>
+      </v-container>
     </v-container>
   </v-container>
 </template>

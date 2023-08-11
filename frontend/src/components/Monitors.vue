@@ -1,16 +1,13 @@
 <template>
-  <v-container fluid class="ma-0 pa-0">
-    <!-- <v-breadcrumbs>
-      <v-breadcrumbs-item to="/">Home</v-breadcrumbs-item>
-      <v-breadcrumbs-divider></v-breadcrumbs-divider>
-      <v-breadcrumbs-item to="/member"><b>Monitors</b></v-breadcrumbs-item>
-    </v-breadcrumbs> -->
-    <v-toolbar>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-0 rounded-pill">
       <v-btn icon><v-icon size="small">mdi-monitor-eye</v-icon></v-btn>
       <v-toolbar-title>Monitors</v-toolbar-title>
     </v-toolbar>
 
-    <MonitorTable :monitors="list" :peers="peers" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
+    <v-container>
+      <MonitorTable :monitors="list" :peers="peers" :columns="['id', 'updatedAt', 'createdAt']"></MonitorTable>
+    </v-container>
   </v-container>
 </template>
 

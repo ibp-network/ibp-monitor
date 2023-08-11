@@ -5,21 +5,20 @@ const HTTP_PORT = process.env.HTTP_PORT || 30001;
 
 export default {
   name: '🌐 metaspan-dev',
-  dateTimeFormat: 'DD/MM/YYYY HH:mm',
+  dateTimeFormat: process.env.DATE_TIME_FORMAT, // 'DD/MM/YYYY HH:mm',
   sequelize: {
-    database: 'ibp_monitor',
-    username: 'ibp_monitor',
-    password: 'ibp_monitor',
+    database: process.env.DB_NAME,       // 'ibp_monitor_v02',
+    username: process.env.DB_USERNAME,   // 'ibp_monitor',
+    password: process.env.DB_PASSWORD,   // 'ibp_monitor',
+    dialect: process.env.DB_DIALECT,     // 'mariadb',
     options: {
-      dialect: 'mariadb',
       // hostname = docker service name
-      host: 'ibp-datastore',
-      port: 3306,
-      logging: false,
+      host: process.env.DB_HOST,           // 'ibp-datastore',
+      port: parseInt(process.env.DB_PORT), // 3307,
+      logging: process.env.DB_LOGGING === 'true', // .env only has string, e.g.: 'false',
     },
   },
   httpPort: HTTP_PORT,
-  // apiPort: API_PORT, // no longer used, same as httpPort
   libp2p: {
     tcpPort: P2P_PORT,
     allowedTopics: [
@@ -30,6 +29,7 @@ export default {
       '/ibp/signedMessage',
     ],
     bootstrapPeers: [
+      '/ip4/192.168.1.23/tcp/30000/p2p/12D3KooWJnBHoi5vkwZroNXSvdqjCWDa3f4HJojAGGn5jDXcUj2h',
       // metaspan:dns
       '/dns4/ibp-monitor.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',
       // helikon:ip4
@@ -46,7 +46,7 @@ export default {
   },
   // Worker Config
   workers: {
-    apiKey: '123123123',
+    apiKey: process.env.WORKER_API_KEY, // '123123123',
   },
   updateInterval: 5 * 60 * 1000, // 5 mins, as milliseconds
   pruning: {

@@ -1,22 +1,23 @@
 <template>
   <v-footer
-    class="mt-5 bg-grey-lighten-4 text-black text-center d-flex flex-column text-body-2">
+    class="bg-background mt-5 text-center d-flex flex-column text-body-2">
     <div>&nbsp;</div>
-    <v-container class="ma-0 pa-0" style="border-top: 1px grey;">
+    <v-container class="ma-0 pa-0">
       <v-row width="100%">
       <v-col class="text-left">
-        <ul>
-          <li style="whitespace: nowrap">
+        <!-- <ul>
+          <li style="whitespace: nowrap"> -->
             <a class="nodecoration" href="https://ibp.network" target="_blank" rel="noopener noreferrer">
               <v-icon size="x-small">mdi-open-in-new</v-icon>
               &nbsp;IBP.network</a>
-          </li>
-          <li style="whitespace: nowrap">
+          <!-- </li>
+          <li style="whitespace: nowrap"> -->
+            <br>
             <a class="nodecoration" href="https://dotters.network" target="_blank" rel="noopener noreferrer">
               <v-icon size="x-small">mdi-open-in-new</v-icon>
               &nbsp;dotters.network</a>
-          </li>
-        </ul>
+          <!-- </li>
+        </ul> -->
       </v-col>
       <!-- <v-col>
         <ul>
@@ -26,29 +27,31 @@
         </ul>
       </v-col> -->
       <v-col class="text-right">
-        <ul>
-          <li>
+        <!-- <ul>
+          <li> -->
             ui: {{ packageVersion }} /
             api: {{ apiVersion }}
             &nbsp;<v-icon size="x-small">mdi-source-branch</v-icon>
-          </li>
-          <li>
+          <!-- </li>
+          <li> -->
+            <br>
             <a class="nodecoration" href="https://github.com/ibp-network/ibp-monitor" target="_blank" rel="noopener noreferrer">
               github
               &nbsp;<v-icon size="x-small">mdi-github</v-icon> 
             </a>
-          </li>
-          <li>
+          <!-- </li>
+          <li> -->
+            <br>
             <a class="nodecoration" href="https://wiki.ibp.network/docs" target="_blank" rel="noopener noreferrer">
               docs
               &nbsp;<v-icon size="x-small">mdi-bookshelf</v-icon> 
             </a>
-          </li>
-        </ul>
+          <!-- </li>
+        </ul> -->
       </v-col>
     </v-row>
-
     </v-container>
+
     <div>
       <span>
         <sup

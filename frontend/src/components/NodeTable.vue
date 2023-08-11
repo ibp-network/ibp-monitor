@@ -1,5 +1,5 @@
 <template>
-  <table class="table is-fullwidth">
+  <v-table class="bg-background is-fullwidth">
     <thead>
       <th v-if="columns.includes('peerId')"></th>
       <th v-if="columns.includes('serviceId')">Service</th>
@@ -10,15 +10,19 @@
     <tbody>
       <tr v-for="node in nodes" v-bind:key="node.peerId">
         <td v-if="columns.includes('peerId')" style="cursor: pointer">
-          <router-link :to="`/node/${node.peerId}`">{{ shortStash(node.peerId) }}</router-link>
+          {{ shortStash(node.peerId) }}
         </td>
-        <td v-if="columns.includes('serviceId')">{{ node.serviceId }}</td>
-        <td v-if="columns.includes('memberId')">{{ node.memberId }}</td>
+        <td v-if="columns.includes('serviceId')">
+          <router-link :to="`/service/${node.serviceId}`">{{ node.serviceId }}</router-link>
+        </td>
+        <td v-if="columns.includes('memberId')">
+          <router-link :to="`/member/${node.memberId}`">{{ node.memberId }}</router-link>
+        </td>
         <td v-if="columns.includes('updatedAt')">{{ formatDateTime(node.updatedAt) }}</td>
         <td v-if="columns.includes('createdAt')">{{ formatDateTime(node.createdAt) }}</td>
       </tr>
     </tbody>
-  </table>
+  </v-table>
 </template>
 
 <script lang="ts">

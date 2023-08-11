@@ -1,61 +1,55 @@
 <template>
-  <v-container fluid class="ma-0 pa-0">
-    <!-- <nav class="breadcrumb" aria-label="breadcrumbs">
-      <ul>
-        <li><router-link to="/">Home</router-link></li>
-        <li><router-link to="/healthCheck">Checks</router-link></li>
-        <li class="is-active">&nbsp;&nbsp;{{healthCheck.id}}&nbsp;&nbsp;</li>
-        <li><a :href="`/api/healthCheck/${healthCheck.id}?raw=true`" target="_blank"><small><em>(json)</em></small></a></li>
-      </ul>
-    </nav> -->
-    <v-toolbar>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-0 rounded-pill">
       <v-btn icon to="/healthCheck"><v-icon size="small">mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ healthCheck?.id }} ({{ healthCheck?.serviceId }})</v-toolbar-title>
     </v-toolbar>
 
-    <table class="table">
-      <tr>
-        <th>Service</th>
-        <td>
-          <router-link :to="`/service/${healthCheck.serviceId}`">{{
-            healthCheck.serviceId
-          }}</router-link>
-        </td>
-      </tr>
-      <tr>
-        <th>Member</th>
-        <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">
-          {{ healthCheck.memberId }}
-        </td>
-      </tr>
-      <tr>
-        <th>Node</th>
-        <td style="cursor: pointer">
-          <router-link :to="`/node/${healthCheck.peerId}`">
-            {{ shortStash(healthCheck.peerId) }}
-          </router-link>
-        </td>
-      </tr>
-      <tr>
-        <th>Monitor</th>
-        <td>
-          <router-link :to="`/monitor/${healthCheck.monitorId}`">{{
-            shortStash(healthCheck.monitorId)
-          }}</router-link>
-        </td>
-      </tr>
-      <tr>
-        <th>Performance</th>
-        <td>{{ healthCheck.record?.performance?.toFixed(2) }} ms</td>
-      </tr>
-    </table>
+    <v-table class="bg-background" density="compact">
+      <tbody>
+        <tr>
+          <th>Service</th>
+          <td>
+            <router-link :to="`/service/${healthCheck.serviceId}`">{{
+              healthCheck.serviceId
+            }}</router-link>
+          </td>
+        </tr>
+        <tr>
+          <th>Member</th>
+          <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">
+            {{ healthCheck.memberId }}
+          </td>
+        </tr>
+        <tr>
+          <th>Node</th>
+          <td style="cursor: pointer">
+            <router-link :to="`/node/${healthCheck.peerId}`">
+              {{ shortStash(healthCheck.peerId) }}
+            </router-link>
+          </td>
+        </tr>
+        <tr>
+          <th>Monitor</th>
+          <td>
+            <router-link :to="`/monitor/${healthCheck.monitorId}`">{{
+              shortStash(healthCheck.monitorId)
+            }}</router-link>
+          </td>
+        </tr>
+        <tr>
+          <th>Performance</th>
+          <td>{{ healthCheck.record?.performance?.toFixed(2) }} ms</td>
+        </tr>
+      </tbody>
+    </v-table>
     <div class="tabs">
       <ul>
         <li class="is-active"><a>JSON</a></li>
       </ul>
     </div>
 
-    <pre
+    <pre class="bg-background"
       >{{ healthCheckAsJSON() }}
     </pre>
   </v-container>

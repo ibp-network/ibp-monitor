@@ -2,16 +2,15 @@
 
 ## Architecture / Components
 
-- BullMQ + Redis - in-memory and persistent storage
 - Datastore (Sequelize => MariaDB, PostgreSQL, MySQL etc)
-- P2P server
-- Workers - do the service health checks and other tasks
-- API - provides http services at `/api`
-- Frontend - serves the web application
+- app server, hosting:
+  - API - provides http services at `/api`
+  - Frontend - serves the web application
+- Worker - perform checks and other tasks
 
 ## Getting Started
 
-Clone the repository:
+Clone the repository: (latest stable\[est] release)
 
 ```bash
 git clone https://github.com/ibp-network/ibp-monitor.git
@@ -73,6 +72,25 @@ node migrate.js
 ```
 
 If you instead choose to run the IBP stack using Docker Compose, the `ibp-datastore-init` job defined in `docker/docker-compose.yml` will initialise the database using Sequelize migration definitions under `data/migrations`, which use the data model definitions under `data/models`.
+
+# Upgrade
+
+## Running manually / PM2
+
+```bash
+pm2 stop ibp-monitor
+git pull
+cd frontend
+yarn install
+yarn build
+cd ..
+cd backend
+npm install
+npm run migrate
+npm run build # PM2 runs the built files
+cd ..
+pm2 start ibp-monitor
+```
 
 # Manual / Development
 

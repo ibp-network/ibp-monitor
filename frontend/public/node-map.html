@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>IBP Node Map</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Leaflet CSS and JS -->
+    <link rel="stylesheet" href="node-map/leaflet.css" />
+    <script src="node-map/leaflet.js"></script>
+    <script src="node-map/heatmap.js"></script>
+    <script src="node-map/leaflet-heatmap.js"></script>
+    <!--
+      not required, will load from map.js
+      <script type="text/javascript" src="node-map/world2.json"></script>
+    -->
+  </head>
+  <body>
+    <div id="map"></div>
+    <div class="heatbar">
+      <div class="heatbar-tick">0</div>
+      <div class="heatbar-tick">25</div>
+      <div class="heatbar-tick">50</div>
+      <div class="heatbar-tick">75</div>
+      <div class="heatbar-tick">100</div>
+    </div>
+
+    <script type="module" src="node-map/map.js"></script>
+  </body>
+</html>

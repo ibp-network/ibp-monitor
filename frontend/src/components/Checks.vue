@@ -1,75 +1,77 @@
 <template>
-  <v-container fluid class="pa-0 ma-0">
-    <v-toolbar>
+  <v-container class="pa-1">
+    <v-toolbar density="compact" class="mb-1 rounded-pill">
       <v-btn icon><v-icon size="small">mdi-pulse</v-icon></v-btn>
       <v-toolbar-title>Checks</v-toolbar-title>
       <v-toolbar-items>
       </v-toolbar-items>
     </v-toolbar>
 
-    <v-row>
+    <v-row dense>
       <v-col>
-        <v-select density="compact" v-model="statusSel" label="Status" :items="statusIds" multiple></v-select>
+        <v-select class="mb-0" density="compact" v-model="statusSel" label="Status" :items="statusIds" multiple></v-select>
       </v-col>
       <v-col>
-        <v-select density="compact" v-model="serviceIdsel" label="Service" :items="serviceIds" multiple></v-select>
+        <v-select class="mb-0" density="compact" v-model="serviceIdsel" label="Service" :items="serviceIds" multiple></v-select>
       </v-col>
       <v-col>
-        <v-select density="compact" v-model="memberIdsel" label="Member" :items="memberIds" multiple></v-select>
+        <v-select class="mb-0" density="compact" v-model="memberIdsel" label="Member" :items="memberIds" multiple></v-select>
       </v-col>
       <v-col>
-        <v-select density="compact" v-model="source" label="Source" :items="['', 'gossip', 'check']"></v-select>
+        <v-select class="mb-0" density="compact" v-model="source" label="Source" :items="['', 'gossip', 'check']"></v-select>
       </v-col>
     </v-row>
 
-    <CheckTable
-      v-if="$vuetify.display.width > 599"
-      :healthChecks="list"
-      :loading="loading"
-      :columns="[
-        'id',
-        'monitorId',
-        'serviceId',
-        'memberId',
-        'source',
-        'version',
-        'performance',
-        'createdAt',
-      ]"
-    ></CheckTable>
-    <CheckList v-if="$vuetify.display.width < 600" :healthChecks="list"></CheckList>
+    <v-container>
+      <CheckTable
+        v-if="$vuetify.display.width > 599"
+        :healthChecks="list"
+        :loading="loading"
+        :columns="[
+          'id',
+          'monitorId',
+          'serviceId',
+          'memberId',
+          'source',
+          // 'version',
+          'performance',
+          'createdAt',
+        ]"
+      ></CheckTable>
+      <CheckList v-if="$vuetify.display.width < 600" :healthChecks="list"></CheckList>
 
-    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-      <a class="pagination-previous" @click="selectPage(pagination.prev.query)"
-        ><i class="fa-solid fa-angle-left"></i
-      ></a>
-      <a class="pagination-next" @click="selectPage(pagination.next.query)"
-        ><i class="fa-solid fa-angle-right"></i
-      ></a>
-      <ul class="pagination-list">
-        <li v-for="(page, idx) in pagination.pages" v-bind:key="idx">
-          <a
-            :class="`${page.class} ${page.current ? ' is-current' : ''}`"
-            @click="selectPage(page.query)"
-          >
-            {{ page.text }}
-          </a>
-        </li>
-        <button class="button is-white">Items:</button>
-        <div class="select">
-          <select id="itemsPerPage" label="Items per page" v-model="itemsPerPage">
-            <option
-              v-for="option in [10, 15, 20, 25, 50]"
-              v-bind:key="option"
-              :value="option"
-              :selected="option === limit"
+      <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+        <a class="pagination-previous" @click="selectPage(pagination.prev.query)"
+          ><i class="fa-solid fa-angle-left"></i
+        ></a>
+        <a class="pagination-next" @click="selectPage(pagination.next.query)"
+          ><i class="fa-solid fa-angle-right"></i
+        ></a>
+        <ul class="pagination-list">
+          <li v-for="(page, idx) in pagination.pages" v-bind:key="idx">
+            <a
+              :class="`${page.class} ${page.current ? ' is-current' : ''}`"
+              @click="selectPage(page.query)"
             >
-              {{ option }}
-            </option>
-          </select>
-        </div>
-      </ul>
-    </nav>
+              {{ page.text }}
+            </a>
+          </li>
+          <button class="button is-white">Items:</button>
+          <div class="select">
+            <select id="itemsPerPage" label="Items per page" v-model="itemsPerPage">
+              <option
+                v-for="option in [10, 15, 20, 25, 50]"
+                v-bind:key="option"
+                :value="option"
+                :selected="option === limit"
+              >
+                {{ option }}
+              </option>
+            </select>
+          </div>
+        </ul>
+      </nav>
+    </v-container>
   </v-container>
 </template>
 
@@ -78,6 +80,9 @@ import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
+
+// FIXME: refactor the pagination
+import '../assets/bulma-0.9.4.css'
 
 export default defineComponent({
   name: 'ChecksC',
@@ -116,15 +121,15 @@ export default defineComponent({
   },
   watch: {
     statusSel(newVal: string) {
-      const params = { offset: this.offset, limit: this.limit, where: { status: newVal, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
+      const params = { offset: this.offset, limit: this.itemsPerPage, where: { status: newVal, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
     memberIdsel(newVal: string) {
-      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: newVal, serviceId: this.serviceIdsel, source: this.source } }
+      const params = { offset: this.offset, limit: this.itemsPerPage, where: { status: this.statusSel, memberId: newVal, serviceId: this.serviceIdsel, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
     serviceIdsel(newVal: string) {
-      const params = { offset: this.offset, limit: this.limit, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: newVal, source: this.source } }
+      const params = { offset: this.offset, limit: this.itemsPerPage, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: newVal, source: this.source } }
       this.store.dispatch('healthCheck/getList', params)
     },
     source(newVal: string) {
@@ -173,7 +178,12 @@ export default defineComponent({
     this.memberIdsel = this.store.state.healthCheck.where.memberId
     this.serviceIdsel = this.store.state.healthCheck.where.serviceId
     this.source = this.store.state.healthCheck.where.source
-    this.store.dispatch('healthCheck/getList', {})
+    const params = { offset: 0, limit: this.itemsPerPage, where: { status: this.statusSel, memberId: this.memberIdsel, serviceId: this.serviceIdsel, source: this.source } }
+    this.store.dispatch('healthCheck/getList', params)
   },
 })
 </script>
+
+<style scoped>
+
+</style>

@@ -3,7 +3,7 @@
     <v-toolbar color="rgb(54,54,54)">
       <v-app-bar-title>
         <v-btn color="white" to="/" style="min-height: 25px">
-          <v-img src="/image/IBP2.png" width="28" height="28"></v-img>
+          <v-img src="/image/IBP_Logo.png" width="28" height="28"></v-img>
           &nbsp;Menu
         </v-btn>
       </v-app-bar-title>
@@ -43,6 +43,12 @@
         </template>
         Status</v-list-item
       >
+      <v-list-item @click="toggleDark">
+        <template v-slot:prepend>
+          <v-icon size="small">mdi-theme-light-dark</v-icon>
+        </template>
+        Dark / Light
+      </v-list-item>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -54,7 +60,8 @@ import { useStore } from 'vuex'
 export default defineComponent({
   setup() {
     const store = useStore()
-    const showSideBar = computed(() => store.state.showSideBar)
+    const showSideBar = computed<boolean>(() => store.state.showSideBar)
+    const dark = computed<boolean>(() => store.state.dark)
     const visible = ref(false)
     watch(
       () => showSideBar.value,
@@ -68,8 +75,13 @@ export default defineComponent({
         store.dispatch('setSideBar', newVal)
       }
     )
+    const toggleDark = () => {
+      store.dispatch('setDark', !dark.value)
+    }
     return {
+      toggleDark,
       visible,
+      dark
     }
   },
 })
