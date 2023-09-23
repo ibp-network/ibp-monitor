@@ -1,9 +1,7 @@
 // import * as dotenv from 'dotenv' // see https://github.com/motdotla/dotenv#how-do-i-use-dotenv-with-import
 // dotenv.config()
 
-import { config } from './config/config.js'
-import { config as configLocal } from './config/config.local.js'
-const cfg = Object.assign(config, configLocal)
+import cfg from './config/index.js'
 
 import express from 'express'
 import { Queue, Worker } from 'bullmq'
@@ -16,6 +14,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 
 import { asyncForeach } from './lib/utils.js'
 import { checkService } from './workers/f-check-service.js'
+import { updateMemberships } from './workers/f-update-memberships.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'
 // import { f_w3f_exposures_update } from './workers/w3f-exposures-update.js'
@@ -40,6 +39,7 @@ const qOpts = {
 const jobs = [
   // 'health_check',
   'checkService',
+  'updateMemberships',
   // '1kv_nominations_update',
   // '1kv_nominators_update',
   // 'w3f_exposures_update',
@@ -64,6 +64,7 @@ async function onFailed(job, event) {
 }
 
 const q_checkService = new Queue('checkService', qOpts)
+const q_updateMemberships = new Queue('updateMemberships', qOpts)
 // const q_health_check = new Queue('health_check', qOpts)
 // const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
 // const q_w3f_exposures_update = new Queue('w3f_exposures_update', qOpts)
@@ -75,6 +76,7 @@ const q_checkService = new Queue('checkService', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
 const w_checkService = new Worker('checkService', checkService, qOpts)
+const w_updateMemberships = new Worker('updateMemberships', updateMemberships, qOpts)
 // const w_health_check = new Worker('health_check', f_health_check, qOpts)
 // const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
 // const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
@@ -84,6 +86,17 @@ const w_checkService = new Worker('checkService', checkService, qOpts)
 // const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
 // const w_w3f_nominations_update = new Worker('w3f_nominations_update', f_w3f_nominations_update, qOpts)
 // const w_dock_auto_payout = new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
+
+// Call updateMemberships repeteadely
+q_updateMemberships.add(
+  'updateMemberships',
+  {},
+  {
+    repeat: {
+      pattern: '0 0 * * *',
+    },
+  }
+)
 
 // handle all error/failed
 jobs.forEach((job) => {

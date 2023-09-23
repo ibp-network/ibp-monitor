@@ -227,6 +227,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   })
 
   // publish the results of our checkService via libp2p
+  const updateMembershipsQueue = new Queue('updateMemberships', queueOpts)
   const checkServiceQueue = new Queue('checkService', queueOpts)
   const checkServiceEvents = new QueueEvents('checkService', queueOpts)
   const handleCheckServiceResult = async ({ jobId }) => {
@@ -324,6 +325,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     }
   }
 
+  // Run `updateMemberships` for once before running it repeatedly
+  updateMembershipsQueue.add('updateMemberships', {}, {})
   console.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL / 1000} seconds`)
 
   // TODO: move healthCheckJobs to worker
