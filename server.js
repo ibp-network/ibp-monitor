@@ -240,23 +240,29 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     const result = job.returnvalue
     // we could get hc for monitor that has not connected yet
     if (result.monitorId) {
-      let monitor = await ds.Monitor.upsert({ id: result.monitorId, multiaddress: [], status: 'active' }, { fields: ['status'] });
+      let monitor = await ds.Monitor.upsert(
+        { id: result.monitorId, multiaddress: [], status: 'active' },
+        { fields: ['status'] }
+      )
     }
     // upsert member service node
     if (result.peerId) {
       let memberService = await ds.MemberService.findOne({ where: { serviceId: service.id } })
       // FIXME: we need to add a memberService from the memnbers.json file
-      if (!memberService) { 
-        console.error('No memberService for', member.id, service.id);
-        return;
+      if (!memberService) {
+        console.error('No memberService for', member.id, service.id)
+        return
       }
-      await ds.MemberServiceNode.upsert({
-        peerId: result.peerId,
-        serviceId: service.id,
-        memberId: member.id,
-        name: null,
-        status: 'active',
-      }, { fields: ['status'] })
+      await ds.MemberServiceNode.upsert(
+        {
+          peerId: result.peerId,
+          serviceId: service.id,
+          memberId: member.id,
+          name: null,
+          status: 'active',
+        },
+        { fields: ['status'] }
+      )
     }
     // insert health check
     await ds.HealthCheck.create(result)
