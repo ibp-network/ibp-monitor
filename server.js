@@ -299,7 +299,10 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     })
     for (let service of services) {
       for (let member of members) {
-        if (member.membershipLevelId < service.membershipLevelId) {
+        if (
+          member.membershipType !== 'external' &&
+          member.membershipLevelId < service.membershipLevelId
+        ) {
           continue
         }
         const activeJobs = await checkServiceQueue.getActive()

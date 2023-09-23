@@ -60,17 +60,17 @@ export async function checkService(job) {
 
   async function retry(fn, retriesLeft = 3, interval = 1000) {
     try {
-      return await fn();
+      return await fn()
     } catch (error) {
       // typically a timeout error
       job.log('attempt', retriesLeft)
       job.log(error)
       if (retriesLeft) {
         // Wait interval milliseconds before next try
-        await new Promise(resolve => setTimeout(resolve, interval));
-        return retry(fn, retriesLeft - 1, interval);
+        await new Promise((resolve) => setTimeout(resolve, interval))
+        return retry(fn, retriesLeft - 1, interval)
       } else {
-        throw new Error('Max retries exceeded');
+        throw new Error('Max retries exceeded')
       }
     }
   }
@@ -154,6 +154,7 @@ export async function checkService(job) {
       peerId: peerId.toString(),
       source: 'check',
       type: 'service_check',
+      checkOrigin: member.membershipType !== 'external' ? 'member' : 'external',
       status: timing > (cfg.performance?.sla || 500) ? 'warning' : 'success',
       responseTimeMs: timing,
       record: {
@@ -178,8 +179,7 @@ export async function checkService(job) {
 
   try {
     // retry 3 times, wait 5 seconds between each try
-    await retry(performCheck, 3, 5 * 1000);
-
+    await retry(performCheck, 3, 5 * 1000)
   } catch (err) {
     console.warn('[worker] WE GOT AN ERROR AFTER RETRIES --------------')
     console.error(err)
@@ -195,6 +195,7 @@ export async function checkService(job) {
       peerId: peerId?.toString() || null,
       source: 'check',
       type: 'service_check',
+      checkOrigin: member.membershipType !== 'external' ? 'member' : 'external',
       status: 'error',
       record: {
         monitorId,
