@@ -51,7 +51,7 @@ const jobRetention = {
 // not used, we listen on the port(s) in cfg.addresses
 // const GOSSIP_PORT = cfg.listenPort || 30000
 
-const UPDATE_INTERVAL = cfg.updateInterval || 5 * 60 * 1000 // 5 mins, in millis
+const UPDATE_INTERVAL = cfg.updateInterval || 10 * 60 * 1000 // 10 mins, in millis
 
 const ds = new DataStore({ pruning: cfg.pruning })
 const hc = new HealthChecker({ datastore: ds })
