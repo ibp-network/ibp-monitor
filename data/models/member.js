@@ -28,7 +28,7 @@ export const memberModel = {
       allowNull: true,
     },
     membershipType: {
-      type: DataTypes.ENUM('hobbyist', 'professional'),
+      type: DataTypes.ENUM('hobbyist', 'professional', 'external'),
       allowNull: false,
     },
     membershipLevelId: {
