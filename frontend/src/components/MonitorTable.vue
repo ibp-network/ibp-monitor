@@ -1,5 +1,5 @@
 <template>
-  <table class="table is-fullwidth">
+  <table class="table is-fullwidth table-container">
     <thead>
       <th v-if="columns.includes('id')">Monitor</th>
       <th>Last Seen (UTC)</th>

@@ -1,59 +1,65 @@
 <template>
+
   <v-container fluid class="pa-0 ma-0">
     <v-toolbar>
       <v-btn icon><v-icon size="small">mdi-pulse</v-icon></v-btn>
       <v-toolbar-title>Checks</v-toolbar-title>
     </v-toolbar>
 
-    <CheckTable
-      v-if="$vuetify.display.width > 599"
-      :healthChecks="list"
-      :loading="loading"
-      :columns="[
-        'id',
-        'monitorId',
-        'serviceId',
-        'memberId',
-        'source',
-        'version',
-        'performance',
-        'createdAt',
-      ]"
-    ></CheckTable>
-    <CheckList v-if="$vuetify.display.width < 600" :healthChecks="list"></CheckList>
+    <div class="columns">
+      <div class="column is-8-desktop is-offset-2-desktop">
+        <CheckTable
+          v-if="$vuetify.display.width > 599"
+          :healthChecks="list"
+          :loading="loading"
+          :columns="[
+            'id',
+            'monitorId',
+            'serviceId',
+            'memberId',
+            'source',
+            'version',
+            'performance',
+            'createdAt',
+          ]"
+        ></CheckTable>
+        <CheckList v-if="$vuetify.display.width < 600" :healthChecks="list"></CheckList>
 
-    <nav class="pagination is-centered" role="navigation" aria-label="pagination">
-      <a class="pagination-previous" @click="selectPage(pagination.prev.query)"
-        ><i class="fa-solid fa-angle-left"></i
-      ></a>
-      <a class="pagination-next" @click="selectPage(pagination.next.query)"
-        ><i class="fa-solid fa-angle-right"></i
-      ></a>
-      <ul class="pagination-list">
-        <li v-for="(page, idx) in pagination.pages" v-bind:key="idx">
-          <a
-            :class="`${page.class} ${page.current ? ' is-current' : ''}`"
-            @click="selectPage(page.query)"
-          >
-            {{ page.text }}
-          </a>
-        </li>
-        <button class="button is-white">Items:</button>
-        <div class="select">
-          <select id="itemsPerPage" label="Items per page" v-model="itemsPerPage">
-            <option
-              v-for="option in [10, 15, 20, 25, 50]"
-              v-bind:key="option"
-              :value="option"
-              :selected="option === limit"
-            >
-              {{ option }}
-            </option>
-          </select>
-        </div>
-      </ul>
-    </nav>
+        <nav class="pagination is-centered" role="navigation" aria-label="pagination">
+          <a class="pagination-previous" @click="selectPage(pagination.prev.query)"
+            ><i class="fa-solid fa-angle-left"></i
+          ></a>
+          <a class="pagination-next" @click="selectPage(pagination.next.query)"
+            ><i class="fa-solid fa-angle-right"></i
+          ></a>
+          <ul class="pagination-list">
+            <li v-for="(page, idx) in pagination.pages" v-bind:key="idx">
+              <a
+                :class="`${page.class} ${page.current ? ' is-current' : ''}`"
+                @click="selectPage(page.query)"
+              >
+                {{ page.text }}
+              </a>
+            </li>
+            <button class="button is-white">Items:</button>
+            <div class="select">
+              <select id="itemsPerPage" label="Items per page" v-model="itemsPerPage">
+                <option
+                  v-for="option in [10, 15, 20, 25, 50]"
+                  v-bind:key="option"
+                  :value="option"
+                  :selected="option === limit"
+                >
+                  {{ option }}
+                </option>
+              </select>
+            </div>
+          </ul>
+        </nav>
+    </div>
+  </div>
   </v-container>
+  
 </template>
 
 <script lang="ts">

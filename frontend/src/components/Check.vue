@@ -12,8 +12,8 @@
       <v-btn icon to="/healthCheck"><v-icon size="small">mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ healthCheck?.id }} ({{ healthCheck?.serviceId }})</v-toolbar-title>
     </v-toolbar>
-
-    <table class="table">
+    <div class="offset-1">
+    <table class="table table-container">
       <tr>
         <th>Service</th>
         <td>
@@ -58,6 +58,7 @@
     <pre
       >{{ healthCheckAsJSON() }}
     </pre>
+  </div>
   </v-container>
 </template>
 

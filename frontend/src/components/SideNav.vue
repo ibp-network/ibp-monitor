@@ -3,7 +3,7 @@
     <v-toolbar color="rgb(54,54,54)">
       <v-app-bar-title>
         <v-btn color="white" to="/" style="min-height: 25px">
-          <v-img src="/image/IBP2.png" width="28" height="28"></v-img>
+          <v-img src="/image/IBP_Logo.png" width="28" height="28"></v-img>
           &nbsp;Menu
         </v-btn>
       </v-app-bar-title>

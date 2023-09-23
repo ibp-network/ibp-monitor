@@ -11,8 +11,8 @@
       <v-btn icon to="/monitor"><v-icon size="small">mdi-chevron-left</v-icon></v-btn>
       <v-toolbar-title>{{ shortStash(monitor.monitorId) }}</v-toolbar-title>
     </v-toolbar>
-
-    <table class="table is-bordered">
+    <div class="offset-1">
+    <table class="table table-container">
       <tbody>
         <tr>
           <th>Monitor ID</th>
@@ -54,6 +54,7 @@
       :columns="['id', 'serviceUrl', 'source', 'version', 'performance', 'updatedAt']"
     ></CheckTable>
     <CheckList v-if="$vuetify.display.width < 600" :healthChecks="monitor.healthChecks"></CheckList>
+  </div>
   </v-container>
 </template>
 
