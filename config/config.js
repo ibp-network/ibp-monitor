@@ -44,6 +44,10 @@ const config = {
     age: 90 * 24 * 60 * 60, // 90 days as seconds
     interval: 1 * 60 * 60, // 1 hour as seconds
   },
+  providers: {
+    members: 'https://raw.githubusercontent.com/ibp-network/config/main/members.json',
+    external: 'https://raw.githubusercontent.com/ibp-network/config/main/external.json',
+  },
 }
 
 export { config }
