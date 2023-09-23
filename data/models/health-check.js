@@ -33,6 +33,10 @@ export const healthCheckModel = {
       type: DataTypes.ENUM('service_check', 'system_health', 'best_block'),
       allowNull: false,
     },
+    checkOrigin: {
+      type: DataTypes.ENUM('member', 'external'),
+      allowNull: false,
+    },
     status: {
       type: DataTypes.ENUM('error', 'warning', 'success'),
       allowNull: false,
