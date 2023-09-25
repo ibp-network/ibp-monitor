@@ -3,7 +3,9 @@ import { DataStore } from '../data/data-store.js'
 import config from '../config/index.js'
 import { ProvidersAggregateRoot } from '../domain/providers.aggregate.js'
 import { ServiceEntity } from '../domain/service.entity.js'
-import * as url from 'node:url'
+import { Logger } from '../lib/utils.js'
+
+const logger = new Logger('worker:updateMemberships')
 
 /**
  * Intializes {@link DataStore} and injects it to the process
@@ -22,7 +24,7 @@ async function withDatastore(callback) {
  */
 export async function updateMemberships() {
   await withDatastore(async (ds) => {
-    console.log('[worker] updateMemberships: Starting update of memberships list')
+    logger.log('Starting update of memberships list')
 
     try {
       const { data: membersList } = await axios.get(config.providers.members)
@@ -52,9 +54,9 @@ export async function updateMemberships() {
       // TODO: Include a check to deactivate services for providers that weren't upserted.
       // Check with @dcolley
     } catch (err) {
-      console.error(`[worker] updateMemberships`, err)
+      logger.error(`updateMemberships`, err)
     } finally {
-      console.log('[worker] updateMemberships: Finished process')
+      logger.log('Finished process')
     }
   })
 }

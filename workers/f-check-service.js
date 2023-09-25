@@ -5,9 +5,10 @@ import edns from 'evil-dns'
 import { ApiPromise, WsProvider } from '@polkadot/api'
 import { serializeError } from 'serialize-error'
 
-import { config } from '../config/config.js'
-import { config as configLocal } from '../config/config.local.js'
-const cfg = Object.assign(config, configLocal)
+import cfg from '../config/index.js'
+import { Logger } from '../lib/utils.js'
+
+const logger = new Logger('worker:checkService')
 
 // eDns has patched node:dns and not node:dns/promises
 async function lookupAsync(domain) {
@@ -22,13 +23,13 @@ async function lookupAsync(domain) {
 const setDNS = async (domain, ip) => {
   edns.add(domain, ip)
   var { address } = await lookupAsync(domain)
-  console.debug(`${domain} now resolves to ${address}, and should be ${ip}`)
+  logger.debug(`${domain} now resolves to ${address}, and should be ${ip}`)
 }
 const clearDNS = async (domain, ip) => {
-  console.log(`removing eDns for ${domain}`)
+  logger.log(`removing eDns for ${domain}`)
   edns.remove(domain, ip)
   var { address } = await lookupAsync(domain)
-  console.log(`${domain} now resolves to ${address}\n`)
+  logger.log(`${domain} now resolves to ${address}\n`)
 }
 
 class TimeoutException extends Error {
@@ -46,10 +47,10 @@ class TimeoutException extends Error {
 export async function checkService(job) {
   // Will print { foo: 'bar'} for the first job
   // and { qux: 'baz' } for the second.
-  // console.log('job.data', job.data);
+  // logger.log('job.data', job.data);
 
   const { subdomain, member, service, monitorId } = job.data
-  console.debug('[worker] checkService', subdomain, member.id, service.id)
+  logger.debug('[worker] checkService', subdomain, member.id, service.id)
 
   const domain = `${subdomain}.dotters.network`
   const endpoint = `wss://${domain}/${service.chainId}`
@@ -106,8 +107,8 @@ export async function checkService(job) {
     api.on('error', async (err) => {
       job.log('== got apiError for ', service.serviceUrl)
       job.log(err)
-      console.log('== got apiError for ', service.serviceUrl)
-      console.log(err)
+      logger.log('== got apiError for ', service.serviceUrl)
+      logger.log(err)
       // result = handleProviderError(err, service, peerId)
       await provider.disconnect()
       // throw new Error(err)
@@ -118,7 +119,7 @@ export async function checkService(job) {
 
     // handle Timeout n seconds
     timeout = setTimeout(async () => {
-      console.debug('[worker] TimeoutException')
+      logger.debug('[worker] TimeoutException')
       job.log('TimeoutException')
       await api.disconnect()
       await provider.disconnect()
@@ -181,8 +182,8 @@ export async function checkService(job) {
     // retry 3 times, wait 5 seconds between each try
     await retry(performCheck, 3, 5 * 1000)
   } catch (err) {
-    console.warn('[worker] WE GOT AN ERROR AFTER RETRIES --------------')
-    console.error(err)
+    logger.warn('[worker] WE GOT AN ERROR AFTER RETRIES --------------')
+    logger.error(err)
     job.log('WE GOT AN ERROR AFTER RETRIES --------------')
     job.log(err)
     job.log(err.toString())
@@ -210,7 +211,7 @@ export async function checkService(job) {
   } finally {
     if (timeout) clearTimeout(timeout)
     await clearDNS(domain, member.serviceIpAddress)
-    console.log('[worker] checkService done...', member.id, service.id)
+    logger.log('[worker] checkService done...', member.id, service.id)
     job.log('checkService done...', member.id, service.id)
     return result
   }

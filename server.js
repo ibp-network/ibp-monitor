@@ -22,6 +22,7 @@ import { HealthChecker } from './lib/health-checker.js'
 import { Job, QueueEvents, Queue } from 'bullmq'
 import { isIPv4, isIPv6 } from 'is-ip'
 import isValidHostname from 'is-valid-hostname'
+import { Logger } from './lib/utils.js'
 
 import * as dotenv from 'dotenv'
 dotenv.config()
@@ -33,6 +34,7 @@ import { config } from './config/config.js'
 import { config as configLocal } from './config/config.local.js'
 
 const cfg = Object.assign(config, configLocal)
+const logger = new Logger('server')
 
 const queueOpts = {
   connection: cfg.redis,
@@ -63,7 +65,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   var peerId
   if (fs.existsSync('./keys/peer-id.json')) {
     const pidJson = JSON.parse(fs.readFileSync('./keys/peer-id.json', 'utf-8'))
-    // console.debug(pidJson)
+    // logger.debug(pidJson)
     peerId = await createFromJSON(pidJson)
   } else {
     peerId = await createEd25519PeerId()
@@ -77,7 +79,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       'utf-8'
     )
   }
-  console.debug('Our monitorId', peerId.toString())
+  logger.debug('Our monitorId', peerId.toString())
 
   const gsub = gossipsub({
     emitSelf: false, // don't want our own pubsub messages
@@ -102,16 +104,16 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       const multiaddress = `/ip4/${process.env.P2P_PUBLIC_IP}/tcp/${
         cfg.listenPort
       }/p2p/${peerId.toString()}`
-      console.log(`Announcing P2P IPv4 multiaddress: ${multiaddress}`)
+      logger.log(`Announcing P2P IPv4 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else if (isIPv6(process.env.P2P_PUBLIC_IP)) {
       const multiaddress = `/ip6/${process.env.P2P_PUBLIC_IP}/tcp/${
         cfg.listenPort
       }/p2p/${peerId.toString()}`
-      console.log(`Announcing P2P IPv6 multiaddress: ${multiaddress}`)
+      logger.log(`Announcing P2P IPv6 multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else {
-      console.error(
+      logger.error(
         `Invalid P2P_PUBLIC_IP environment variable: ${process.env.P2P_PUBLIC_IP}. P2P IP address will NOT be announced.`
       )
     }
@@ -122,10 +124,10 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       const multiaddress = `/dnsaddr/${process.env.P2P_PUBLIC_HOST}/tcp/${
         cfg.listenPort
       }/p2p/${peerId.toString()}`
-      console.log(`Announcing P2P DNS multiaddress: ${multiaddress}`)
+      logger.log(`Announcing P2P DNS multiaddress: ${multiaddress}`)
       announce.push(multiaddress)
     } else {
-      console.error(
+      logger.error(
         `Invalid P2P_PUBLIC_HOST environment variable: ${process.env.P2P_PUBLIC_HOST}. P2P DNS address will NOT be announced.`
       )
     }
@@ -171,7 +173,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   })
 
   await libp2p.start()
-  console.debug(libp2p.getMultiaddrs())
+  logger.debug(libp2p.getMultiaddrs())
 
   // update our monitor record with computed multiAddrs
   await ds.Monitor.upsert({
@@ -181,11 +183,11 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   })
 
   libp2p.dht.addEventListener('peer', (peer) => {
-    console.log('WOOT: dht peer', peer.toString())
+    logger.log('WOOT: dht peer', peer.toString())
   })
 
   libp2p.connectionManager.addEventListener('peer:connect', (peerId) => {
-    console.debug(
+    logger.debug(
       'peer:connect',
       peerId.detail?.remotePeer.toString(),
       'at',
@@ -193,7 +195,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     )
   })
   libp2p.connectionManager.addEventListener('peer:disconnect', (peerId) => {
-    console.debug(
+    logger.debug(
       'peer:disconnect',
       peerId.detail?.remotePeer.toString(),
       'at',
@@ -202,11 +204,8 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   })
 
   libp2p.addEventListener('peer:discovery', async (peerId) => {
-    console.debug('peer:discovery, we have', libp2p.getPeers().length, 'peers')
-    console.debug(
-      'libp2p.connectionManager.listenerCount',
-      libp2p.connectionManager.listenerCount()
-    )
+    logger.debug('peer:discovery, we have', libp2p.getPeers().length, 'peers')
+    logger.debug('libp2p.connectionManager.listenerCount', libp2p.connectionManager.listenerCount())
     await mh.handleDiscovery(peerId)
   })
 
@@ -216,13 +215,13 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
 
   // subscribe to pubsub topics
   for (var i = 0; i < cfg.allowedTopics.length; i++) {
-    console.debug('subscribing to', cfg.allowedTopics[i])
+    logger.debug('subscribing to', cfg.allowedTopics[i])
     libp2p.pubsub.subscribe(cfg.allowedTopics[i])
   }
 
   libp2p.handle(['/ibp/ping'], (event) => {
     const { stream, connection } = event
-    // console.debug(stream, connection, protocol)
+    // logger.debug(stream, connection, protocol)
     return mh.handleProtocol({ stream, connection, protocol: '/ibp/ping' })
   })
 
@@ -232,7 +231,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   const checkServiceEvents = new QueueEvents('checkService', queueOpts)
   const handleCheckServiceResult = async ({ jobId }) => {
     const job = await Job.fromId(checkServiceQueue, jobId)
-    console.log('handleCheckServiceResult', jobId, JSON.stringify(job.returnvalue))
+    logger.log('handleCheckServiceResult', jobId, job.returnvalue)
     if (!job.returnvalue) {
       return
     }
@@ -250,7 +249,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       let memberService = await ds.MemberService.findOne({ where: { serviceId: service.id } })
       // FIXME: we need to add a memberService from the memnbers.json file
       if (!memberService) {
-        console.error('No memberService for', member.id, service.id)
+        logger.error('No memberService for', member.id, service.id)
         return
       }
       await ds.MemberServiceNode.upsert(
@@ -267,7 +266,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
     // insert health check
     await ds.HealthCheck.create(result)
     if (cfg.gossipResults) {
-      console.debug(
+      logger.debug(
         `[gossip] publishing healthCheck: ${member.id} ${service.id} to /ibp/healthCheck`
       )
       const res = await libp2p.pubsub.publish(
@@ -275,15 +274,15 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
         uint8ArrayFromString(JSON.stringify(result))
       )
       // debug recipient list
-      console.debug(res)
+      logger.debug(res)
     }
   }
   checkServiceQueue.on('completed', handleCheckServiceResult)
   checkServiceQueue.on('error', (args) => {
-    console.log('Check service queue error', args)
+    logger.log('Check service queue error', args)
   })
   checkServiceQueue.on('failed', (event, listener, id) => {
-    console.log('Queue failed', event, listener, id)
+    logger.log('Queue failed', event, listener, id)
   })
   checkServiceEvents.on('completed', handleCheckServiceResult)
 
@@ -314,11 +313,11 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
           (j) => j.data.service.id === service.id && j.data.member.id === member.id
         )
         if (activeJob) {
-          console.warn('WARNING: active job, skipping check for ', member.id, service.id)
+          logger.warn('WARNING: active job, skipping check for ', member.id, service.id)
         } else if (waitingJob) {
-          console.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
+          logger.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
         } else {
-          console.debug('Creating new [checkService] job for', member.id, service.id)
+          logger.debug('Creating new [checkService] job for', member.id, service.id)
           checkServiceQueue.add(
             'checkService',
             {
@@ -336,7 +335,7 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
 
   // Run `updateMemberships` for once before running it repeatedly
   updateMembershipsQueue.add('updateMemberships', {}, {})
-  console.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL / 1000} seconds`)
+  logger.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL / 1000} seconds`)
 
   // TODO: move healthCheckJobs to worker
   // if cfg.gossipResults, results will be broadcast to all peers
