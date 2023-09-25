@@ -32,6 +32,9 @@ console.log('VERSION', pkg.version)
 
 import { config } from './config/config.js'
 import { config as configLocal } from './config/config.local.js'
+import { ProvidersAggregateRoot } from './domain/providers.aggregate.js'
+import { Op } from 'sequelize'
+import chalkTemplate from 'chalk-template'
 
 const cfg = Object.assign(config, configLocal)
 const logger = new Logger('server')
@@ -56,8 +59,7 @@ const jobRetention = {
 const UPDATE_INTERVAL = cfg.updateInterval || 10 * 60 * 1000 // 10 mins, in millis
 
 const ds = new DataStore({ pruning: cfg.pruning })
-const hc = new HealthChecker({ datastore: ds })
-const mh = new MessageHandler({ datastore: ds, api: hc })
+const mh = new MessageHandler({ datastore: ds })
 // const hh = new HttpHandler({ datastore: ds, version: pkg.version })
 
 ;(async () => {
@@ -226,12 +228,22 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
   })
 
   // publish the results of our checkService via libp2p
-  const updateMembershipsQueue = new Queue('updateMemberships', queueOpts)
   const checkServiceQueue = new Queue('checkService', queueOpts)
+  const checkExternalServiceQueue = new Queue('checkExternalService', queueOpts)
   const checkServiceEvents = new QueueEvents('checkService', queueOpts)
-  const handleCheckServiceResult = async ({ jobId }) => {
-    const job = await Job.fromId(checkServiceQueue, jobId)
-    logger.log('handleCheckServiceResult', jobId, job.returnvalue)
+  const checkExternalServiceEvents = new QueueEvents('checkExternalService', queueOpts)
+
+  const handleCheckServiceResult = async (queue, { jobId }) => {
+    const job = await Job.fromId(queue, jobId)
+    logger.log(
+      chalkTemplate`{magenta.bold handleCheckServiceResult(${queue.name}, ${jobId}):}
+      {bold Monitor ID:} ${job.returnvalue.monitorId}
+      {bold Service ID:} ${job.returnvalue.serviceId}
+      {bold Member ID:} ${job.returnvalue.memberId}
+      {bold Status:} ${job.returnvalue.status}
+      {bold Response time:} ${job.returnvalue.responseTimeMs?.toFixed(2) ?? NaN}ms
+    `
+    )
     if (!job.returnvalue) {
       return
     }
@@ -277,14 +289,27 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       logger.debug(res)
     }
   }
-  checkServiceQueue.on('completed', handleCheckServiceResult)
-  checkServiceQueue.on('error', (args) => {
-    logger.log('Check service queue error', args)
-  })
-  checkServiceQueue.on('failed', (event, listener, id) => {
+
+  const onCheckError = (args) => {
+    logger.error('Check service queue error', args)
+  }
+  const onCheckQueueFailed = (event, listener, id) => {
     logger.log('Queue failed', event, listener, id)
-  })
-  checkServiceEvents.on('completed', handleCheckServiceResult)
+  }
+
+  checkServiceQueue.on('completed', (job) => handleCheckServiceResult(checkServiceQueue, job))
+  checkServiceQueue.on('error', onCheckError)
+  checkServiceQueue.on('failed', onCheckQueueFailed)
+  checkServiceEvents.on('completed', (job) => handleCheckServiceResult(checkServiceQueue, job))
+
+  checkExternalServiceQueue.on('completed', (job) =>
+    handleCheckServiceResult(checkExternalServiceQueue, job)
+  )
+  checkExternalServiceQueue.on('error', onCheckError)
+  checkExternalServiceQueue.on('failed', onCheckQueueFailed)
+  checkExternalServiceEvents.on('completed', (job) =>
+    handleCheckServiceResult(checkExternalServiceQueue, job)
+  )
 
   async function checkServiceJobs() {
     // from now on all monitors check all services
@@ -293,50 +318,95 @@ const mh = new MessageHandler({ datastore: ds, api: hc })
       include: ['membershipLevel'],
     })
     const members = await ds.Member.findAll({
-      where: { status: 'active' },
+      where: { status: 'active', membershipType: { [Op.ne]: 'external' } },
       include: ['membershipLevel'],
     })
-    for (let service of services) {
-      for (let member of members) {
-        if (
-          member.membershipType !== 'external' &&
-          member.membershipLevelId < service.membershipLevelId
-        ) {
-          continue
-        }
-        const activeJobs = await checkServiceQueue.getActive()
-        const waitingJobs = await checkServiceQueue.getWaiting()
-        const activeJob = activeJobs.find(
-          (j) => j.data.service.id === service.id && j.data.member.id === member.id
-        )
-        const waitingJob = waitingJobs.find(
-          (j) => j.data.service.id === service.id && j.data.member.id === member.id
-        )
-        if (activeJob) {
-          logger.warn('WARNING: active job, skipping check for ', member.id, service.id)
-        } else if (waitingJob) {
-          logger.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
-        } else {
-          logger.debug('Creating new [checkService] job for', member.id, service.id)
-          checkServiceQueue.add(
-            'checkService',
-            {
-              subdomain: service.membershipLevel.subdomain,
-              member,
-              service,
-              monitorId: peerId.toString(),
-            },
-            { repeat: false, ...jobRetention }
-          )
-        }
+    const internalProviders = ProvidersAggregateRoot.crossProduct(
+      members,
+      services,
+      ({ member, service }) => member.membershipLevelId >= service.membershipLevelId
+    )
+
+    const externalMembers = await ds.Member.findAll({
+      where: { status: 'active', membershipType: 'external' },
+      include: ['membershipLevel'],
+    })
+    const memberServices = await ds.MemberService.findAll({
+      where: { status: 'active' },
+      include: { association: 'member', where: { membershipType: 'external' } },
+    })
+    const externalProviders = ProvidersAggregateRoot.fromDataStore(
+      externalMembers,
+      services,
+      memberServices
+    )
+
+    const activeJobs = await checkServiceQueue.getActive()
+    const waitingJobs = await checkServiceQueue.getWaiting()
+
+    internalProviders.providedServices.forEach(({ member, service }) => {
+      const activeJob = activeJobs.find(
+        (j) => j.data.service.id === service.id && j.data.member.id === member.id
+      )
+      const waitingJob = waitingJobs.find(
+        (j) => j.data.service.id === service.id && j.data.member.id === member.id
+      )
+
+      if (activeJob) {
+        return logger.warn('WARNING: active job, skipping check for ', member.id, service.id)
+      } else if (waitingJob) {
+        return logger.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
       }
-    }
+
+      logger.debug('Creating new [checkService] job for', member.id, service.id)
+      checkServiceQueue.add(
+        'checkService',
+        {
+          subdomain: service.membershipLevel.subdomain,
+          member,
+          service,
+          monitorId: peerId.toString(),
+        },
+        { repeat: false, ...jobRetention }
+      )
+    })
+
+    externalProviders.providedServices.forEach(({ member, service, serviceUrl }) => {
+      const activeJob = activeJobs.find(
+        (j) => j.data.service.id === service.id && j.data.member.id === member.id
+      )
+      const waitingJob = waitingJobs.find(
+        (j) => j.data.service.id === service.id && j.data.member.id === member.id
+      )
+
+      if (activeJob) {
+        return logger.warn('WARNING: active job, skipping check for ', member.id, service.id)
+      } else if (waitingJob) {
+        return logger.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
+      }
+
+      logger.debug('Creating new [checkExternalService] job for', member.id, service.id)
+      checkExternalServiceQueue.add(
+        'checkExternalService',
+        {
+          member,
+          service,
+          serviceUrl,
+          monitorId: peerId.toString(),
+        },
+        { repeat: false, ...jobRetention }
+      )
+    })
   }
 
   // Run `updateMemberships` for once before running it repeatedly
-  updateMembershipsQueue.add('updateMemberships', {}, {})
-  logger.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL / 1000} seconds`)
+  logger.log('Called to update memeberships')
+  const updateMembershipJob = await new Queue('updateMemberships', queueOpts).add(
+    'updateMemberships'
+  )
+  await updateMembershipJob.waitUntilFinished(new QueueEvents('updateMemberships', queueOpts))
 
+  logger.log(`UPDATE_INTERVAL: ${UPDATE_INTERVAL / 1000} seconds`)
   // TODO: move healthCheckJobs to worker
   // if cfg.gossipResults, results will be broadcast to all peers
   await checkServiceJobs()

@@ -35,7 +35,7 @@ export class ProvidersAggregateRoot {
    * @param {ServiceEntity[]} services
    * @param {{ memberId: string, serviceId: string, serviceUrl: string, status: string }[]} memberServices
    */
-  static fromDataStore(members, services, memberServices) {
+  static fromDataStore(members, services, memberServices, filter = () => true) {
     const root = new ProvidersAggregateRoot()
 
     root.members = members
@@ -48,7 +48,7 @@ export class ProvidersAggregateRoot {
           status: memberService.status,
         })
       })
-      .filter(({ member, service }) => member.membershipLevelId >= service.membershipLevelId)
+      .filter(filter)
 
     return root
   }
@@ -58,7 +58,7 @@ export class ProvidersAggregateRoot {
    * @param {MemberEntity[]} members
    * @param {ServiceEntity[]} services
    */
-  static crossProduct(members, services) {
+  static crossProduct(members, services, filter = () => true) {
     const root = new ProvidersAggregateRoot()
 
     root.members = members
@@ -72,7 +72,7 @@ export class ProvidersAggregateRoot {
             status: service.status,
           })
         })
-        .filter(({ member, service }) => member.membershipLevelId >= service.membershipLevelId)
+        .filter(filter)
     })
 
     return root

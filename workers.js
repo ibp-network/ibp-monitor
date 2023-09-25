@@ -14,6 +14,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 
 import { asyncForeach } from './lib/utils.js'
 import { checkService } from './workers/f-check-service.js'
+import { checkService as checkExternalService } from './workers/f-check-external-service.js'
 import { updateMemberships } from './workers/f-update-memberships.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'
@@ -36,21 +37,6 @@ const qOpts = {
   connection: cfg.redis,
 }
 
-const jobs = [
-  // 'health_check',
-  'checkService',
-  'updateMemberships',
-  // '1kv_nominations_update',
-  // '1kv_nominators_update',
-  // 'w3f_exposures_update',
-  // 'w3f_nominators_update',
-  // 'w3f_pools_update',
-  // 'w3f_validator_location_stats_update',
-  // 'w3f_validators_update',
-  // 'w3f_nominations_update',
-  // 'dock_auto_payout'
-]
-
 async function onError(job, err) {
   const errStr = `ERROR: ${job}: ` + typeof err === 'string' ? err : JSON.stringify(err)
   // await axios.get('http://192.168.1.2:1880/sendToTelegram?text='+ errStr)
@@ -64,6 +50,7 @@ async function onFailed(job, event) {
 }
 
 const q_checkService = new Queue('checkService', qOpts)
+const q_checkExternalService = new Queue('checkExternalService', qOpts)
 const q_updateMemberships = new Queue('updateMemberships', qOpts)
 // const q_health_check = new Queue('health_check', qOpts)
 // const q_1kv_nominators_update = new Queue('1kv_nominators_update', qOpts)
@@ -75,17 +62,22 @@ const q_updateMemberships = new Queue('updateMemberships', qOpts)
 // const q_w3f_nominations_update = new Queue('w3f_nominations_update', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
-const w_checkService = new Worker('checkService', checkService, qOpts)
-const w_updateMemberships = new Worker('updateMemberships', updateMemberships, qOpts)
-// const w_health_check = new Worker('health_check', f_health_check, qOpts)
-// const w_1kv_nominators_update = new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
-// const w_w3f_exposures_update = new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
-// const w_w3f_nominators_update = new Worker('w3f_nominators_update', f_w3f_nominators_update, qOpts)
-// const w_w3f_pools_update = new Worker('w3f_pools_update', f_w3f_pools_update, qOpts)
-// const w_w3f_validator_location_stats_update = new Worker('w3f_validator_location_stats_update', f_w3f_validator_location_stats_update, qOpts)
-// const w_w3f_validators_update = new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
-// const w_w3f_nominations_update = new Worker('w3f_nominations_update', f_w3f_nominations_update, qOpts)
-// const w_dock_auto_payout = new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
+const workers = [
+  new Worker('checkService', checkService, qOpts),
+  new Worker('checkExternalService', checkExternalService, qOpts),
+  new Worker('updateMemberships', updateMemberships, qOpts),
+  // new Worker('health_check', f_health_check, qOpts)
+  // new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
+  // new Worker('w3f_exposures_update', f_w3f_exposures_update, qOpts)
+  // new Worker('w3f_nominators_update', f_w3f_nominators_update, qOpts)
+  // new Worker('w3f_pools_update', f_w3f_pools_update, qOpts)
+  // new Worker('w3f_validator_location_stats_update', f_w3f_validator_location_stats_update, qOpts)
+  // new Worker('w3f_validators_update', f_w3f_validators_update, qOpts)
+  // new Worker('w3f_nominations_update', f_w3f_nominations_update, qOpts)
+  // new Worker('dock_auto_payout', f_dock_auto_payout, qOpts)
+]
+
+const jobs = workers.map((w) => w.name)
 
 // Call updateMemberships repeteadely
 q_updateMemberships.add(
@@ -99,8 +91,7 @@ q_updateMemberships.add(
 )
 
 // handle all error/failed
-jobs.forEach((job) => {
-  const worker = eval(`w_${job}`)
+workers.forEach((worker) => {
   worker.on('error', (err) => onError(job, err))
   worker.on('failed', (event) => onFailed(job, event))
 })
@@ -166,6 +157,8 @@ async function clearQueue(jobname) {
     queues: [
       // new BullMQAdapter(q_health_check, { readOnlyMode: false }),
       new BullMQAdapter(q_checkService, { readOnlyMode: false }),
+      new BullMQAdapter(q_checkExternalService, { readOnlyMode: false }),
+      new BullMQAdapter(q_updateMemberships, { readOnlyMode: false }),
       // new BullMQAdapter(q_1kv_nominators_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_exposures_update, { readOnlyMode: false }),
       // new BullMQAdapter(q_w3f_nominators_update, { readOnlyMode: false }),

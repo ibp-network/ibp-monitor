@@ -5,9 +5,9 @@ import { serializeError } from 'serialize-error'
 
 import cfg from '../config/index.js'
 import { Logger } from '../lib/utils.js'
-import { clearDNS, setDNS, tryConnectProvider } from '../lib/check-service.js'
+import { tryConnectProvider } from '../lib/check-service.js'
 
-const logger = new Logger('worker:checkService')
+const logger = new Logger('worker:checkExternalService')
 
 /**
  * Similar to healthCheck-endpoint, but for IBP url at member.services_address
@@ -15,15 +15,8 @@ const logger = new Logger('worker:checkService')
  * @returns
  */
 export async function checkService(job) {
-  // Will print { foo: 'bar'} for the first job
-  // and { qux: 'baz' } for the second.
-  // logger.log('job.data', job.data);
-
-  const { subdomain, member, service, monitorId } = job.data
-  logger.debug('[worker] checkService', subdomain, member.id, service.id)
-
-  const domain = `${subdomain}.dotters.network`
-  const endpoint = `wss://${domain}/${service.chainId}`
+  const { member, service, monitorId, serviceUrl } = job.data
+  logger.debug(member.id, service.id, serviceUrl)
 
   var timeout = null
   var result
@@ -34,8 +27,12 @@ export async function checkService(job) {
       return await fn()
     } catch (error) {
       // typically a timeout error
+      logger.log('attempt', retriesLeft)
       job.log('attempt', retriesLeft)
+
+      logger.err(error)
       job.log(error)
+
       if (retriesLeft) {
         // Wait interval milliseconds before next try
         await new Promise((resolve) => setTimeout(resolve, interval))
@@ -47,13 +44,10 @@ export async function checkService(job) {
   }
 
   const performCheck = async () => {
-    job.log(`checkService: ${domain}, ${member.id}, ${service.id}`)
-
-    // amend DNS
-    await setDNS(domain, member.serviceIpAddress)
+    job.log(`Perform check for ${member.id}, ${service.id} ${serviceUrl}`)
 
     // 10 seconds timeout
-    const provider = new WsProvider(endpoint, false, {}, 10 * 1000)
+    const provider = new WsProvider(serviceUrl, false, {}, 10 * 1000)
 
     try {
       job.log('connecting to provider...')
@@ -69,16 +63,15 @@ export async function checkService(job) {
 
     job.log('connecting to api...')
     const api = await ApiPromise.create({ provider, noInitWarn: true, throwOnConnect: true })
-    // api.on('error', function (err) { throw new ApiError(err.toString()) })
+
     api.on('error', async (err) => {
       job.log('== got apiError for ', service.serviceUrl)
       job.log(err)
-      logger.log('== got apiError for ', service.serviceUrl)
-      logger.log(err)
       // result = handleProviderError(err, service, peerId)
       await provider.disconnect()
       // throw new Error(err)
     })
+
     job.log('waiting for api...')
     await api.isReady
     job.log('api is ready...')
@@ -93,6 +86,7 @@ export async function checkService(job) {
       throw new Error('TimeoutException')
     }, 70 * 1000)
 
+    logger.log('getting stats from provider / api...')
     job.log('getting stats from provider / api...')
 
     peerId = await api.rpc.system.localPeerId()
@@ -128,7 +122,7 @@ export async function checkService(job) {
         monitorId,
         memberId: member.id,
         serviceId: service.id,
-        endpoint,
+        endpoint: serviceUrl,
         ipAddress: member.serviceIpAddress,
         chain,
         chainType,
@@ -141,7 +135,6 @@ export async function checkService(job) {
         performance: timing,
       },
     }
-
     await provider.disconnect()
   }
 
@@ -151,6 +144,7 @@ export async function checkService(job) {
   } catch (err) {
     logger.warn('[worker] WE GOT AN ERROR AFTER RETRIES --------------')
     logger.error(err)
+
     job.log('WE GOT AN ERROR AFTER RETRIES --------------')
     job.log(err)
     job.log(err.toString())
@@ -169,7 +163,7 @@ export async function checkService(job) {
         monitorId,
         memberId: member.id,
         serviceId: service.id,
-        endpoint,
+        endpoint: serviceUrl,
         ip_address: member.serviceIpAddress,
         error: serializeError(err),
         performance: -1,
@@ -177,9 +171,8 @@ export async function checkService(job) {
     }
   } finally {
     if (timeout) clearTimeout(timeout)
-    await clearDNS(domain, member.serviceIpAddress)
-    logger.log('[worker] checkService done...', member.id, service.id)
-    job.log('checkService done...', member.id, service.id)
+    logger.log('Check done for', member.id, service.id)
+    job.log('Check done for', member.id, service.id)
     return result
   }
 }
