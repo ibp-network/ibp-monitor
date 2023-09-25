@@ -14,7 +14,7 @@ import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 
 import { asyncForeach } from './lib/utils.js'
 import { checkService } from './workers/f-check-service.js'
-import { checkService as checkExternalService } from './workers/f-check-external-service.js'
+import { checkExternalService } from './workers/f-check-external-service.js'
 import { updateMemberships } from './workers/f-update-memberships.js'
 // import { f_1kv_nominations_update } from './workers/1kv-nominations-update.js'
 // import { f_1kv_nominators_update } from './workers/1kv-nominators-update.js'

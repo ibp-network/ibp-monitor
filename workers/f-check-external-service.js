@@ -14,7 +14,7 @@ const logger = new Logger('worker:checkExternalService')
  * @param {} job
  * @returns
  */
-export async function checkService(job) {
+export async function checkExternalService(job) {
   const { member, service, monitorId, serviceUrl } = job.data
   logger.debug(member.id, service.id, serviceUrl)
 
