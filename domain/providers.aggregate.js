@@ -28,4 +28,70 @@ export class ProvidersAggregateRoot {
 
     return root
   }
+
+  /**
+   * Creates an aggregate based on the
+   * @param {MemberEntity[]} members
+   * @param {ServiceEntity[]} services
+   * @param {{ memberId: string, serviceId: string, serviceUrl: string, status: string }[]} memberServices
+   */
+  static fromDataStore(members, services, memberServices) {
+    const root = new ProvidersAggregateRoot()
+
+    root.members = members
+    root.providedServices = memberServices
+      .map((memberService) => {
+        return new MemberServiceAggregate({
+          member: members.find((member) => member.id === memberService.memberId),
+          service: services.find((service) => service.id === memberService.serviceId),
+          serviceUrl: memberService.serviceUrl,
+          status: memberService.status,
+        })
+      })
+      .filter(({ member, service }) => member.membershipLevelId >= service.membershipLevelId)
+
+    return root
+  }
+
+  /**
+   * Creates an providers aggregate root based on the mere cross product of the members and services lists
+   * @param {MemberEntity[]} members
+   * @param {ServiceEntity[]} services
+   */
+  static crossProduct(members, services) {
+    const root = new ProvidersAggregateRoot()
+
+    root.members = members
+    root.providedServices = members.flatMap((member) => {
+      return services
+        .map((service) => {
+          return new MemberServiceAggregate({
+            member,
+            service,
+            serviceUrl: service.serviceUrl,
+            status: service.status,
+          })
+        })
+        .filter(({ member, service }) => member.membershipLevelId >= service.membershipLevelId)
+    })
+
+    return root
+  }
+
+  /**
+   * Merges two or more providers' aggregate roots
+   * @param {ProvidersAggregateRoot[]} other
+   */
+  concat(...other) {
+    const root = JSON.parse(JSON.stringify(this))
+
+    return other.reduce((root, other) => {
+      root.members = Array.from(new Set(prev.mebers.concat(other.members)))
+      root.providedServices = Array.from(
+        new Set(prev.providedServices.concat(other.providedServices))
+      )
+
+      return root
+    }, root)
+  }
 }

@@ -67,9 +67,9 @@ export class MemberEntity {
       current_level = '0',
       active = '0',
       level_timestamp = { 0: `${Date.now() / 1_000}` },
-      services_address = '0.0.0.0',
+      services_address = '',
       monitor_url = null,
-      region = '',
+      region,
       latitude = '0.0000',
       longitude = '0.0000',
     } = configObject

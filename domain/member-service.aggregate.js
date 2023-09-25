@@ -11,11 +11,11 @@ export class MemberServiceAggregate {
   /** @type {String} */ serviceUrl
   /** @type {'active' | 'inactive'} */ status
 
-  constructor(memberService) {
-    this.member = memberService.member
-    this.service = memberService.service
-    this.serviceUrl = memberService.serviceUrl
-    this.status = memberService.status
+  constructor({ member, service, serviceUrl, status }) {
+    this.member = member
+    this.service = service
+    this.serviceUrl = serviceUrl
+    this.status = status
   }
 
   /**
