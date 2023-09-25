@@ -59,6 +59,8 @@ export async function checkService(job) {
     } catch (err) {
       job.log('== got providerError for ', service.serviceUrl)
       job.log(err.toString())
+
+      throw err
     }
 
     job.log('connecting to api...')

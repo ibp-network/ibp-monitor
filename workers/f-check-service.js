@@ -65,7 +65,19 @@ export async function checkService(job) {
     } catch (err) {
       job.log('== got providerError for ', service.serviceUrl)
       job.log(err.toString())
+
+      throw err
     }
+
+    // handle Timeout n seconds
+    timeout = setTimeout(async () => {
+      logger.debug('[worker] TimeoutException')
+      job.log('TimeoutException')
+      await api.disconnect()
+      await provider.disconnect()
+      await job.discard()
+      throw new Error('TimeoutException')
+    }, 70 * 1000)
 
     job.log('connecting to api...')
     const api = await ApiPromise.create({ provider, noInitWarn: true, throwOnConnect: true })
@@ -82,16 +94,6 @@ export async function checkService(job) {
     job.log('waiting for api...')
     await api.isReady
     job.log('api is ready...')
-
-    // handle Timeout n seconds
-    timeout = setTimeout(async () => {
-      logger.debug('[worker] TimeoutException')
-      job.log('TimeoutException')
-      await api.disconnect()
-      await provider.disconnect()
-      await job.discard()
-      throw new Error('TimeoutException')
-    }, 70 * 1000)
 
     job.log('getting stats from provider / api...')
 
