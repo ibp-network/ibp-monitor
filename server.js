@@ -32,8 +32,12 @@ console.log('VERSION', pkg.version)
 import { config } from './config/config.js'
 import { config as configLocal } from './config/config.local.js'
 import { ProvidersAggregateRoot } from './domain/providers.aggregate.js'
-import { Op } from 'sequelize'
 import chalkTemplate from 'chalk-template'
+import { ProviderEntity } from './domain/provider.entity.js'
+import { ServiceEntity } from './domain/service.entity.js'
+import { ProviderServiceEntity } from './domain/provider-service.entity.js'
+import { HealthCheckEntity } from './domain/health-check.entity.js'
+import { MemberEntity } from './domain/member.entity.js'
 
 const cfg = Object.assign(config, configLocal)
 const logger = new Logger('server')
@@ -232,20 +236,26 @@ const mh = new MessageHandler({ datastore: ds })
 
   const handleCheckServiceResult = async (queue, { jobId }) => {
     const job = await Job.fromId(queue, jobId)
-    logger.log(
-      chalkTemplate`{magenta.bold handleCheckServiceResult(${queue.name}, ${jobId}):}
-      {bold Monitor ID:} ${job.returnvalue.monitorId}
-      {bold Service ID:} ${job.returnvalue.serviceId}
-      {bold Member ID:} ${job.returnvalue.memberId}
-      {bold Status:} ${job.returnvalue.status}
-      {bold Response time:} ${job.returnvalue.responseTimeMs?.toFixed(2) ?? NaN}ms
-    `
-    )
+
+    /** @type {ProviderServiceEntity} */
+    const { provider, service } = job.data.providerService
+
     if (!job.returnvalue) {
       return
     }
-    const { member, service } = job.data
+    /** @type {HealthCheckEntity} */
     const result = job.returnvalue
+
+    logger.log(
+      chalkTemplate`{magenta.bold handleCheckServiceResult(${queue.name}, ${jobId}):}
+      {bold Monitor ID:} ${result.monitorId}
+      {bold Service ID:} ${result.serviceId}
+      {bold Member ID:} ${result.memberId}
+      {bold Status:} ${result.status}
+      {bold Response time:} ${result.responseTimeMs?.toFixed(2) ?? NaN}ms
+    `
+    )
+
     // we could get hc for monitor that has not connected yet
     if (result.monitorId) {
       let monitor = await ds.Monitor.upsert(
@@ -253,30 +263,38 @@ const mh = new MessageHandler({ datastore: ds })
         { fields: ['status'] }
       )
     }
+
     // upsert member service node
     if (result.peerId) {
-      let memberService = await ds.MemberService.findOne({ where: { serviceId: service.id } })
+      let providerService = await ds.ProviderService.findOne({
+        where: { serviceId: service.id },
+      }).then((providerService) =>
+        providerService !== null ? new ProviderServiceEntity(providerService) : null
+      )
+
       // FIXME: we need to add a memberService from the memnbers.json file
-      if (!memberService) {
-        logger.error('No memberService for', member.id, service.id)
+      if (!providerService) {
+        logger.error('No providerService for', provider.id, service.id)
         return
       }
-      await ds.MemberServiceNode.upsert(
+      await ds.ProviderServiceNode.upsert(
         {
           peerId: result.peerId,
           serviceId: service.id,
-          memberId: member.id,
+          providerId: provider.id,
           name: null,
           status: 'active',
         },
         { fields: ['status'] }
       )
     }
+
     // insert health check
     await ds.HealthCheck.create(result)
+
     if (cfg.gossipResults) {
       logger.debug(
-        `[gossip] publishing healthCheck: ${member.id} ${service.id} to /ibp/healthCheck`
+        `[gossip] publishing healthCheck: ${provider.id} ${service.id} to /ibp/healthCheck`
       )
       const res = await libp2p.pubsub.publish(
         '/ibp/healthCheck',
@@ -304,82 +322,71 @@ const mh = new MessageHandler({ datastore: ds })
     const services = await ds.Service.findAll({
       where: { type: 'rpc', status: 'active' },
       include: ['membershipLevel'],
-    })
-    const members = await ds.Member.findAll({
-      where: { status: 'active', membershipType: { [Op.ne]: 'external' } },
-      include: ['membershipLevel'],
-    })
-    const internalProviders = ProvidersAggregateRoot.crossProduct(
-      members,
-      services,
-      ({ member, service }) => member.membershipLevelId >= service.membershipLevelId
-    )
-
-    const externalMembers = await ds.Member.findAll({
-      where: { status: 'active', membershipType: 'external' },
-      include: ['membershipLevel'],
-    })
-    const memberServices = await ds.MemberService.findAll({
+    }).then((services) => services.map((service) => new ServiceEntity(service)))
+    const providers = await ds.Provider.findAll({
       where: { status: 'active' },
-      include: { association: 'member', where: { membershipType: 'external' } },
+      include: [
+        {
+          association: 'member',
+          model: ds.Member,
+          include: ['membershipLevel'],
+        },
+      ],
+    }).then((providers) =>
+      providers.map(
+        (provider) =>
+          new ProviderEntity(
+            provider,
+            provider.member ? new MemberEntity(provider.member) : undefined
+          )
+      )
+    )
+    const storedProviderServices = await ds.ProviderService.findAll({
+      where: { status: 'active' },
+      include: ['provider'],
     })
-    const externalProviders = ProvidersAggregateRoot.fromDataStore(
-      externalMembers,
+
+    const memberProviders = ProvidersAggregateRoot.crossProduct(
+      providers.filter((provider) => provider.member),
       services,
-      memberServices
+      ({ provider, service }) => provider.member.membershipLevelId >= service.membershipLevelId
+    )
+    const nonMemberProviders = ProvidersAggregateRoot.fromDataStore(
+      providers.filter((provider) => !provider.member),
+      services,
+      storedProviderServices,
+      ({ provider, service }) => provider !== undefined && service !== undefined
     )
 
     const activeJobs = await checkServiceQueue.getActive()
     const waitingJobs = await checkServiceQueue.getWaiting()
 
-    internalProviders.providedServices.forEach(({ member, service }) => {
+    const providerServices = memberProviders.concat(nonMemberProviders)
+    providerServices.providerServices.forEach((providerService) => {
+      const { provider, service } = providerService
+
       const activeJob = activeJobs.find(
-        (j) => j.data.service.id === service.id && j.data.member.id === member.id
+        (j) =>
+          j.data.providerService.provider.id === providerService.provider.id &&
+          j.data.providerService.service.id === providerService.service.id
       )
       const waitingJob = waitingJobs.find(
-        (j) => j.data.service.id === service.id && j.data.member.id === member.id
+        (j) =>
+          j.data.providerService.provider.id === providerService.provider.id &&
+          j.data.providerService.service.id === providerService.service.id
       )
 
       if (activeJob) {
-        return logger.warn('WARNING: active job, skipping check for ', member.id, service.id)
+        return logger.warn('WARNING: active job, skipping check for ', provider.id, service.id)
       } else if (waitingJob) {
-        return logger.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
+        return logger.warn('WARNING: waiting job, skipping check for ', provider.id, service.id)
       }
 
-      logger.debug('Creating new [checkService] job for', member.id, service.id)
+      logger.debug('Creating new [checkService] job for', provider.id, service.id)
       checkServiceQueue.add(
         'checkService',
         {
-          subdomain: service.membershipLevel.subdomain,
-          member,
-          service,
-          monitorId: peerId.toString(),
-        },
-        { repeat: false, ...jobRetention }
-      )
-    })
-
-    externalProviders.providedServices.forEach(({ member, service, serviceUrl }) => {
-      const activeJob = activeJobs.find(
-        (j) => j.data.service.id === service.id && j.data.member.id === member.id
-      )
-      const waitingJob = waitingJobs.find(
-        (j) => j.data.service.id === service.id && j.data.member.id === member.id
-      )
-
-      if (activeJob) {
-        return logger.warn('WARNING: active job, skipping check for ', member.id, service.id)
-      } else if (waitingJob) {
-        return logger.warn('WARNING: waiting job, skipping check for ', member.id, service.id)
-      }
-
-      logger.debug('Creating new [checkExternalService] job for', member.id, service.id)
-      checkExternalServiceQueue.add(
-        'checkExternalService',
-        {
-          member,
-          service,
-          serviceUrl,
+          providerService,
           monitorId: peerId.toString(),
         },
         { repeat: false, ...jobRetention }
