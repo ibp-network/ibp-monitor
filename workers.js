@@ -89,6 +89,7 @@ q_updateMemberships.add(
 
 // handle all error/failed
 workers.forEach((worker) => {
+  const job = worker.name
   worker.on('error', (err) => onError(job, err))
   worker.on('failed', (event) => onFailed(job, event))
 })
