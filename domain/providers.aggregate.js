@@ -1,29 +1,32 @@
 import { ServiceEntity } from './service.entity.js'
-import { MemberEntity } from './member.entity.js'
-import { MemberServiceAggregate } from './member-service.aggregate.js'
+import { ProviderEntity } from './provider.entity.js'
+import { ProviderServiceEntity } from './provider-service.entity.js'
 
 export class ProvidersAggregateRoot {
-  /** @type {MemberEntity[]}} */ members = []
-  /** @type {MemberServiceAggregate[]}} */ providedServices = []
+  /** @type {ProviderEntity[]}} */ providers = []
+  /** @type {ProviderServiceEntity[]}} */ providerServices = []
 
   /**
-   * Takes a `members` list from a config object and retrieves a list of aggregate {@link MemberServiceAggregate}s
+   * Takes a providers list from a config object and retrieves a list of aggregate {@link ProviderServiceEntity}s
    * @param {Record<string, Object>} config
    * @param {ServiceEntity[]} services
    */
   static fromConfig(config, services) {
     let root = new ProvidersAggregateRoot()
 
-    Object.entries(config).forEach(([id, memberConfig]) => {
-      const member = MemberEntity.fromConfig({ id, ...memberConfig })
+    Object.entries(config).forEach(([id, providerConfig]) => {
+      const provider = ProviderEntity.fromConfig(
+        { id, ...providerConfig },
+        'membership' in providerConfig
+      )
 
-      Object.entries(memberConfig.endpoints ?? {}).forEach((endpointConfig) => {
-        root.providedServices.push(
-          MemberServiceAggregate.fromConfig(endpointConfig, services, member)
+      Object.entries(providerConfig.endpoints ?? {}).forEach((endpointConfig) => {
+        root.providerServices.push(
+          ProviderServiceEntity.fromConfig(endpointConfig, services, provider)
         )
       })
 
-      root.members.push(member)
+      root.providers.push(provider)
     })
 
     return root
@@ -31,21 +34,21 @@ export class ProvidersAggregateRoot {
 
   /**
    * Creates an aggregate based on the
-   * @param {MemberEntity[]} members
+   * @param {ProviderEntity[]} providers
    * @param {ServiceEntity[]} services
-   * @param {{ memberId: string, serviceId: string, serviceUrl: string, status: string }[]} memberServices
+   * @param {{ providerId: string, serviceId: string, serviceUrl: string, status: string }[]} providerServices
    */
-  static fromDataStore(members, services, memberServices, filter = () => true) {
+  static fromDataStore(providers, services, providerServices, filter = () => true) {
     const root = new ProvidersAggregateRoot()
 
-    root.members = members
-    root.providedServices = memberServices
-      .map((memberService) => {
-        return new MemberServiceAggregate({
-          member: members.find((member) => member.id === memberService.memberId),
-          service: services.find((service) => service.id === memberService.serviceId),
-          serviceUrl: memberService.serviceUrl,
-          status: memberService.status,
+    root.providers = providers
+    root.providerServices = providerServices
+      .map((providerService) => {
+        return new ProviderServiceEntity({
+          provider: providers.find((provider) => provider.id === providerService.providerId),
+          service: services.find((service) => service.id === providerService.serviceId),
+          serviceUrl: providerService.serviceUrl,
+          status: providerService.status,
         })
       })
       .filter(filter)
@@ -54,21 +57,21 @@ export class ProvidersAggregateRoot {
   }
 
   /**
-   * Creates an providers aggregate root based on the mere cross product of the members and services lists
-   * @param {MemberEntity[]} members
+   * Creates an providers aggregate root based on the mere cross product of the providers and services lists
+   * @param {ProviderEntity[]} providers
    * @param {ServiceEntity[]} services
+   * @param {(provider: ProviderServiceEntity) => bool} filter
    */
-  static crossProduct(members, services, filter = () => true) {
+  static crossProduct(providers, services, filter = () => true) {
     const root = new ProvidersAggregateRoot()
 
-    root.members = members
-    root.providedServices = members.flatMap((member) => {
+    root.providers = providers
+    root.providerServices = providers.flatMap((provider) => {
       return services
         .map((service) => {
-          return new MemberServiceAggregate({
-            member,
+          return new ProviderServiceEntity({
+            provider,
             service,
-            serviceUrl: service.serviceUrl,
             status: service.status,
           })
         })
@@ -83,15 +86,15 @@ export class ProvidersAggregateRoot {
    * @param {ProvidersAggregateRoot[]} other
    */
   concat(...other) {
-    const root = JSON.parse(JSON.stringify(this))
+    const root = new ProvidersAggregateRoot()
 
-    return other.reduce((root, other) => {
-      root.members = Array.from(new Set(prev.mebers.concat(other.members)))
-      root.providedServices = Array.from(
-        new Set(prev.providedServices.concat(other.providedServices))
+    return [this, ...other].reduce((prev, other) => {
+      prev.providers = Array.from(new Set(prev.providers.concat(other.providers)))
+      prev.providerServices = Array.from(
+        new Set(prev.providerServices.concat(other.providerServices))
       )
 
-      return root
+      return prev
     }, root)
   }
 }

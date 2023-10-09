@@ -4,9 +4,7 @@
  */
 export class MemberEntity {
   /** @type {String} */ id
-  /** @type {String} */ name
-  /** @type {String} */ websiteUrl
-  /** @type {String} */ logoUrl
+  /** @type {String} */ providerId
   /** @type {String} */ serviceIpAdress
   /** @type {String} */ monitorUrl
 
@@ -15,40 +13,23 @@ export class MemberEntity {
   /** @type {Number} */ membershipLevelTimestamp
   /** @type {'active' | 'pending'} */ status
 
-  /** @type {'' | 'africa' | 'asia' | 'central_america' | 'europe' | 'middle_east' | 'north_america' | 'oceania'} */
-  region
-
-  /** @type {Number} */ latitude
-  /** @type {Number} */ longitude
-
   constructor({
     id,
-    name,
-    websiteUrl,
-    logoUrl,
     serviceIpAddress,
     monitorUrl,
     membershipType,
     membershipLevelId,
     membershipLevelTimestamp,
     status,
-    region,
-    latitude,
-    longitude,
   }) {
     this.id = id
-    this.name = name
-    this.websiteUrl = websiteUrl
-    this.logoUrl = logoUrl
+    this.providerId = id
     this.serviceIpAddress = serviceIpAddress
     this.monitorUrl = monitorUrl
     this.membershipType = membershipType
     this.membershipLevelId = membershipLevelId
     this.membershipLevelTimestamp = membershipLevelTimestamp
     this.status = status
-    this.region = region
-    this.latitude = latitude
-    this.longitude = longitude
   }
 
   /**
@@ -60,34 +41,22 @@ export class MemberEntity {
   static fromConfig(configObject) {
     const {
       id,
-      name = configObject.id,
-      website = null,
-      logo = null,
-      membership = 'external',
-      current_level = '0',
-      active = '0',
-      level_timestamp = { 0: `${Date.now() / 1_000}` },
-      services_address = '',
-      monitor_url = null,
-      region,
-      latitude = '0.0000',
-      longitude = '0.0000',
+      services_address,
+      monitor_url,
+      current_level,
+      membership,
+      active,
+      level_timestamp,
     } = configObject
 
     return new MemberEntity({
       id,
-      name,
-      websiteUrl: website,
-      logoUrl: logo,
       serviceIpAddress: services_address,
       monitorUrl: monitor_url,
       membershipType: membership,
       membershipLevelId: Number(current_level) + 1,
       membershipLevelTimestamp: Number(level_timestamp[current_level]),
       status: !!Number(active) ? 'active' : 'pending',
-      region,
-      latitude: Number(latitude),
-      longitude: Number(longitude),
     })
   }
 

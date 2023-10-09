@@ -1,18 +1,18 @@
-import { MemberEntity } from './member.entity.js'
+import { ProviderEntity } from './provider.entity.js'
 import { ServiceEntity } from './service.entity.js'
 
 /**
  * Represents an entrypoint for a service provided by an entity within the network,
  * either a member or a non-member
  */
-export class MemberServiceAggregate {
-  /** @type {MemberEntity} */ member
+export class ProviderServiceEntity {
+  /** @type {ProviderEntity} */ provider
   /** @type {ServiceEntity} */ service
   /** @type {String} */ serviceUrl
   /** @type {'active' | 'inactive'} */ status
 
-  constructor({ member, service, serviceUrl, status }) {
-    this.member = member
+  constructor({ provider, service, serviceUrl, status }) {
+    this.provider = provider
     this.service = service
     this.serviceUrl = serviceUrl
     this.status = status
@@ -22,14 +22,14 @@ export class MemberServiceAggregate {
    * Receivs a list of services, as well as a config object for the input member and its
    * @param {[string, string]} endpointConfig The config object that defines a member
    * @param {ServiceEntity[]} services A list of all the available services
-   * @param {MemberEntity} member The member for which this endpoint belongs to
-   * @returns {MemberServiceAggregate} An member service descriptor based on the endpoint information
+   * @param {ProviderEntity} provider The member for which this endpoint belongs to
+   * @returns {ProviderServiceEntity} An member service descriptor based on the endpoint information
    */
-  static fromConfig([chainId, serviceUrl], services, member) {
+  static fromConfig([chainId, serviceUrl], services, provider) {
     const service = services.find((service) => service.chainId === chainId)
 
-    return new MemberServiceAggregate({
-      member,
+    return new ProviderServiceEntity({
+      provider,
       service,
       serviceUrl,
       status: 'active',
@@ -42,7 +42,7 @@ export class MemberServiceAggregate {
    */
   toRecord() {
     return {
-      memberId: this.member.id,
+      providerId: this.provider.id,
       serviceId: this.service.id,
       serviceUrl: this.serviceUrl,
       status: this.status,
