@@ -229,9 +229,7 @@ const mh = new MessageHandler({ datastore: ds })
 
   // publish the results of our checkService via libp2p
   const checkServiceQueue = new Queue('checkService', queueOpts)
-  const checkExternalServiceQueue = new Queue('checkExternalService', queueOpts)
   const checkServiceEvents = new QueueEvents('checkService', queueOpts)
-  const checkExternalServiceEvents = new QueueEvents('checkExternalService', queueOpts)
 
   const handleCheckServiceResult = async (queue, { jobId }) => {
     const job = await Job.fromId(queue, jobId)
@@ -301,15 +299,6 @@ const mh = new MessageHandler({ datastore: ds })
   checkServiceQueue.on('error', onCheckError)
   checkServiceQueue.on('failed', onCheckQueueFailed)
   checkServiceEvents.on('completed', (job) => handleCheckServiceResult(checkServiceQueue, job))
-
-  checkExternalServiceQueue.on('completed', (job) =>
-    handleCheckServiceResult(checkExternalServiceQueue, job)
-  )
-  checkExternalServiceQueue.on('error', onCheckError)
-  checkExternalServiceQueue.on('failed', onCheckQueueFailed)
-  checkExternalServiceEvents.on('completed', (job) =>
-    handleCheckServiceResult(checkExternalServiceQueue, job)
-  )
 
   async function checkServiceJobs() {
     // from now on all monitors check all services
