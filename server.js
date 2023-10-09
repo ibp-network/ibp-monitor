@@ -17,7 +17,6 @@ import { createEd25519PeerId, createFromJSON } from '@libp2p/peer-id-factory'
 
 import { DataStore } from './data/data-store.js'
 import { MessageHandler } from './lib/message-handler.js'
-import { HealthChecker } from './lib/health-checker.js'
 
 import { Job, QueueEvents, Queue } from 'bullmq'
 import { isIPv4, isIPv6 } from 'is-ip'
