@@ -16,9 +16,13 @@ export const healthCheckModel = {
       type: DataTypes.STRING(128),
       allowNull: false,
     },
-    memberId: {
+    providerId: {
       type: DataTypes.STRING(128),
       allowNull: false,
+    },
+    memberId: {
+      type: DataTypes.STRING(128),
+      allowNull: true,
     },
     // peer id can be null when the service is unreachable
     peerId: {
@@ -31,10 +35,6 @@ export const healthCheckModel = {
     },
     type: {
       type: DataTypes.ENUM('service_check', 'system_health', 'best_block'),
-      allowNull: false,
-    },
-    checkOrigin: {
-      type: DataTypes.ENUM('member', 'external'),
       allowNull: false,
     },
     status: {

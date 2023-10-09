@@ -2,10 +2,8 @@ import { Sequelize } from 'sequelize'
 import { Umzug, SequelizeStorage } from 'umzug'
 import { config } from '../config/config.js'
 import { config as configLocal } from '../config/config.local.js'
-import { DataStore } from '../data/data-store.js'
 
 const cfg = Object.assign(config, configLocal)
-const ds = new DataStore({ pruning: cfg.pruning })
 const sequelize = new Sequelize(
   cfg.sequelize.database,
   cfg.sequelize.username,
@@ -38,6 +36,7 @@ const sequelize = new Sequelize(
     storage: new SequelizeStorage({ sequelize, modelName: 'sequelize_migrations' }),
     logger: console,
   })
+
   console.log('Running migrations...')
   await umzug.up()
 
