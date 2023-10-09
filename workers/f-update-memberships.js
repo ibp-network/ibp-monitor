@@ -36,19 +36,23 @@ export async function updateMemberships() {
       const providers = ProvidersAggregateRoot.fromConfig(
         {
           ...membersList.members,
-          ...externalsList.members,
+          ...externalsList.providers,
         },
         services
       )
 
-      await providers.members.reduce(async (thenable, member) => {
+      await providers.providers.reduce(async (thenable, provider) => {
         await thenable
-        return ds.Member.upsert(member.toRecord())
+
+        await ds.Provider.upsert(provider.toRecord())
+        if (provider.member) {
+          await ds.Member.upsert(provider.member.toRecord())
+        }
       }, Promise.resolve())
 
-      await providers.providedServices.reduce(async (thenable, memberService) => {
+      await providers.providerServices.reduce(async (thenable, providerService) => {
         await thenable
-        return ds.MemberService.upsert(memberService.toRecord())
+        await ds.ProviderService.upsert(providerService.toRecord())
       }, Promise.resolve())
 
       // TODO: Include a check to deactivate services for providers that weren't upserted.
