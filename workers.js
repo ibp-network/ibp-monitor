@@ -61,7 +61,7 @@ const q_updateMemberships = new Queue('updateMemberships', qOpts)
 // const q_dock_auto_payout = new Queue('dock_auto_payout', qOpts)
 
 const workers = [
-  new Worker('checkService', checkService, qOpts),
+  new Worker('checkService', checkService, { ...qOpts, concurrency: 1 }),
   new Worker('updateMemberships', updateMemberships, qOpts),
   // new Worker('health_check', f_health_check, qOpts)
   // new Worker('1kv_nominators_update', f_1kv_nominators_update, qOpts)
