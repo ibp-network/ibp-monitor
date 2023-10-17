@@ -1,5 +1,7 @@
 'use strict'
 
+import { MINUTE_AS_MILLISECONDS, SECOND_AS_MILLISECONDS } from '../lib/consts.js'
+
 const GOSSIP_PORT = process.env.GOSSIP_PORT || 30000 // 0 for development/debugging, 30000 for deployment
 const HTTP_PORT = process.env.HTTP_PORT || 30001
 const API_PORT = process.env.API_PORT || 30002
@@ -29,7 +31,8 @@ const config = {
   listenPort: GOSSIP_PORT,
   apiPort: API_PORT,
   allowedTopics: ['/ibp', '/ibp/services', '/ibp/healthCheck', '/ibp/signedMessage'],
-  updateInterval: 5 * 60 * 1000, // 5 mins, as milliseconds
+  updateInterval: 5 * MINUTE_AS_MILLISECONDS,
+  checkTimeout: 3 * SECOND_AS_MILLISECONDS,
   bootstrapPeers: [
     // metaspan:dns
     '/dns4/ibp-monitor.metaspan.io/tcp/30000/p2p/12D3KooWK88CwRP1eHSoHheuQbXFcQrQMni2cgVDmB8bu9NtaqVu',

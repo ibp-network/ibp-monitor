@@ -38,6 +38,11 @@ import { ServiceEntity } from './domain/service.entity.js'
 import { ProviderServiceEntity } from './domain/provider-service.entity.js'
 import { HealthCheckEntity } from './domain/health-check.entity.js'
 import { MemberEntity } from './domain/member.entity.js'
+import {
+  DAY_AS_MILLISECONDS,
+  MINUTE_AS_MILLISECONDS,
+  SECOND_AS_MILLISECONDS,
+} from './lib/consts.js'
 
 const cfg = Object.assign(config, configLocal)
 const logger = new Logger('server')
@@ -46,20 +51,21 @@ const queueOpts = {
   connection: cfg.redis,
 }
 const jobRetention = {
-  timeout: 60 * 1000, // active jobs timeout after 60 seconds
+  /** active jobs timeout */
+  timeout: 1 * MINUTE_AS_MILLISECONDS,
   removeOnComplete: {
-    age: 5 * 24 * 60 * 60, // keep up to 5 * 24 hour (in millis)
-    count: 10000, // keep up to 1000 jobs
+    /** time keep up to */
+    age: 5 * DAY_AS_MILLISECONDS,
+    /** amount of jobs to keep up at the same time */
+    count: 10_000,
   },
   removeOnFail: {
-    age: 5 * 24 * 60 * 60, // keep up to 5 * 24 hours (in millis)
+    /** time keep up to */
+    age: 5 * DAY_AS_MILLISECONDS,
   },
 }
 
-// not used, we listen on the port(s) in cfg.addresses
-// const GOSSIP_PORT = cfg.listenPort || 30000
-
-const UPDATE_INTERVAL = cfg.updateInterval || 10 * 60 * 1000 // 10 mins, in millis
+const UPDATE_INTERVAL = cfg.updateInterval || 10 * MINUTE_AS_MILLISECONDS
 
 const ds = new DataStore({ pruning: cfg.pruning })
 const mh = new MessageHandler({ datastore: ds })
@@ -159,13 +165,13 @@ const mh = new MessageHandler({ datastore: ds })
       bootstrap({
         enabled: true,
         list: cfg.bootstrapPeers,
-        timeout: 3 * 1000, // in ms,
+        timeout: 3 * SECOND_AS_MILLISECONDS,
         tagName: 'bootstrap',
         tagValue: 50,
-        tagTTL: 120 * 1000, // in ms
+        tagTTL: 120 * SECOND_AS_MILLISECONDS,
       }),
       pubsubPeerDiscovery({
-        interval: 10 * 1000, // in ms?
+        interval: 10 * SECOND_AS_MILLISECONDS, // is it ms?
         // topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
         topics: [`ibp_monitor._peer-discovery._p2p._pubsub`, '_peer-discovery._p2p._pubsub'],
         listenOnly: false,
@@ -252,7 +258,7 @@ const mh = new MessageHandler({ datastore: ds })
       {bold Service ID:} ${result.serviceId}
       {bold Member ID:} ${result.memberId}
       {bold Status:} ${result.status}
-      {bold Response time:} ${result.responseTimeMs?.toFixed(2) ?? NaN}ms
+      {bold Response time:} ${result.responseTimeMs?.toFixed(2) || NaN}ms
     `
     )
 
@@ -413,5 +419,5 @@ const mh = new MessageHandler({ datastore: ds })
   // pruning
   setInterval(async () => {
     await ds.prune()
-  }, cfg.pruning.interval * 1000)
+  }, cfg.pruning.interval * SECOND_AS_MILLISECONDS)
 })()

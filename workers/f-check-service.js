@@ -9,6 +9,7 @@ import { ProviderServiceEntity } from '../domain/provider-service.entity.js'
 
 import { HealthChecker, retry, asyncCallWithTimeout } from '../lib/check-service/index.js'
 import { Logger } from '../lib/utils.js'
+import { SECOND_AS_MILLISECONDS } from '../lib/consts.js'
 
 const logger = new Logger('worker:checkService')
 
@@ -28,7 +29,7 @@ async function performCheck(job, { healthChecker, providerService }) {
     provider = await healthChecker.buildProvider()
 
     job.log('connecting to provider...')
-    await asyncCallWithTimeout(healthChecker.connectProvider(provider), 15 * 1_000)
+    await asyncCallWithTimeout(healthChecker.connectProvider(provider), cfg.checkTimeout)
     job.log('provider is ready!')
 
     job.updateProgress(25)
@@ -36,7 +37,7 @@ async function performCheck(job, { healthChecker, providerService }) {
     api = await healthChecker.buildApi(provider)
 
     job.log('connecting to api...')
-    await asyncCallWithTimeout(healthChecker.connectApi(api), 15 * 1_000)
+    await asyncCallWithTimeout(healthChecker.connectApi(api), cfg.checkTimeout)
     job.log('api is ready...')
 
     job.updateProgress(60)
@@ -96,7 +97,7 @@ export async function checkService(job) {
         }),
       job,
       3, // retry 3 times
-      5 * 1000 // wait 5 seconds between each try
+      5 * SECOND_AS_MILLISECONDS
     )
 
     logger.log(`Done checking ${serviceId} for ${providerId}`)

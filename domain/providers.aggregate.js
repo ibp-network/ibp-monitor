@@ -20,7 +20,7 @@ export class ProvidersAggregateRoot {
         'membership' in providerConfig
       )
 
-      Object.entries(providerConfig.endpoints ?? {}).forEach((endpointConfig) => {
+      Object.entries(providerConfig.endpoints || {}).forEach((endpointConfig) => {
         root.providerServices.push(
           ProviderServiceEntity.fromConfig(endpointConfig, services, provider)
         )
