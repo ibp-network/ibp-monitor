@@ -31,12 +31,25 @@
         </template>
         Monitors
       </v-list-item>
-      <v-list-item to="/healthCheck">
+      <v-list-item>
         <template v-slot:prepend>
           <v-icon>mdi-pulse</v-icon>
         </template>
-        Checks</v-list-item
-      >
+        Checks
+
+        <v-menu activator="parent" location="bottom">
+          <v-list>
+            <v-list-item>
+              <v-btn to="/healthCheck">
+                Members
+              </v-btn>
+              <v-btn to="/healthCheck/non-members">
+                Non-Members
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-list-item>
       <v-list-item to="/status">
         <template v-slot:prepend>
           <v-icon>mdi-radar</v-icon>

@@ -27,11 +27,24 @@
         </template>
         Monitors
       </v-btn>
-      <v-btn color="white" variant="plain" to="/healthCheck">
+      <v-btn color="white" variant="plain">
         <template v-slot:prepend>
           <v-icon v-if="$vuetify.display.width > 900">mdi-pulse</v-icon>
         </template>
         Checks
+
+        <v-menu activator="parent" location="bottom">
+          <v-list>
+            <v-list-item>
+              <v-btn to="/healthCheck">
+                Members
+              </v-btn>
+              <v-btn to="/healthCheck/non-members">
+                Non-Members
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-btn>
       <v-btn color="white" variant="plain" to="/status">
         <template v-slot:prepend>

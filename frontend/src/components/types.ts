@@ -66,7 +66,8 @@ export interface IHealthCheck {
   id: number
   monitorId: string
   serviceId: string
-  memberId: string
+  providerId: string
+  memberId?: string
   peerId: string
   source: string
   status: string
