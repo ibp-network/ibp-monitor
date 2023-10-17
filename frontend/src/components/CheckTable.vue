@@ -12,7 +12,7 @@
       <th></th>
       <th class="has-text-centered">Id</th>
       <th v-if="columns.includes('serviceId')" class="has-text-centered">Service</th>
-      <th v-if="columns.includes('memberId')" class="has-text-centered">Member</th>
+      <th v-if="columns.includes('providerId')" class="has-text-centered">Member</th>
       <th v-if="columns.includes('monitorId')" class="has-text-centered">Monitor</th>
       <th v-if="columns.includes('source')" class="has-text-centered">Source</th>
       <th v-if="columns.includes('version')" class="has-text-centered">Version</th>
@@ -41,8 +41,9 @@
         <td v-if="columns.includes('serviceId')">
           <router-link :to="`/service/${hc.serviceId}`">{{ hc.serviceId }}</router-link>
         </td>
-        <td v-if="columns.includes('memberId')">
-          <router-link :to="`/member/${hc.memberId}`">{{ hc.memberId }}</router-link>
+        <td v-if="columns.includes('providerId')">
+          <router-link v-if="hc.memberId" :to="`/member/${hc.providerId}`">{{ hc.providerId }}</router-link>
+          <p v-else>{{ hc.providerId }}</p>
         </td>
         <td v-if="columns.includes('monitorId')">
           <router-link :to="`/monitor/${hc.monitorId}`">{{ shortStash(hc.monitorId) }}</router-link>
