@@ -1,9 +1,7 @@
-import { memberServiceNodeModel } from '../models/member-service-node.js'
-
 async function up({ context: queryInterface }) {
-  await queryInterface
-    // .createTable('member_service_node', memberServiceNodeModel.definition)
-    .sequelize.query(
+  await queryInterface// .createTable('member_service_node', memberServiceNodeModel.definition)
+  .sequelize
+    .query(
       'CREATE TABLE `member_service_node` ( \
         `peerId` varchar(64) NOT NULL, \
         `serviceId` varchar(128) NOT NULL, \

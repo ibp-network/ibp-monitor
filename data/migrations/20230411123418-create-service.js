@@ -1,19 +1,17 @@
-import { serviceModel } from '../models/service.js'
-
 async function up({ context: queryInterface }) {
-  await queryInterface
-    // .createTable('service', serviceModel.definition)
-    .sequelize.query(
-      'CREATE TABLE `service` ( \
+  await queryInterface// .createTable('service', serviceModel.definition)
+  .sequelize
+    .query(
+      "CREATE TABLE `service` ( \
         `id` varchar(128) NOT NULL, \
         `chainId` varchar(64) NOT NULL, \
-        `type` enum(\'rpc\',\'bootnode\') NOT NULL, \
+        `type` enum('rpc','bootnode') NOT NULL, \
         `membershipLevelId` int(11) NOT NULL, \
-        `status` enum(\'active\',\'planned\') NOT NULL, \
+        `status` enum('active','planned') NOT NULL, \
         `createdAt` datetime NOT NULL DEFAULT current_timestamp(), \
         `updatedAt` datetime NOT NULL DEFAULT current_timestamp(), \
         PRIMARY KEY (`id`) \
-      )'
+      )"
     )
     .then(() =>
       // UNIQUE KEY `u_service_chain_service_type` (`chainId`,`type`), \

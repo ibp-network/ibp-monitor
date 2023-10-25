@@ -1,9 +1,7 @@
-import { geoDnsPoolModel } from '../models/geo-dns-pool.js'
-
 async function up({ context: queryInterface }) {
-  await queryInterface
-    // .createTable('geo_dns_pool', geoDnsPoolModel.definition)
-    .sequelize.query(
+  await queryInterface// .createTable('geo_dns_pool', geoDnsPoolModel.definition)
+  .sequelize
+    .query(
       'CREATE TABLE `geo_dns_pool` ( \
         `id` int(11) NOT NULL AUTO_INCREMENT, \
         `name` varchar(128) NOT NULL, \
