@@ -11,7 +11,7 @@ async function up({ context: queryInterface }) {
 
       transaction,
     })
-    await queryInterface.changeColumn('health_check', 'member', {
+    await queryInterface.changeColumn('health_check', 'memberId', {
       type: DataTypes.STRING(128),
       after: 'providerId',
       allowNull: true,
