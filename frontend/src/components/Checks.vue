@@ -61,6 +61,7 @@ import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
+import 'vue-router'
 
 export default defineComponent({
   name: 'ChecksC',
@@ -75,8 +76,8 @@ export default defineComponent({
   computed: {
     ...mapState(['dateTimeFormat']),
     ...mapState('healthCheck', ['list', 'loading', 'pagination']),
-    isMember() {
-      return this.$route.name !== 'NonMemberChecks'
+    isMember(): boolean {
+      return this?.$route.name !== 'NonMemberChecks'
     }
   },
   data() {
