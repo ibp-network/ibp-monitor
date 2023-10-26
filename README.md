@@ -79,6 +79,7 @@ If you instead choose to run the IBP stack using Docker Compose, the `ibp-datast
 - requirements
   - Redis server
   - MariaDB / MySQL / PostgreSQL server
+  - Node.js@18 (higher versions aren't guaranteed to work correctly)
   - hosts file (optional)
 - edit the hosts file & `config.local.js` as needed
 
