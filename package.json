@@ -58,7 +58,7 @@
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.1",
     "prettier": "^2.8.8",
-    "sequelize-cli": "^6.6.0",
+    "sequelize-cli": "^6.6.2",
     "webpack": "^5.82.1",
     "webpack-cli": "^5.1.1",
     "webpack-node-externals": "^3.0.0"
