@@ -15,7 +15,7 @@ services:
     image: redis
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - '127.0.0.1:6379:6379'
   ibp-datastore:
     container_name: ibp-datastore
     image: mariadb:10.11.2
@@ -26,7 +26,7 @@ services:
       - MARIADB_PASSWORD=ibp_monitor
       - MARIADB_DATABASE=ibp_monitor
     ports:
-      - '3306:3306'
+      - '127.0.0.1:3306:3306'
     volumes:
       - ../data/mariadb:/var/lib/mysql
   wait-for-datastore-ready:
@@ -57,7 +57,7 @@ services:
       ibp-datastore-init:
         condition: service_completed_successfully
     ports:
-      - '30002:30002'
+      - '127.0.0.1:30002:30002'
     command: >
       bash -c "node api.js"
     volumes:
@@ -96,7 +96,7 @@ services:
       wait-for-ibp-server-ready:
         condition: service_completed_successfully
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
     command: >
       bash -c "node workers.js"
   wait-for-ibp-api-ready:
