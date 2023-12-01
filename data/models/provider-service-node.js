@@ -1,24 +1,23 @@
 import { DataTypes, Sequelize } from 'sequelize'
 
-export const memberServiceModel = {
+export const providerServiceNodeModel = {
   definition: {
-    memberId: {
-      type: DataTypes.STRING(128),
+    peerId: {
+      type: DataTypes.STRING(64),
       allowNull: false,
       primaryKey: true,
     },
     serviceId: {
       type: DataTypes.STRING(128),
       allowNull: false,
-      primaryKey: true,
     },
-    serviceUrl: {
-      type: DataTypes.STRING(256),
+    providerId: {
+      type: DataTypes.STRING(128),
       allowNull: false,
     },
-    status: {
-      type: DataTypes.ENUM('active', 'inactive'),
-      allowNull: false,
+    name: {
+      type: DataTypes.STRING(128),
+      allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -32,7 +31,7 @@ export const memberServiceModel = {
     },
   },
   options: {
-    tableName: 'member_service',
+    tableName: 'provider_service_node',
     timestamps: true,
     createdAt: true,
     updatedAt: true,

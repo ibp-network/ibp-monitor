@@ -7,17 +7,9 @@ export const memberModel = {
       allowNull: false,
       primaryKey: true,
     },
-    name: {
+    providerId: {
       type: DataTypes.STRING(128),
       allowNull: false,
-    },
-    websiteUrl: {
-      type: DataTypes.STRING(256),
-      allowNull: true,
-    },
-    logoUrl: {
-      type: DataTypes.STRING(256),
-      allowNull: true,
     },
     serviceIpAddress: {
       type: DataTypes.STRING(64),
@@ -41,27 +33,6 @@ export const memberModel = {
     },
     status: {
       type: DataTypes.ENUM('active', 'pending'),
-      allowNull: false,
-    },
-    region: {
-      type: DataTypes.ENUM(
-        '',
-        'africa',
-        'asia',
-        'central_america',
-        'europe',
-        'middle_east',
-        'north_america',
-        'oceania'
-      ),
-      allowNull: true,
-    },
-    latitude: {
-      type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    longitude: {
-      type: DataTypes.FLOAT,
       allowNull: false,
     },
     createdAt: {

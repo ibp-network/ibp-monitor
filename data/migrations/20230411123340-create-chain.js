@@ -1,9 +1,7 @@
-import { chainModel } from '../models/chain.js'
-
 async function up({ context: queryInterface }) {
-  await queryInterface
-    // .createTable('chain', chainModel.definition_v0)
-    .sequelize.query('CREATE TABLE `chain` ( \
+  await queryInterface.sequelize // .createTable('chain', chainModel.definition_v0)
+    .query(
+      'CREATE TABLE `chain` ( \
       `id` varchar(64) NOT NULL, \
       `genesisHash` varchar(64) NOT NULL, \
       `name` varchar(64) NOT NULL, \
@@ -11,7 +9,8 @@ async function up({ context: queryInterface }) {
       `logoUrl` varchar(256) DEFAULT NULL, \
       `createdAt` datetime NOT NULL DEFAULT current_timestamp(), \
       PRIMARY KEY (`id`) \
-    )')
+    )'
+    )
     // KEY `fk_chain_relay_chain` (`relayChainId`) \
     .then(() =>
       queryInterface.addConstraint('chain', {

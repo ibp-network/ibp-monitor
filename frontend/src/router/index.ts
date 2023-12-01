@@ -1,5 +1,5 @@
 // Composables
-import { createRouter, createWebHistory } from 'vue-router'
+import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 
 import Home from '@/components/Home.vue'
 import Config from '@/components/Config.vue'
@@ -14,7 +14,7 @@ import Check from '@/components/Check.vue'
 import Message from '@/components/Message.vue'
 import Status from '@/components/Status.vue'
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   // {
   //   path: '/',
   //   component: () => import('@/layouts/default/Default.vue'),
@@ -65,6 +65,11 @@ const routes = [
   {
     path: '/healthCheck',
     name: 'Checks',
+    component: Checks,
+  },
+  {
+    path: '/healthCheck/non-members',
+    name: 'NonMemberChecks',
     component: Checks,
   },
   {

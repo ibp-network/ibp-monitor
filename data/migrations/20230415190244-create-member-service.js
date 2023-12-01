@@ -1,19 +1,17 @@
-import { memberServiceModel } from '../models/member-service.js'
-
 async function up({ context: queryInterface }) {
-  await queryInterface
-    // .createTable('member_service', memberServiceModel.definition)
-    .sequelize.query(
-      'CREATE TABLE `member_service` ( \
+  await queryInterface// .createTable('member_service', memberServiceModel.definition)
+  .sequelize
+    .query(
+      "CREATE TABLE `member_service` ( \
         `id` int(11) NOT NULL AUTO_INCREMENT, \
         `memberId` varchar(128) NOT NULL, \
         `serviceId` varchar(128) NOT NULL, \
         `serviceUrl` varchar(256) NOT NULL, \
-        `status` enum(\'active\',\'inactive\') NOT NULL, \
+        `status` enum('active','inactive') NOT NULL, \
         `createdAt` datetime NOT NULL DEFAULT current_timestamp(), \
         `updatedAt` datetime NOT NULL DEFAULT current_timestamp(), \
         PRIMARY KEY (`id`) \
-      )'
+      )"
     )
     .then(() =>
       // UNIQUE KEY `u_member_service_member_service` (`memberId`,`serviceId`), \

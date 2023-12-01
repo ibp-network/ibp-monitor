@@ -24,9 +24,15 @@
       </tr>
       <tr>
         <th>Member</th>
-        <td style="cursor: pointer" @click="gotoMember(healthCheck.memberId)">
-          {{ healthCheck.memberId }}
+        <td>
+          <router-link v-if="healthCheck.memberId" :to="`/member/${healthCheck.memberId}?tab=checks`">{{
+            healthCheck.memberId
+          }}</router-link>
+          <span v-else>{{ healthCheck.providerId }}</span>
         </td>
+        <!-- <td :style="healthCheck.memberId ? 'cursor: pointer': ''" @click="healthCheck.memberId ? gotoMember(healthCheck.providerId) : noop()">
+          {{ healthCheck.providerId }}
+        </td> -->
       </tr>
       <tr>
         <th>Node</th>
@@ -97,6 +103,7 @@ export default defineComponent({
         query: { tab: 'checks' },
       })
     },
+    noop() {},
   },
   created() {
     console.debug(this.route.params)

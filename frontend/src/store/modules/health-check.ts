@@ -45,7 +45,7 @@ const healthCheck: Module<IState, IRootState> = {
     },
   },
   actions: {
-    async getList({ state, commit, dispatch }: any, { offset, limit }: any) {
+    async getList({ state, commit, dispatch }: any, { isMember, offset, limit }: any) {
       if (offset) {
         commit('SET_OFFSET', offset)
       }
@@ -54,7 +54,7 @@ const healthCheck: Module<IState, IRootState> = {
       }
       commit('SET_LOADING', true)
       const res = await axios.get('/api/healthCheck', {
-        params: { offset: offset || state.offset, limit: limit || state.limit },
+        params: { isMember, offset: offset || state.offset, limit: limit || state.limit },
       })
       commit('SET_LIST', res.data.models)
       commit('SET_LOADING', false)

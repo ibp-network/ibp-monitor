@@ -3,9 +3,9 @@
     <SideNav></SideNav>
     <NavBar></NavBar>
     <v-main>
-      <router-view v-slot="{ Component }">
+      <router-view v-slot="{ route, Component }">
         <transition name="fade" mode="out-in" :duration="150">
-          <component :is="Component" />
+          <component :key="route.name" :is="Component" />
         </transition>
       </router-view>
       <!-- <HelloWorld /> -->

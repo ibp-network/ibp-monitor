@@ -13,7 +13,7 @@
         'id',
         'monitorId',
         'serviceId',
-        'memberId',
+        'providerId',
         'source',
         'version',
         'performance',
@@ -61,6 +61,7 @@ import { defineComponent } from 'vue'
 import { mapState, useStore } from 'vuex'
 import CheckTable from './CheckTable.vue'
 import CheckList from './CheckList.vue'
+import 'vue-router'
 
 export default defineComponent({
   name: 'ChecksC',
@@ -75,6 +76,9 @@ export default defineComponent({
   computed: {
     ...mapState(['dateTimeFormat']),
     ...mapState('healthCheck', ['list', 'loading', 'pagination']),
+    isMember(): boolean {
+      return this?.$route.name !== 'NonMemberChecks'
+    }
   },
   data() {
     return {
@@ -87,7 +91,7 @@ export default defineComponent({
     itemsPerPage(newVal: number) {
       console.debug('watch.itemsPerPage', newVal)
       const params = { offset: 0, limit: newVal }
-      this.store.dispatch('healthCheck/getList', params)
+      this.store.dispatch('healthCheck/getList', { ...params, isMember: this.isMember })
     },
   },
   methods: {
@@ -111,7 +115,7 @@ export default defineComponent({
       const params = this.parseQuery(page)
       console.debug(params)
       // const [offset, limit] = page.replace('?', '')
-      this.store.dispatch('healthCheck/getList', params)
+      this.store.dispatch('healthCheck/getList', { ...params, isMember: this.isMember })
     },
     // previous () {},
     handleSelect(evt: any) {
@@ -123,7 +127,7 @@ export default defineComponent({
   },
   mounted() {
     this.itemsPerPage = this.store.state.healthCheck.limit
-    this.store.dispatch('healthCheck/getList', {})
+    this.store.dispatch('healthCheck/getList', { isMember: this.isMember })
   },
 })
 </script>

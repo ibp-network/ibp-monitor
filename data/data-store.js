@@ -5,8 +5,9 @@ import { chainModel } from '../data/models/chain.js'
 import { memberModel } from '../data/models/member.js'
 import { membershipLevelModel } from '../data/models/membership-level.js'
 import { serviceModel } from '../data/models/service.js'
-import { memberServiceModel } from '../data/models/member-service.js'
-import { memberServiceNodeModel } from '../data/models/member-service-node.js'
+import { providerModel } from '../data/models/provider.js'
+import { providerServiceModel } from '../data/models/provider-service.js'
+import { providerServiceNodeModel } from '../data/models/provider-service-node.js'
 import { monitorModel } from '../data/models/monitor.js'
 import { healthCheckModel } from '../data/models/health-check.js'
 import { geoDnsPoolModel } from '../data/models/geo-dns-pool.js'
@@ -23,14 +24,25 @@ const sequelize = new Sequelize(
 )
 
 class DataStore {
+  /** @type {import('sequelize').ModelStatic<Model<typeof chainModel.definition>>} */
   Chain = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof geoDnsPoolModel.definition>>} */
   GeoDnsPool = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof healthCheckModel.definition>>} */
   HealthCheck = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof memberModel.definition>>} */
   Member = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof membershipLevelModel.definition>>} */
   MembershipLevel = undefined
-  MemberService = undefined
-  MemberServiceNode = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof providerModel.definition>>} */
+  Provider = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof providerServiceModel.definition>>} */
+  ProviderService = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof providerServiceNodeModel.definition>>} */
+  ProviderServiceNode = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof serviceModel.definition>>} */
   Service = undefined
+  /** @type {import('sequelize').ModelStatic<Model<typeof monitorModel.definition>>} */
   Monitor = undefined
 
   pruning = {
@@ -66,8 +78,14 @@ class DataStore {
       }
     )
 
+    // define provider
+    const Provider = sequelize.define(providerModel.options.tableName, providerModel.definition, {
+      ...providerModel.options,
+      sequelize,
+    })
+
     // define member
-    const Member = sequelize.define('member', memberModel.definition, {
+    const Member = sequelize.define(memberModel.options.tableName, memberModel.definition, {
       ...memberModel.options,
       sequelize,
     })
@@ -82,8 +100,17 @@ class DataStore {
       foreignKey: 'membershipLevelId',
     })
 
+    Member.belongsTo(Provider, {
+      as: 'provider',
+      foreignKey: 'providerId',
+    })
+    Provider.hasOne(Member, {
+      as: 'member',
+      foreignKey: 'providerId',
+    })
+
     // define service
-    const Service = sequelize.define('service', serviceModel.definition, {
+    const Service = sequelize.define(serviceModel.options.tableName, serviceModel.definition, {
       ...serviceModel.options,
       sequelize,
     })
@@ -109,70 +136,70 @@ class DataStore {
     })
 
     // define member service
-    const MemberService = sequelize.define('member_service', memberServiceModel.definition, {
-      ...memberServiceModel.options,
-      sequelize,
-    })
-    Member.hasMany(MemberService, {
-      as: 'services',
-      foreignKey: 'memberId',
-      onDelete: 'RESTRICT',
-      onUpdate: 'RESTRICT',
-    })
-    MemberService.belongsTo(Member, {
-      as: 'member',
-      foreignKey: 'memberId',
-    })
-
-    // define member service node
-    const MemberServiceNode = sequelize.define(
-      'member_service_node',
-      memberServiceNodeModel.definition,
+    const ProviderService = sequelize.define(
+      providerServiceModel.options.tableName,
+      providerServiceModel.definition,
       {
-        ...memberServiceNodeModel.options,
+        ...providerServiceModel.options,
         sequelize,
       }
     )
-    Service.hasMany(MemberServiceNode, {
+    Provider.hasMany(ProviderService, {
+      as: 'services',
+      foreignKey: 'providerId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'RESTRICT',
+    })
+    ProviderService.belongsTo(Provider, {
+      as: 'provider',
+      foreignKey: 'providerId',
+    })
+
+    // define member service node
+    const ProviderServiceNode = sequelize.define(
+      providerServiceModel.options.tableName,
+      providerServiceNodeModel.definition,
+      {
+        ...providerServiceNodeModel.options,
+        sequelize,
+      }
+    )
+    Service.hasMany(ProviderServiceNode, {
       as: 'nodes',
       foreignKey: 'serviceId',
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
     })
-    MemberServiceNode.belongsTo(Service, {
+    ProviderServiceNode.belongsTo(Service, {
       as: 'service',
       foreignKey: 'serviceId',
     })
-    Member.hasMany(MemberServiceNode, {
+    Provider.hasMany(ProviderServiceNode, {
       as: 'nodes',
-      foreignKey: 'memberId',
+      foreignKey: 'providerId',
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
     })
-    MemberServiceNode.belongsTo(Member, {
-      as: 'member',
-      foreignKey: 'memberId',
+    ProviderServiceNode.belongsTo(Provider, {
+      as: 'provider',
+      foreignKey: 'providerId',
     })
     // This is a hack to get around the fact that sequelize does not support composite foreign keys
-    MemberService.hasMany(MemberServiceNode, {
-      as: 'memberNodes',
-      foreignKey: 'memberId',
+    ProviderService.hasMany(ProviderServiceNode, {
+      as: 'providerNodes',
+      foreignKey: 'providerId',
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
     })
-    MemberService.hasMany(MemberServiceNode, {
+    ProviderService.hasMany(ProviderServiceNode, {
       as: 'serviceNodes',
       foreignKey: 'serviceId',
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
     })
-    // MemberServiceNode.belongsTo(MemberService, {
-    //   as: 'memberService',
-    //   foreignKey: 'memberServiceId',
-    // })
 
     // define monitor
-    const Monitor = sequelize.define('member_service_node', monitorModel.definition, {
+    const Monitor = sequelize.define(monitorModel.options.name, monitorModel.definition, {
       ...monitorModel.options,
       sequelize,
     })
@@ -202,6 +229,17 @@ class DataStore {
       as: 'service',
       foreignKey: 'serviceId',
     })
+    Provider.hasMany(HealthCheck, {
+      as: 'healthChecks',
+      foreignKey: 'providerId',
+      onDelete: 'RESTRICT',
+      onUpdate: 'RESTRICT',
+    })
+    HealthCheck.belongsTo(Provider, {
+      as: 'provider',
+      foreignKey: 'providerId',
+    })
+
     Member.hasMany(HealthCheck, {
       as: 'healthChecks',
       foreignKey: 'memberId',
@@ -212,13 +250,13 @@ class DataStore {
       as: 'member',
       foreignKey: 'memberId',
     })
-    MemberServiceNode.hasMany(HealthCheck, {
+    ProviderServiceNode.hasMany(HealthCheck, {
       as: 'healthChecks',
       foreignKey: 'peerId',
       onDelete: 'RESTRICT',
       onUpdate: 'RESTRICT',
     })
-    HealthCheck.belongsTo(MemberServiceNode, {
+    HealthCheck.belongsTo(ProviderServiceNode, {
       as: 'node',
       foreignKey: 'peerId',
     })
@@ -233,98 +271,17 @@ class DataStore {
     this.HealthCheck = HealthCheck
     this.Member = Member
     this.MembershipLevel = MembershipLevel
-    this.MemberService = MemberService
-    this.MemberServiceNode = MemberServiceNode
+    this.Provider = Provider
+    this.ProviderService = ProviderService
+    this.ProviderServiceNode = ProviderServiceNode
     this.Monitor = Monitor
     this.Service = Service
   }
-
-  /*
-  // migrations are handled by ./data/migrate.js - see the readme for more info
-  async migrate() {
-    const umzug = new Umzug({
-      migrations: { glob: './data/migrations/*.js' },
-      context: sequelize.getQueryInterface(),
-      storage: new SequelizeStorage({ sequelize }),
-      logger: console,
-    })
-    await umzug.up()
-  }
-  */
 
   async close() {
     console.debug('Closing datastore...')
     return await sequelize.close()
   }
-
-  async readMemberJson() {
-    // get updated members.json
-    const membersResponse = await axios.get(
-      'https://raw.githubusercontent.com/ibp-network/config/main/members.json'
-    )
-    if (membersResponse.data) {
-      for (const [memberId, data] of Object.entries(membersResponse.data.members)) {
-        console.log('Upserting member: ', memberId)
-        // member
-        const {
-          name,
-          website,
-          logo,
-          membership,
-          current_level,
-          active,
-          level_timestamp,
-          services_address,
-          endpoints,
-          monitor_url,
-          region,
-          latitude,
-          longitude,
-          payments,
-        } = data
-        if (current_level == 0) {
-          continue
-        }
-        const record = {
-          id: memberId,
-          name,
-          websiteUrl: website,
-          logoUrl: logo,
-          membershipType: membership,
-          membershipLevelId: Number(current_level),
-          membershipLevelTimestamp: Number(level_timestamp[current_level]),
-          status: Number(active) == 1 ? 'active' : 'pending',
-          serviceIpAddress: services_address,
-          monitorUrl: monitor_url,
-          region,
-          latitude: Number(latitude),
-          longitude: Number(longitude),
-        }
-        await ds.Member.upsert(record)
-        // member endpoints
-        if (data.endpoints) {
-          for (const [chainId, serviceUrl] of Object.entries(data.endpoints)) {
-            const service = await ds.Service.findOne({ where: { chainId, type: 'rpc' } })
-            const memberService = {
-              memberId,
-              serviceId: service.id,
-              serviceUrl,
-              status: 'active',
-            }
-            await ds.MemberService.upsert(memberService)
-          }
-        }
-      }
-    }
-  }
-
-  // async log(level = 'info', data) {
-  //   const model = {
-  //     level,
-  //     data,
-  //   }
-  //   return this.Log.create(model)
-  // }
 
   async prune() {
     console.debug('DataStore.prune()', this.pruning)
