@@ -54,7 +54,7 @@ export class MemberEntity {
       serviceIpAddress: services_address,
       monitorUrl: monitor_url,
       membershipType: membership,
-      membershipLevelId: Number(current_level) + 1,
+      membershipLevelId: Number(current_level),
       membershipLevelTimestamp: Number(level_timestamp[current_level]),
       status: !!Number(active) ? 'active' : 'pending',
     })
